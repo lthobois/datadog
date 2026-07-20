@@ -1,14 +1,14 @@
 ---
-title: "Module 8 — Atelier : instrumenter et analyser une modale avec RUM"
+title: "Module 7 — Atelier V2 : analyser le RUM et concevoir l'observation d'une modale"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
 
-# Concevoir l'observation RUM d'une modale legacy
+# Relier une expérience RUM au diagnostic backend
 
 ## Objectif
 
-Parcourir l'organisation du RUM en lecture seule, concevoir trois actions respectueuses de la confidentialité et construire le chemin allant de l'expérience utilisateur à la requête backend.
+Parcourir l'organisation RUM réellement disponible en lecture seule, qualifier ce qui peut être relié à l'APM après le module 6, concevoir trois actions respectueuses de la confidentialité et préparer les indicateurs du dashboard du module 8.
 
 ## Livrable
 
@@ -19,11 +19,22 @@ Vous produisez :
 - une matrice des données interdites et des protections ;
 - un indicateur d'usage avec ses limites ;
 - un chemin d'investigation RUM vers APM et logs ;
+- trois spécifications de widgets RUM pour le module 8 ;
+- une conclusion séparant constat réel, hypothèse et limite ;
 - une checklist de validation avant instrumentation réelle.
+
+## Place dans la progression
+
+Au module 6, vous avez étudié `eu-interfaces`, dont l'opération `console` ne correspond pas à une requête issue d'un navigateur. Cet atelier ne force donc aucune relation entre ce service et le RUM. Il recherche un service web corrélable uniquement si l'interface en fournit la preuve.
+
+Les résultats préparent :
+
+- le module 8, avec trois widgets RUM spécifiés mais non créés ;
+- le module 9, avec un chemin d'investigation allant de l'impact utilisateur à une ressource puis, si disponible, à une trace backend et à ses logs.
 
 ## Règle de sécurité
 
-Travaillez uniquement en lecture. Ne créez ni application, vue sauvegardée, mesure, funnel, monitor ou configuration. N'ouvrez aucun Session Replay réel non préparé et non validé. Ne recopiez aucun nom, email, identifiant de session, URL détaillée, saisie ou contenu utilisateur réel.
+Travaillez uniquement en lecture. Ne créez ni application, vue sauvegardée, mesure, funnel, monitor, dashboard ou configuration. Ne cliquez pas sur un bouton d'enregistrement ou de modification. N'ouvrez aucun Session Replay réel non préparé et non validé. Ne recopiez aucun nom d'application sensible, nom, email, identifiant d'application ou de session, token client, URL détaillée, saisie ou contenu utilisateur réel.
 
 ## Prérequis
 
@@ -32,10 +43,17 @@ Travaillez uniquement en lecture. Ne créez ni application, vue sauvegardée, me
 - scénario fictif PeopleShop ;
 - vocabulaire `env/service/version` ;
 - connaissance du parcours `POST /api/orders/validate`.
+- fiche de pivot APM préparée au module 6.
 
 ## Comment utiliser ce document
 
-Effectuez d'abord l'observation demandée, puis lisez la réponse qui suit la question. Les applications, sessions et volumes évoluent avec la période et l'échantillonnage : votre relevé daté prévaut sur l'instantané historique. N'utilisez aucune donnée réelle dans la conception PeopleShop.
+Effectuez d'abord l'observation demandée, puis lisez la réponse qui suit la question. Les applications, sessions et volumes évoluent avec la période, le consentement et l'échantillonnage : votre relevé daté prévaut sur l'instantané historique. Les parties 1 et 2 utilisent une application RUM réelle autorisée uniquement pour apprendre la navigation ; les parties PeopleShop reposent exclusivement sur le scénario fictif. Ne mélangez jamais leurs preuves.
+
+## Contexte de plateforme pris en compte
+
+Lors de la dernière vérification, trois applications RUM actives étaient visibles : deux applications JavaScript et une application Flutter. Certaines proposaient Product Analytics. Une application RUM était déjà ouverte dans Chrome sur sa page d'installation SDK.
+
+Cette page peut afficher des identifiants techniques nécessaires à l'installation. Ne les copiez pas dans le livrable. Pour l'atelier, choisissez une application **Browser JavaScript** autorisée depuis la liste des applications, puis restez dans les vues d'exploitation.
 
 # Scénario PeopleShop
 
@@ -66,7 +84,8 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 
 1. Repérez les applications sans ouvrir leur configuration.
 2. Notez uniquement leur type générique : Browser JavaScript, Flutter, mobile ou autre.
-3. Choisissez une application autorisée pour la suite, sans recopier son nom si celui-ci est sensible.
+3. Choisissez une application **Browser JavaScript** autorisée pour la suite, sans recopier son nom si celui-ci est sensible.
+4. Si la navigation vous conduit à une page **SDK Installation**, revenez aux vues d'exploitation sans copier `applicationId`, `clientToken` ou extrait d'initialisation.
 
 ### Quel était l'état observé lors de la conception ?
 
@@ -80,6 +99,14 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 2. Repérez la période, les filtres et les indicateurs disponibles.
 3. Identifiez les accès vers sessions, vues, actions, erreurs et ressources.
 4. Ne changez pas la configuration de l'application.
+
+| Élément | Observation non sensible |
+|---|---|
+| Type d'application | Browser JavaScript |
+| Période |  |
+| Sessions ou vues visibles |  |
+| Session Replay disponible | oui / non observé |
+| Product Analytics disponible | oui / non observé |
 
 ### Pourquoi commencer par une synthèse agrégée ?
 
@@ -168,14 +195,17 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 
 1. Sélectionnez le type **Resources**.
 2. Repérez méthode, type, URL normalisée ou ressource, durée et statut.
-3. Ouvrez un détail non sensible et recherchez un accès vers la trace backend, sans recopier d'identifiant.
-4. Revenez à la liste.
+3. Privilégiez une ressource XHR ou Fetch dont le nom est générique et non sensible.
+4. Ouvrez son détail et recherchez **View Trace**, **Trace**, **APM** ou un accès équivalent, sans recopier d'identifiant.
+5. Notez **trace liée observée**, **aucune trace liée** ou **non vérifiable avec mes droits**, puis revenez à la liste.
 
 ### Que représente une ressource RUM ?
 
 **Réponse :** un chargement ou appel réseau, notamment XHR ou Fetch, observé depuis le frontend.
 
 **Pourquoi :** elle constitue le pont naturel entre l'action de soumission et la trace backend de `orders-api`.
+
+**Contexte du module 6 :** ne recherchez pas `eu-interfaces` comme cible de cette corrélation. Son opération `console` n'est pas une requête web déclenchée par une ressource navigateur.
 
 ## Étape 11 — Examiner erreurs et tâches longues
 
@@ -190,6 +220,8 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 **Limite :** ni l'une ni l'autre ne prouve automatiquement que la requête backend a échoué.
 
 # Partie 2 — Décider quoi instrumenter
+
+À partir de cette partie, quittez les données réelles. Toutes les actions, valeurs, ressources et conclusions suivantes appartiennent au scénario fictif PeopleShop. Une absence d'action ou de trace dans l'application réelle peut justifier une proposition d'amélioration, mais ne constitue pas une preuve dans le scénario.
 
 ## Étape 12 — Choisir action ou vue pour la modale
 
@@ -346,6 +378,10 @@ agrégats d'actions sur la vue checkout
 
 **Réponse :** les agrégats mesurent fréquence et segments ; le replay explique seulement le contexte d'un cas choisi.
 
+### Ce chemin a-t-il été validé sur `eu-interfaces` au module 6 ?
+
+**Réponse :** non. `eu-interfaces` a servi à apprendre l'APM avec une opération `console`. Le chemin RUM-APM doit partir d'une ressource navigateur XHR ou Fetch et rejoindre un service web distinct uniquement si un lien explicite est disponible.
+
 ## Étape 22 — Examiner la ressource frontend
 
 Pour la ressource, vérifiez conceptuellement :
@@ -380,6 +416,46 @@ Pour la ressource, vérifiez conceptuellement :
 
 **Réponse :** passer d'une action utilisateur à l'appel réseau, puis au chemin backend, à la dépendance dominante et aux logs du même parcours.
 
+## Étape 25 — Préparer trois widgets RUM pour le module 8
+
+Ne créez aucun dashboard dans cet atelier. Complétez les spécifications et conservez-les pour le module 8.
+
+| Widget à construire | Source | Périmètre | Mesure | Regroupement | Représentation | Interprétation et limite |
+|---|---|---|---|---|---|---|
+| Sessions avec erreur frontend | RUM Sessions | application et environnement autorisés | nombre ou taux de sessions avec erreur | `version` ou `browser.name` | série temporelle | mesure l'impact collecté ; dépend du consentement et de l'échantillonnage |
+| Latence des vues principales | RUM Views | vues autorisées et normalisées | p75 ou p95 de `view.loading_time` | `view.name`, puis `version` | série temporelle ou toplist | compare les vues ; une vue mal nommée fragmente les résultats |
+| Ressources XHR/Fetch lentes ou en erreur | RUM Resources | application, environnement et type XHR/Fetch | p95 de durée et taux d'erreur | ressource normalisée ou statut | toplist | prépare le pivot backend ; une ressource lente ne prouve pas la cause serveur |
+
+### Pourquoi utiliser les données structurées plutôt que le nombre de replays ?
+
+**Réponse :** les événements structurés permettent de compter, segmenter et suivre une tendance. Un replay contextualise un cas individuel et sa disponibilité dépend d'un échantillonnage spécifique.
+
+## Étape 26 — Rédiger la conclusion de passage vers le module 8
+
+Complétez le modèle sans ajouter de donnée réelle sensible :
+
+```text
+Constat réel : l'application Browser autorisée expose [types d'événements]
+                sur la période [période].
+
+Corrélation : une trace backend liée a été [observée / non observée /
+              non vérifiable] depuis une ressource XHR ou Fetch.
+
+Limite : ce constat dépend de la période, des droits, du consentement,
+         de l'échantillonnage et de la rétention.
+
+Conception PeopleShop : trois actions stables décrivent la modale et
+                        la ressource POST porte la preuve du traitement.
+
+Préparation dashboard : trois widgets RUM sont spécifiés ; ils seront
+                        construits et confrontés aux logs et à l'APM
+                        au module 8.
+```
+
+### Pourquoi séparer constat réel et conception PeopleShop ?
+
+**Réponse :** le premier démontre seulement que vous maîtrisez la navigation sur l'organisation existante ; la seconde décrit un dispositif pédagogique fictif. Les fusionner produirait une conclusion non vérifiable sur la production partagée.
+
 ## Questions de synthèse corrigées
 
 ### Quelle différence existe entre une vue et une action ?
@@ -403,11 +479,13 @@ Pour la ressource, vérifiez conceptuellement :
 | Difficulté | Interprétation | Action en lecture seule |
 |---|---|---|
 | RUM indisponible | droits ou fonctionnalité non activée | utiliser les captures anonymisées |
+| Page SDK Installation ouverte | navigation restée dans la configuration | revenir à Summary ou Explorer sans copier d'identifiant |
 | Aucune action visible | suivi absent ou période différente | utiliser ce manque pour justifier les actions personnalisées |
 | Nom d'action instable | dépendance au texte ou DOM | définir un nom métier explicite et stable |
 | Confusion vue/action | état logique non défini | demander si l'état possède une durée et une navigation autonomes |
 | Replay non autorisé | confidentialité ou droits | ne pas l'ouvrir ; poursuivre avec les événements structurés |
 | Trace non liée | corrélation incomplète | parcourir la checklist de l'étape 24 |
+| Seul `eu-interfaces` est connu en APM | service `console` sans relation navigateur attendue | chercher un service web depuis une ressource RUM ou noter **non vérifiable** |
 | Attribut trop cardinal | identifiant presque unique | le remplacer par une catégorie bornée |
 
 ## Validation finale
@@ -424,5 +502,17 @@ Pour la ressource, vérifiez conceptuellement :
 - [ ] Les agrégats mesurent l'ampleur et le replay contextualise un cas.
 - [ ] Le chemin vers la ressource, la trace et les logs est complet.
 - [ ] L'absence de trace liée n'est pas interprétée comme absence de backend.
+- [ ] `eu-interfaces` n'est pas présenté comme un backend RUM corrélé.
 - [ ] Versions frontend et backend ne sont pas confondues.
+- [ ] Trois widgets RUM sont spécifiés pour le module 8 sans créer de dashboard.
+- [ ] Le constat réel est séparé de la conception fictive PeopleShop.
 - [ ] Aucune ressource Datadog n'a été créée ou modifiée.
+
+## Références officielles
+
+- [RUM Browser Monitoring](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/)
+- [RUM Browser Data Collected](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/data_collected/)
+- [Tracking User Actions](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/tracking_user_actions/)
+- [Monitoring Resource Performance](https://docs.datadoghq.com/real_user_monitoring/browser/monitoring_resource_performance/)
+- [Connect RUM and Traces](https://docs.datadoghq.com/real_user_monitoring/correlate_with_other_telemetry/apm/?tab=browserrum)
+- [Session Replay Browser Privacy Options](https://docs.datadoghq.com/session_replay/browser/privacy_options/)

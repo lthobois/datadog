@@ -1,5 +1,5 @@
 ---
-title: "Module 1 — Atelier : naviguer dans Datadog et cartographier l'observabilité"
+title: "Module 3 — Atelier : cartographier l'observabilité"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
@@ -587,6 +587,52 @@ La matrice suivante contient directement les réponses attendues. Utilisez-la po
 | Faut-il notifier une équipe ? | condition de monitor | Monitoring | état, seuil, groupe et destinataire | dashboard et runbook | l'alerte doit conduire à une action explicite |
 | L'objectif de fiabilité est-il tenu ? | indicateur de niveau de service | SLO | objectif, période et budget d'erreur | RUM ou métriques métier | le SLO mesure la fiabilité délivrée dans la durée |
 
+## Étape 19 — Distinguer fait, hypothèse et conclusion prématurée
+
+| Affirmation | Réponse | Explication |
+|---|---|---|
+| La latence p95 affichée vaut la valeur relevée pour la période. | Fait, si réellement observé | la phrase décrit une valeur, son périmètre et sa période |
+| Une dépendance lente contribue peut-être à la latence. | Hypothèse | « peut-être » indique une explication à tester par trace et métriques |
+| Le dernier déploiement est forcément la cause. | Conclusion prématurée | la proximité temporelle ne suffit pas à démontrer la causalité |
+| Le taux d'erreur affiché est nul pour la période. | Fait, si réellement observé | l'affirmation reste limitée à la requête et à la période |
+| Le service est sain parce que le taux d'erreur est nul. | Conclusion prématurée | la latence, les erreurs métier et l'expérience utilisateur restent inconnues |
+| Une trace lente peut localiser le temps consommé. | Proposition de test | la trace est le signal adapté, mais son résultat n'est pas encore observé |
+| `No Data` signifie que le service est arrêté. | Conclusion prématurée | la collecte, la requête et la fenêtre doivent d'abord être vérifiées |
+| Aucun SLO n'est visible pour `app-api`. | Fait d'interface | cela ne prouve ni l'absence de suivi de fiabilité ni l'absence de contrat externe |
+
+## Étape 20 — Suivre le parcours d'investigation de référence
+
+1. **Dashboard ou Service Summary** — vérifier si une rupture existe.
+2. **Période, environnement et périmètre** — dater et segmenter la rupture.
+3. **Endpoints ou Resources** — identifier l'opération affectée.
+4. **Trace Explorer** — sélectionner une requête représentative.
+5. **Trace** — repérer le span ou la dépendance dominante.
+6. **Logs, Infrastructure et Deployments** — recouper l'hypothèse.
+7. **RUM** — qualifier l'impact utilisateur lorsque les données sont disponibles.
+8. **Monitoring et SLO** — vérifier la détection, l'action attendue et l'objectif de fiabilité.
+
+### Question — Pourquoi cet ordre commence-t-il par une vue agrégée ?
+
+**Réponse :** parce qu'il faut d'abord confirmer l'existence, la période et le périmètre du problème avant de choisir un événement individuel.
+
+**Pourquoi :** ouvrir immédiatement une trace ou un log spectaculaire peut conduire à analyser un cas non représentatif.
+
+**Limite :** cet ordre est une référence, pas une règle rigide. Une alerte, un identifiant de trace fourni par le support ou une session RUM précise peut justifier une autre porte d'entrée.
+
+## Étape 21 — Vérifier l'autonomie de votre livrable
+
+Votre document est complet lorsque vous avez :
+
+- relevé la période et l'environnement ;
+- décrit `app-api` sans extrapolation ;
+- cartographié au moins deux dépendances ;
+- identifié le rôle des principales vues APM ;
+- parcouru Dashboards, Developer Portal, Metrics, Logs, Monitoring et RUM ;
+- expliqué Service Health Monitor, `No Data` et SLO ;
+- distingué exploitation et configuration ;
+- séparé faits, hypothèses et conclusions prématurées ;
+- conservé une posture strictement en lecture seule.
+
 # Synthèse — Questions et réponses
 
 ## Quelle vue répond le mieux à « quand la dégradation commence-t-elle ? »
@@ -630,5 +676,36 @@ La matrice suivante contient directement les réponses attendues. Utilisez-la po
 **Réponse :** parce que le menu peut être affiché alors que l'instrumentation, les données, la licence, les droits ou le processus d'équipe ne sont pas en place.
 
 **Explication :** l'usage doit être démontré par des objets, des données récentes et un workflow opérationnel, pas par le seul libellé du menu.
+
+# Aide au diagnostic
+
+| Difficulté | Cause probable | Action en lecture seule |
+|---|---|---|
+| `app-api` absent | période ou instrumentation modifiée | élargir la période, puis choisir un service actif et noter la substitution |
+| Vue vide | période, droits, filtre ou absence de données | vérifier période, requête, env et droits ; noter `non observé` |
+| Dépendances illisibles | carte dense ou données insuffisantes | utiliser les entités de la liste sans inventer le sens des liens |
+| Version absente | instrumentation ou période | noter `non observé` et poursuivre |
+| Aucun Service Health Monitor | autre stratégie d'alerte ou absence de configuration | expliquer l'apport attendu et constater l'absence sans créer |
+| Aucun SLO | indicateur ou cible non formalisés | expliquer la différence monitor/SLO et noter l'absence |
+| Aucun log `app-api` | collecte non activée ou nom différent | retirer le filtre et identifier les services réellement disponibles |
+| Aucun résultat RUM | période, application ou instrumentation | passer à 24 heures et noter la limite |
+| Commande d'édition ouverte | confusion de navigation | fermer sans enregistrer |
+| Interface différente | évolution ou droits Datadog | chercher la fonction par son objectif et la recherche globale |
+
+# Point de contrôle final
+
+Vous maîtrisez les fondamentaux de navigation si vous pouvez expliquer la chaîne suivante :
+
+```text
+question
+  -> porte d'entrée
+  -> période et périmètre
+  -> vue agrégée
+  -> événement représentatif
+  -> signal de recoupement
+  -> fait
+  -> hypothèse testée
+  -> décision
+```
 
 La maîtrise de Datadog ne consiste pas à ouvrir tous les menus. Elle consiste à choisir la vue qui répond à la question présente, à conserver le contexte pendant les pivots et à savoir ce que chaque observation permet — ou ne permet pas — de conclure.

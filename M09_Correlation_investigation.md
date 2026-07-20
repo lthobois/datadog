@@ -1,5 +1,5 @@
 ---
-title: "Module 6 — Atelier : corrélation et investigation d'incidents"
+title: "Module 9 — Atelier : corrélation et investigation d'incidents"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
@@ -30,10 +30,10 @@ Ne recopiez aucun identifiant réel, nom d'hôte, adresse IP ou donnée personne
 
 ## Prérequis
 
-- convention `env/service/version/team` du module 2 ;
-- conception du dashboard du module 3 ;
-- pratique des logs du module 4 ;
-- fiche APM du module 5 ;
+- convention `env/service/version/team` du module 4 ;
+- conception du dashboard du module 8 ;
+- pratique des logs du module 5 ;
+- fiche APM du module 6 ;
 - accès en lecture à APM et aux logs pour répéter les gestes de navigation.
 
 ## Comment utiliser ce document

@@ -1,5 +1,5 @@
 ---
-title: "Module 7 — Atelier : concevoir un monitor actionnable"
+title: "Module 10 — Atelier : concevoir un monitor actionnable"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
@@ -27,14 +27,15 @@ Travaillez uniquement en lecture. N'utilisez pas **New Monitor**, **Edit**, **Cl
 
 ## Prérequis
 
-- convention `env/service/version/team` du module 2 ;
-- dashboard PeopleShop conçu au module 3 ;
+- convention `env/service/version/team` du module 4 ;
+- dashboard PeopleShop conçu au module 8 ;
+- journal d'investigation et symptômes vérifiés du module 9 ;
 - accès en lecture à la liste et au détail des monitors ;
 - scénario fictif `orders-api`, `env:training`.
 
 ## Comment utiliser ce document
 
-Observez d'abord la plateforme, puis comparez votre analyse aux réponses placées après chaque question. Les nombres et états réels évoluent : votre relevé daté prévaut sur l'instantané historique. La première partie concerne les monitors réels ; la conception cible concerne exclusivement PeopleShop.
+Observez d'abord la plateforme, puis comparez votre analyse aux réponses placées après chaque question. Les nombres et états réels évoluent : votre relevé daté prévaut sur l'instantané historique. La première partie concerne les monitors réels ; la conception cible concerne exclusivement PeopleShop et doit dériver d'un symptôme confirmé pendant l'investigation du module 9.
 
 # Partie 1 — Comprendre le portefeuille de monitors
 

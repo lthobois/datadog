@@ -1,5 +1,5 @@
 ---
-title: "Module 3 — Atelier : dashboards et requêtes"
+title: "Module 8 — Atelier : dashboards et requêtes"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
@@ -29,7 +29,10 @@ Travaillez uniquement en lecture dans Datadog. N'utilisez aucune commande **New 
 
 - Chrome connecté à Datadog ;
 - accès en lecture aux dashboards et à APM ;
-- convention de services et de tags du module 2 ;
+- convention de services et de tags du module 4 ;
+- requêtes et observations issues des logs du module 5 ;
+- hypothèse et indicateurs APM du module 6 ;
+- indicateurs d'expérience utilisateur retenus au module 7 ;
 - un document dans lequel consigner les réponses.
 
 ## Comment utiliser ce document
@@ -209,7 +212,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 **Réponse :** pour vérifier que les dimensions prévues pour le dashboard correspondent à des dimensions de navigation réelles du service.
 
-**Pourquoi :** le module 2 a défini un contrat commun ; le dashboard doit le réutiliser pour faciliter le passage vers APM.
+**Pourquoi :** le module 4 a défini un contrat commun ; le dashboard doit le réutiliser pour faciliter le passage vers APM.
 
 **Limite :** `app-api` sert uniquement à apprendre la navigation. Ses valeurs et seuils ne constituent aucune preuve pour PeopleShop.
 
@@ -227,7 +230,7 @@ Comparez votre proposition à la référence.
 
 **Réponse :** chaque variable ajoute de la flexibilité mais aussi une charge cognitive et un risque de combinaison incohérente.
 
-**Pourquoi :** ces trois dimensions répondent aux usages récurrents du dashboard et reprennent la convention du module 2.
+**Pourquoi :** ces trois dimensions répondent aux usages récurrents du dashboard et reprennent la convention du module 4.
 
 # Partie 3 — Concevoir les décisions PeopleShop
 
