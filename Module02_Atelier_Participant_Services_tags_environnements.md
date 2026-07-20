@@ -441,29 +441,3 @@ Améliorations prioritaires
 ### Pourquoi faut-il distinguer fait et hypothèse ?
 
 **Réponse :** l'interface prouve ce qui est affiché dans une vue et une période ; elle ne prouve pas automatiquement la nature métier, la cause d'une absence ou l'état de toute la plateforme.
-
-## Aide au diagnostic
-
-| Difficulté | Interprétation | Action en lecture seule |
-|---|---|---|
-| Catalogue vide | droits, filtres ou absence de données | vérifier période et filtres ; utiliser les captures fournies |
-| `app-api` absent | activité ou période différente | choisir un service applicatif actif et noter la substitution |
-| Aucun `env:none` | état amélioré ou période différente | noter **non observé** et poursuivre avec le principe |
-| Version absente | contexte non propagé ou non visible | consigner l'absence comme écart potentiel |
-| Monitor, SLO ou owner absent | non configuré, non lié, hors droits ou hors vue | écrire **non observé dans la vue consultée** |
-| Désaccord sur une valeur canonique | référentiel incomplet | noter **à valider** et identifier le décideur |
-
-## Validation finale
-
-- [ ] Le relevé réel est daté et sa période est indiquée.
-- [ ] Huit entités ont été auditées ou les absences ont été consignées.
-- [ ] Les faits sont distingués des hypothèses.
-- [ ] Service, ressource, instance et dépendance sont distingués.
-- [ ] L'environnement et la version ne figurent pas dans le nom du service.
-- [ ] `env`, `service`, `version` et `team` ont une règle et une source d'autorité.
-- [ ] La cardinalité a été calculée et interprétée.
-- [ ] Les données personnelles et de paiement sont exclues.
-- [ ] Les absences de monitor, SLO ou owner ne sont pas surinterprétées.
-- [ ] Trois améliorations reposent sur des observations actuelles.
-- [ ] La convention tient sur une page.
-- [ ] Aucune ressource Datadog n'a été modifiée.
