@@ -28,8 +28,8 @@ Vous produisez :
 Cet atelier vient après l'exploration des logs du module 5. Il observe directement les dimensions `env`, `service` et `version`, ainsi que les pivots proposés par Datadog. Les saisies nécessaires dans les modules suivants seront indiquées au moment de leur utilisation :
 
 - le module 7, en vérifiant sans l'imposer l'existence d'un pivot RUM–APM ;
-- le module 8, qui donnera directement les paramètres du widget APM ;
-- le module 9, en conservant une conclusion sous la forme fait, hypothèse, limite et test suivant.
+- le module 9, qui donnera directement les paramètres du widget APM ;
+- le module 10, en conservant une conclusion sous la forme fait, hypothèse, limite et test suivant.
 
 ## Règle de sécurité
 

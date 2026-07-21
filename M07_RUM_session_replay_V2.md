@@ -27,8 +27,8 @@ Au module 6, vous avez étudié `eu-interfaces`, dont l'opération `console` ne 
 
 Les observations servent ensuite à :
 
-- le module 8, qui donnera directement les paramètres du widget RUM agrégé ;
-- le module 9, avec un chemin d'investigation allant de l'impact utilisateur à une ressource puis, si disponible, à une trace backend et à ses logs.
+- le module 9, qui donnera directement les paramètres du widget RUM agrégé ;
+- le module 10, avec un chemin d'investigation allant de l'impact utilisateur à une ressource puis, si disponible, à une trace backend et à ses logs.
 
 ## Règle de sécurité
 
@@ -49,7 +49,7 @@ Effectuez d'abord l'observation demandée, puis lisez la réponse qui suit la qu
 
 ## Contexte réel vérifié sur la plateforme
 
-Le parcours a été vérifié le 20 juillet 2026 sur l'application Browser JavaScript autorisée `peopulse` :
+Le parcours a été vérifié le 21 juillet 2026 sur l'application Browser JavaScript autorisée `peopulse` :
 
 | Élément | Implémentation observée |
 |---|---|
@@ -58,15 +58,12 @@ Le parcours a été vérifié le 20 juillet 2026 sur l'application Browser JavaS
 | Application | `peopulse`, événements reçus par le Browser SDK |
 | Navigation RUM | **Summary**, **Optimization**, **Feature Flag Tracking**, **Profiling**, **Session Replay**, **Explorer**, **Error Tracking**, **Product Analytics** |
 | Filtres Summary | `env`, `service`, `version`, pays et navigateur |
-| Types d'événements Explorer | **Sessions**, **Views**, **Actions**, **Errors**, **Resources**, **Long tasks**, **Vitals** ; le volume de **Vitals** peut être nul sur la période |
+| Types d'événements Explorer | **Sessions**, **Views**, **Actions**, **Errors**, **Resources**, **Long tasks**, **Vitals** ; **Vitals** ne retournait aucun événement sur la période vérifiée |
 | Période affichée lors du contrôle | **Past 1 Week** |
+| Mode de recherche de l'Explorer | **Advanced Search** à l'ouverture ; **Simple Search** reste disponible et doit être sélectionné pour l'atelier |
+| Pivot RUM vers APM | aucun lien **View Trace** sûr n'était visible dans la liste agrégée des ressources ; corrélation non démontrée |
 
 L'application contient un volume important de sessions, vues, actions et ressources. Les nombres changent en continu et ne sont pas des résultats attendus. La page **SDK Configuration** confirme que des événements sont reçus, mais elle peut afficher des identifiants techniques nécessaires à l'installation : ne copiez ni identifiant, ni token, ni extrait d'initialisation.
-
-**Alerte de confidentialité vérifiée :** certains noms d'actions automatiques reprennent le texte cliqué et peuvent contenir des informations personnelles ou métier. Certaines URL de ressources contiennent aussi des identifiants ou paramètres. Ne lisez pas ces valeurs à voix haute, ne les projetez pas et ne les recopiez pas.
-
-
-
 
 
 # Partie 1 — Comprendre l'organisation du RUM
@@ -104,7 +101,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 
 **Réponse :** l'application `peopulse` utilise le Browser SDK, envoie des événements et donne accès au RUM ainsi qu'à Product Analytics.
 
-**Limite :** ce constat du 20 juillet 2026 décrit l'état de la plateforme pendant la vérification ; il ne garantit ni la configuration complète du SDK ni la représentativité des données.
+**Limite :** ce constat décrit l'état de la plateforme pendant la vérification ; il ne garantit ni la configuration complète du SDK ni la représentativité des données.
 
 ## Étape 3 — Parcourir Summary
 
@@ -181,8 +178,6 @@ L'application contient un volume important de sessions, vues, actions et ressour
 
 **Réponse :** vue concernée, action ou erreur présente, durée cohérente, segment pertinent et replay disponible et autorisé.
 
-**Limite :** lors de la vérification, environ 20 000 sessions étaient retournées sur une semaine. Ce nombre évolue continuellement et dépend de la période, du trafic, du consentement et de l'échantillonnage.
-
 ## Étape 8 — Examiner les vues
 
 1. Sélectionnez le type **Views**.
@@ -216,7 +211,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 3. Utilisez le filtre **Resource Type** pour isoler `xhr` ou `fetch` si nécessaire.
 4. Ne copiez aucune URL : la plateforme contient des chemins paramétrés, identifiants et chaînes de requête.
 5. Si une ressource générique et manifestement non sensible peut être ouverte, recherchez **View Trace**, **Trace**, **APM** ou un accès équivalent sans recopier d'identifiant.
-6. Sinon, notez **pivot APM non vérifiable en sécurité sur les données réelles** et n'inventez aucune ressource de remplacement.
+6. Si aucun lien **View Trace** sûr n'est visible dans la liste, notez **pivot APM non vérifiable en sécurité sur les données réelles** et n'inventez aucune ressource de remplacement.
 
 ### Que représente une ressource RUM ?
 
@@ -250,7 +245,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 ## Étape 13 — Étudier les vues
 
 1. Revenez sur **Views**.
-2. Filtrez l'application `peopulse` avec le sélecteur réellement proposé.
+2. Filtrez l'application `peopulse` avec le sélecteur proposé.
 3. Comparez deux périodes.
 4. Relevez les Web Vitals agrégés disponibles.
 
@@ -259,9 +254,8 @@ L'application contient un volume important de sessions, vues, actions et ressour
 ## Étape 14 — Étudier les actions sans exposer leur contenu
 
 1. Ouvrez **Actions**.
-2. Observez uniquement la structure des colonnes et les agrégations.
-3. N'ouvrez aucun détail dont le nom peut contenir une information personnelle ou métier.
-4. Notez les risques de confidentialité constatés au niveau des noms automatiques.
+2. Observez la structure des colonnes et les agrégations.
+3. Notez les risques de confidentialité constatés au niveau des noms automatiques.
 
 ## Étape 15 — Étudier les ressources
 
@@ -269,8 +263,6 @@ L'application contient un volume important de sessions, vues, actions et ressour
 2. Utilisez des facettes agrégées telles que type, statut ou domaine si elles sont disponibles et autorisées.
 3. Ne copiez aucune URL contenant un identifiant ou une chaîne de requête.
 4. Vérifiez si un pivot APM est proposé sans l'ouvrir sur une donnée sensible.
-
-Si aucun lien sûr n'est validé, écrivez **corrélation RUM–APM non démontrée**.
 
 ## Questions de synthèse
 
@@ -285,11 +277,3 @@ Si aucun lien sûr n'est validé, écrivez **corrélation RUM–APM non démontr
 ### Quelle donnée RUM peut être utilisée sans exposer de détail sensible ?
 
 **Réponse :** le nombre agrégé de vues de l'application réelle `peopulse`, sans regroupement par utilisateur, action, URL ou session. La saisie correspondante sera donnée directement lors de la création du widget.
-
-## Validation finale
-
-- [ ] Seule l'application réelle `peopulse` est utilisée.
-- [ ] Aucun replay, détail de session ou action sensible n'a été ouvert.
-- [ ] Aucune URL détaillée ni donnée personnelle n'a été copiée.
-- [ ] Aucun lien RUM–APM n'est affirmé sans preuve.
-- [ ] Les observations restent strictement agrégées.
