@@ -1,5 +1,5 @@
 ---
-title: "Module 6 — Atelier V2 : APM et traçage distribué"
+title: "Module 6 — Atelier : APM et traçage distribué"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
@@ -8,7 +8,7 @@ lang: fr-FR
 
 ## Objectif
 
-Parcourir les principales vues APM sur un service réel, vérifier la continuité avec les logs étudiés au module 5, lire le chemin critique d'une trace, puis préparer les pivots nécessaires aux modules RUM, dashboards et investigation.
+Parcourir les principales vues APM sur un service réel, vérifier les pivots réellement proposés et lire le chemin critique d'une trace.
 
 ## Livrable
 
@@ -18,35 +18,34 @@ Vous produisez :
 - une comparaison de trois observations comparables ;
 - une représentation du chemin critique d'une trace ;
 - un audit de l'instrumentation PHP et de la corrélation logs-traces ;
-- un contrat d'enrichissement métier proposé, sans l'appliquer ;
-- trois spécifications de widgets APM pour le dashboard du module 8 ;
-- un pivot backend à rechercher depuis le RUM au module 7 ;
-- une analyse des preuves pédagogiques PeopleShop ;
+- un inventaire des attributs réellement présents ;
+- un constat sur les pivots réellement proposés par Datadog ;
+- une analyse datée des traces réellement disponibles ;
 - une conclusion structurée et un test suivant.
 
 ## Place dans la progression
 
-Cet atelier vient après l'exploration des logs du module 5. Il réutilise les dimensions `env`, `service` et `version`, ainsi que la vue enregistrée créée dans ce module si elle est accessible. Il prépare :
+Cet atelier vient après l'exploration des logs du module 5. Il observe directement les dimensions `env`, `service` et `version`, ainsi que les pivots proposés par Datadog. Les saisies nécessaires dans les modules suivants seront indiquées au moment de leur utilisation :
 
-- le module 7, en identifiant le service backend que le RUM pourrait relier à une requête frontend ;
-- le module 8, en spécifiant les widgets APM à construire une fois les signaux explorés ;
+- le module 7, en vérifiant sans l'imposer l'existence d'un pivot RUM–APM ;
+- le module 8, qui donnera directement les paramètres du widget APM ;
 - le module 9, en conservant une conclusion sous la forme fait, hypothèse, limite et test suivant.
 
 ## Règle de sécurité
 
-Travaillez uniquement en lecture. Ne créez ni règle APM, service, monitor, dashboard, vue sauvegardée, instrumentation, attribut, règle d'échantillonnage ou configuration. N'utilisez pas **Save**, **Create**, **Edit**, **Configure**, **Add filter** ou une commande équivalente. Ne recopiez aucun `trace_id` réel, paramètre sensible, URL complète, requête SQL, nom d'hôte ou donnée personnelle.
+Travaillez uniquement en lecture. Ne créez ni règle APM, service, monitor, dashboard, vue sauvegardée, instrumentation, attribut, règle d'échantillonnage ou configuration. N'utilisez pas **Save**, **Create**, **Edit**, **Configure** ou une commande équivalente. Les filtres et requêtes temporaires nécessaires à l'exploration sont autorisés, mais ne doivent pas être enregistrés. Ne recopiez aucun `trace_id` réel, paramètre sensible, URL complète, requête SQL, nom d'hôte ou donnée personnelle.
 
 ## Prérequis
 
 - Chrome connecté à Datadog ;
 - accès en lecture à **APM**, aux services et au Trace Explorer ;
 - convention `env/service/version` du module 4 ;
-- vue de logs `[TRAINING] M05 Logs - <participant> - <date>` créée au module 5 V2, si ce parcours a été réalisé ;
-- captures ou fiches PeopleShop fournies avec l'atelier.
+- vue de logs `[TRAINING] M05 Logs API - <participant> - 20260720` créée au module 5, si ce parcours a été réalisé ;
+- accès en lecture au service réel `eu-interfaces`.
 
 ## Comment utiliser ce document
 
-Effectuez chaque manipulation avant de lire la réponse de référence qui suit la question. Les métriques et traces changent selon la période, les droits, l'ingestion et la rétention : votre relevé daté prévaut sur les exemples historiques. Les étapes réelles utilisent `eu-interfaces`, service actif vérifié sur la plateforme, pour apprendre la navigation. Les étapes PeopleShop utilisent `orders-api` pour raisonner sur le fil rouge. Ne mélangez jamais leurs preuves.
+Effectuez chaque manipulation avant de lire la réponse de référence qui suit la question. Les métriques et traces changent selon la période, les droits, l'ingestion et la rétention : votre relevé daté prévaut. Toutes les étapes utilisent uniquement `eu-interfaces` et l'opération réelle `console`.
 
 Une recherche de traces vide ne signifie pas nécessairement qu'il n'y a eu aucun trafic. Les statistiques APM agrégées et les spans conservés pour la recherche ne représentent pas exactement le même ensemble. De plus, logs et traces peuvent être échantillonnés et conservés indépendamment.
 
@@ -60,11 +59,12 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 | Navigation supérieure | **Service**, **Traces**, **Profiles**, puis **Settings** |
 | Service d'exercice | `eu-interfaces` |
 | Opération principale | `console` |
-| Page du service | **Service Summary**, **Resources**, **Deployments**, **Dependencies**, **Traces**, **Errors**, **Live Debugger**, **Infrastructure** |
+| Page du service | **Service Summary**, **Resources**, **Deployments**, **Dependencies**, **Traces**, **Errors**, **Live Debugger**, **Infrastructure**, **Logs**, **Security** et **Costs** |
 | Santé du service | aucun Service Health Monitor ni SLO associé au moment de la vérification |
 | Contexte de déploiement | sélecteurs `operation`, `env` et `version` présents ; valeur de version à relever ou déclarer non observée |
+| Trace Explorer | ouverture en mode **Spans** ; bascule manuelle vers **Traces** nécessaire pour afficher une trace complète et son waterfall |
 
-`eu-interfaces` peut produire peu de traces sur une période courte. Si vous ne trouvez pas trois observations comparables dans **Past 1 Hour**, élargissez progressivement à **Past 4 Hours**, puis **Past 1 Day**. Ce changement de période est temporaire et ne modifie aucune ressource.
+`eu-interfaces` peut produire peu de traces sur une période courte. Le Trace Explorer s'ouvre actuellement sur **Past 15 Minutes**. Si vous ne trouvez pas trois observations comparables, élargissez progressivement à **Past 1 Hour**, **Past 4 Hours**, puis **Past 1 Day**. Ce changement de période est temporaire et ne modifie aucune ressource.
 
 # Partie 1 — Comprendre l'organisation de l'APM
 
@@ -138,7 +138,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 ## Étape 4 — Ouvrir la page du service réel retenu
 
 1. Si nécessaire, revenez à la page de `eu-interfaces` depuis **APM Home > Services**.
-2. Repérez **Service Summary**, **Resources**, **Traces**, **Dependencies**, **Deployments** ou leurs équivalents.
+2. Repérez **Service Summary**, **Resources**, **Deployments**, **Dependencies**, **Traces**, **Errors**, **Live Debugger**, **Infrastructure**, **Logs**, **Security** et **Costs**, selon vos droits.
 3. Relevez les filtres **operation**, **env**, **version** et la période.
 4. Notez la version visible ou **non observée**.
 5. Repérez **Service Config**, mais ne l'ouvrez pas et ne cliquez pas sur **Edit**.
@@ -191,7 +191,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 
 **Réponse :** le service est un composant stable instrumenté ; la ressource est une action stable exécutée par ce service, par exemple une route HTTP.
 
-**Exemple PeopleShop :** `orders-api` est le service et `POST /api/orders/validate` une ressource.
+**Application réelle :** `eu-interfaces` est le service et `console` l'opération retenue.
 
 ## Étape 7 — Ouvrir une ressource
 
@@ -221,7 +221,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 ## Étape 9 — Reprendre le contrat de contexte des logs
 
 1. Ouvrez **Logs > Explorer** dans un nouvel onglet.
-2. Si elle existe et vous est accessible, sélectionnez votre vue `[TRAINING] M05 Logs - <participant> - <date>` créée au module 5 V2.
+2. Si elle existe et vous est accessible, sélectionnez votre vue `[TRAINING] M05 Logs API - <participant> - 20260720` créée au module 5.
 3. Cette vue cible les logs du module 5 et sert uniquement à retrouver la navigation. Elle ne prouve pas une corrélation avec `eu-interfaces`.
 4. Remplacez temporairement la requête par `service:eu-interfaces`, sans enregistrer la modification.
 5. Relevez uniquement la présence ou l'absence des attributs `service`, `env`, `version`, `dd.trace_id` et `dd.span_id`.
@@ -244,15 +244,16 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 ## Étape 10 — Ouvrir le Trace Explorer
 
 1. Dans l'en-tête APM, ouvrez **Traces**.
-2. Repérez la barre de requête, la période, la liste des spans et le panneau de facettes.
-3. Vérifiez qu'aucune vue sauvegardée ou configuration n'est en cours.
-4. La navigation depuis `eu-interfaces` préremplit normalement le service et l'opération. Si nécessaire, saisissez temporairement la requête suivante, puis ne la sauvegardez pas :
+2. Dans **Search for**, conservez le mode **Spans** pour commencer.
+3. Repérez la barre de requête, la période, la liste des spans et le panneau de facettes.
+4. Vérifiez qu'aucune vue sauvegardée ou configuration n'est en cours.
+5. La navigation depuis `eu-interfaces` préremplit normalement le service et l'opération. Elle peut également ajouter des exclusions techniques sur `@span.kind`. Si nécessaire, saisissez temporairement la requête minimale suivante, puis ne la sauvegardez pas :
 
 ```text
 service:eu-interfaces operation_name:console
 ```
 
-5. Si moins de trois spans sont disponibles, élargissez la période à **Past 4 Hours**, puis **Past 1 Day**.
+6. Si moins de trois spans sont disponibles, élargissez la période de **Past 15 Minutes** à **Past 1 Hour**, puis **Past 4 Hours** et **Past 1 Day**.
 
 ### Que contient principalement le Trace Explorer ?
 
@@ -329,10 +330,16 @@ service:<service> resource_name:<ressource_proposée>
 
 ## Étape 15 — Ouvrir une trace
 
-1. Ouvrez le détail d'un span, puis la trace associée si cette navigation est proposée.
-2. Repérez le span racine, la durée totale, le statut et les services traversés.
-3. N'inscrivez aucun identifiant réel dans le livrable.
-4. Repérez la chronologie ou le waterfall.
+1. En haut du Trace Explorer, dans **Search for**, sélectionnez **Traces** à la place de **Spans**.
+2. Vérifiez que l'intitulé de la source devient **All Ingested Traces (Live Search)** et que la liste affiche notamment **Root service**, **Span Duration**, **Spans** et **Resource**.
+3. Conservez la requête sur `service:eu-interfaces` et `operation_name:console`.
+4. Cliquez sur une ligne de trace. Le panneau de détail s'ouvre à droite.
+5. Repérez le span racine, la durée totale, le statut et les services traversés.
+6. N'inscrivez aucun identifiant réel dans le livrable.
+7. Le panneau s'ouvre actuellement sur **Flame Graph**. Sélectionnez l'onglet **Waterfall** ; les onglets **Span List** et **Map** peuvent également être proposés.
+8. Repérez les onglets de détail du span, notamment **Overview**, **Infrastructure**, **Metrics** et **Logs**, lorsqu'ils sont disponibles.
+
+**Résultat attendu :** une trace complète contient plusieurs spans ; lors de la vérification, les traces visibles de `eu-interfaces` contenaient respectivement plusieurs opérations, alors que le mode **Spans** présentait une ligne par opération recherchable.
 
 ### Quelle différence existe entre une trace et un span ?
 
@@ -435,196 +442,37 @@ service:<service> resource_name:<ressource_proposée>
 
 **Réponse :** lorsque le traceur PHP est installé et que les bibliothèques sont compatibles, il crée automatiquement des spans techniques et collecte notamment des durées, des informations de requête web, des accès SQL et des exceptions non gérées.
 
-**Limite :** elle ne connaît pas spontanément les concepts métier de PeopleShop. Une étape de commande, une catégorie de client ou une fonctionnalité activée doivent être décrites par des attributs maîtrisés ou une instrumentation adaptée. Cet atelier propose ces enrichissements mais ne les applique pas en production.
+**Limite :** l'instrumentation automatique ne connaît pas spontanément les concepts métier. Relevez uniquement les attributs réellement présents ; aucune instrumentation n'est modifiée pendant l'atelier.
 
-## Étape 22 — Concevoir un contrat d'enrichissement métier
+## Étape 22 — Inventorier les attributs réellement présents
 
-1. À partir des questions d'exploitation, proposez trois attributs de faible cardinalité.
-2. Définissez leur type et leurs valeurs autorisées.
-3. Écartez toute donnée personnelle, valeur libre ou identifiant quasi unique.
-4. Indiquez si l'attribut doit servir à filtrer, agréger ou seulement expliquer un cas.
-5. Ne créez aucun tag, facet, span personnalisé ou règle Datadog.
+1. Dans les traces ouvertes, relevez uniquement les noms d'attributs non sensibles réellement visibles.
+2. Pour chacun, indiquez son type, quelques valeurs agrégées proposées par Datadog et son usage possible comme filtre.
+3. Marquez **absent** pour `env`, `version`, `team` ou tout attribut attendu mais non disponible.
+4. Ne proposez et ne créez aucun attribut supplémentaire.
 
-| Attribut proposé | Type et valeurs autorisées | Sensibilité | Question opérationnelle | Usage prévu |
-|---|---|---|---|---|
-| `tenant_tier` | chaîne : `standard`, `enterprise` | non personnelle | une catégorie est-elle davantage affectée ? | filtre et regroupement |
-| `checkout_step` | chaîne : `cart`, `validation`, `payment`, `confirmation` | non personnelle | quelle étape contribue à la dégradation ? | filtre et regroupement |
-| `feature` | chaîne issue d'une liste versionnée | vérifier qu'elle ne porte aucun identifiant | une fonctionnalité activée modifie-t-elle le comportement ? | comparaison contrôlée |
+| Attribut observé | Type visible | Usage possible | Limite |
+|---|---|---|---|
+|  |  |  |  |
 
-### Pourquoi faut-il définir les valeurs avant d'instrumenter ?
+**Réponse expliquée :** cet inventaire décrit l'instrumentation actuelle. Une absence devient une limite documentée, pas une donnée de remplacement.
 
-**Réponse :** un vocabulaire borné rend les comparaisons stables, limite la cardinalité et empêche l'apparition de données sensibles ou inutilisables.
+## Étape 23 — Vérifier les pivots proposés par Datadog
 
-**Pratique de production :** ce contrat doit être validé avec les équipes applicatives, sécurité et exploitation avant tout changement de code ou de configuration.
+1. Depuis la trace réelle ouverte, repérez les liens proposés vers Logs ou RUM.
+2. Testez uniquement un pivot en lecture seule et revenez à la trace sans enregistrer de vue.
+3. Si aucun pivot n'est proposé, écrivez **pivot non disponible sur cette trace**.
+4. Ne recherchez pas un service de remplacement et ne spécifiez pas de widget : les valeurs à saisir seront données directement dans le module concerné.
 
-## Étape 23 — Préparer les modules RUM et dashboard
+**Réponse expliquée :** un pivot visible dépend de l'instrumentation, de la propagation du contexte, de l'ingestion et de la rétention. Son absence ne doit pas être compensée par une préparation théorique.
 
-### 23.1 — Définir le pivot backend à rechercher depuis le RUM
+# Partie 5 — Consolider les observations réelles
 
-1. Ne retenez pas automatiquement `eu-interfaces` : son opération `console` correspond à un traitement en ligne de commande et ne constitue pas un backend RUM pertinent.
-2. Recherchez en lecture seule un service web actif, par exemple un service portant l'opération `web.request`, puis choisissez une ressource HTTP non sensible.
-3. Notez son service, son environnement et son nom anonymisé si nécessaire.
-4. Formulez la vérification à réaliser au module 7. Si aucun service web corrélable n'est vérifiable, inscrivez **pivot RUM-APM non vérifiable sur les données réelles** et utilisez le cas PeopleShop.
+## Étape 24 — Comparer plusieurs traces disponibles
 
-| Élément | Préparation |
-|---|---|
-| Service backend |  |
-| Ressource ou famille de ressources |  |
-| Environnement |  |
-| Vérification RUM | rechercher si une requête frontend permet d'ouvrir une trace de ce backend |
+1. Conservez le filtre `service:eu-interfaces operation_name:console` et le mode **Traces**.
+2. Étendez la période de 15 minutes à 1 heure, 4 heures puis 1 jour si nécessaire.
+3. Comparez jusqu'à trois traces réellement disponibles.
+4. Relevez durée, statut, ressource et dépendances visibles.
 
-### La relation RUM-APM est-elle déjà prouvée ?
-
-**Réponse :** non. Vous avez seulement défini le pivot à rechercher. La relation exige que le RUM et l'APM soient configurés pour propager le contexte et que les données correspondantes aient été ingérées et conservées.
-
-### 23.2 — Spécifier trois widgets APM sans les créer
-
-Complétez le périmètre avec le service réel retenu. Conservez ces spécifications pour le module 8.
-
-| Widget à construire au module 8 | Source | Périmètre | Mesure et agrégation | Regroupement | Représentation | Interprétation et limite |
-|---|---|---|---|---|---|---|
-| Débit par version | métriques APM | `env:<env> service:<service>` | requêtes par seconde ou volume | `version` | série temporelle | compare l'activité ; une version absente peut refléter un tag manquant |
-| Taux d'erreur par ressource | métriques APM | même service et environnement | taux d'erreur | `resource_name`, puis `version` si lisible | série ou toplist | localise une ressource ; ne prouve pas la cause |
-| Latence p95 par ressource | métriques APM | même service et environnement | p95 de latence | `resource_name`, puis `version` si lisible | série temporelle | suit la queue de distribution ; dépend du périmètre et du trafic |
-
-### Pourquoi ne pas créer le dashboard maintenant ?
-
-**Réponse :** l'ordre pédagogique fait d'abord explorer et qualifier les données. Le module 8 pourra ensuite construire un dashboard avec des requêtes justifiées par les constats des modules logs, APM et RUM.
-
-# Partie 5 — Analyser les preuves PeopleShop
-
-À partir d'ici, utilisez uniquement les observations pédagogiques suivantes.
-
-## Étape 24 — Comparer les trois cas
-
-| Observation | Référence normale | Cas lent | Fausse piste |
-|---|---:|---:|---:|
-| Version | `2.3.7` | `2.4.0` | `2.4.0` |
-| Durée totale | 420 ms | 2 800 ms | 650 ms |
-| Span validation | 90 ms | 150 ms | 110 ms |
-| Span PostgreSQL | 120 ms | 2 200 ms | 130 ms |
-| Paiement | 140 ms | 300 ms | 380 ms en erreur |
-| `tenant_tier` | `standard` | `enterprise` | `standard` |
-
-### Que montrent directement ces preuves ?
-
-**Réponse :** dans le cas lent `2.4.0` et `enterprise`, le span PostgreSQL occupe la majeure partie des 2 800 ms ; dans la fausse piste, le paiement est en erreur mais la trace reste nettement plus courte.
-
-**Pourquoi :** la durée dominante oriente le test vers PostgreSQL pour le cas lent, tandis que la couleur rouge du paiement ne suffit pas à expliquer la dégradation principale.
-
-**Limite :** trois observations pédagogiques ne prouvent ni la fréquence générale ni le mécanisme précis de la lenteur.
-
-## Étape 25 — Distinguer ce qui change et ce qui reste stable
-
-| Dimension | Observation de référence |
-|---|---|
-| Ressource | même parcours de validation supposé |
-| Version | `2.3.7` puis `2.4.0` |
-| Population | `standard` puis `enterprise` |
-| Contribution PostgreSQL | 120 ms puis 2 200 ms |
-| Erreur paiement | présente sur la fausse piste, sans latence équivalente |
-
-### Quelle hypothèse est justifiée ?
-
-**Réponse :** la latence observée pourrait être liée au comportement de la dépendance PostgreSQL pour la population `enterprise` sur la version `2.4.0`.
-
-**Limite :** les données ne permettent pas encore de choisir entre requête lente, attente de pool, saturation d'infrastructure ou autre mécanisme.
-
-## Étape 26 — Vérifier les attributs métier proposés
-
-| Attribut | Valeurs contrôlées | Question permise |
-|---|---|---|
-| `tenant_tier` | `standard`, `enterprise` | une catégorie est-elle davantage affectée ? |
-| `checkout_step` | `cart`, `validation`, `payment`, `confirmation` | quelle étape contribue à la dégradation ? |
-| `feature` | liste contrôlée à définir avec l'équipe produit | une fonctionnalité activée modifie-t-elle le comportement ? |
-
-### Pourquoi ces attributs sont-ils acceptables ?
-
-**Réponse :** ils ont un vocabulaire borné, répondent à une question opérationnelle et ne désignent pas une personne précise.
-
-**Limite :** email, contenu du panier, donnée de paiement et identifiant client presque unique sont refusés comme dimensions d'agrégation par défaut.
-
-## Étape 27 — Rédiger la fiche de conclusion
-
-```text
-Périmètre : env:training, service:orders-api,
-            resource_name:"POST /api/orders/validate"
-
-Fait : sur la trace lente étudiée, le span PostgreSQL occupe 2,2 s
-       sur une durée totale de 2,8 s.
-
-Hypothèse : la latence du service pourrait être liée à la dépendance
-            PostgreSQL pour la population enterprise observée.
-
-Limite : les exemples étudiés ne démontrent ni l'ampleur générale,
-         ni le mécanisme exact, ni une causalité liée à la version.
-
-Test suivant : comparer davantage de traces de la même ressource par
-               version et tenant_tier, rechercher les logs corrélés,
-               puis examiner l'attente et l'utilisation du pool.
-```
-
-### Pourquoi séparer fait, hypothèse, limite et test ?
-
-**Réponse :** cette structure empêche de transformer une observation locale en certitude et rend l'investigation reproductible.
-
-## Questions de synthèse corrigées
-
-### L'instrumentation automatique connaît-elle spontanément le sens métier ?
-
-**Réponse :** non. Elle crée des spans pour les frameworks et bibliothèques compatibles, mais ne connaît pas nécessairement les étapes fonctionnelles propres à PeopleShop.
-
-**Explication :** une instrumentation personnalisée n'est justifiée que lorsqu'une question utile reste sans réponse, avec des attributs bornés et non sensibles.
-
-### Pourquoi plusieurs traces doivent-elles être comparées ?
-
-**Réponse :** pour distinguer un cas isolé d'un motif reproductible et comparer versions, populations ou périodes équivalentes.
-
-### Une recherche vide prouve-t-elle l'absence d'incident ?
-
-**Réponse :** non. Elle peut résulter de la période, des filtres, de la rétention, des droits ou de l'échantillonnage.
-
-## Aide au diagnostic
-
-| Difficulté | Interprétation | Action en lecture seule |
-|---|---|---|
-| `eu-interfaces` absent | période trop courte ou activité différente | élargir jusqu'à **Past 1 Day**, puis demander un service validé |
-| Aucun span | période, droits ou échantillonnage | utiliser les fiches pédagogiques fournies |
-| Aucune erreur | flux réel sain sur la période | analyser une trace lente puis la fausse piste fournie |
-| Trace impossible à ouvrir | données non conservées ou droits | basculer vers les captures ou fiches préparées |
-| Version absente | contexte non injecté ou non visible | noter **non observé** comme limite |
-| Nombreux spans Symfony | instrumentation automatique détaillée | recentrer sur ressource, hiérarchie et chemin critique |
-| Aucun pivot vers les logs | parsing, corrélation, période, droits ou échantillonnage | noter **corrélation non observée** sans inventer de lien |
-| Vue du module 5 absente | parcours V2 non réalisé ou vue inaccessible | saisir une requête temporaire en lecture seule, sans la sauvegarder |
-| Service réel autre que `eu-interfaces` | activité réelle différente | faire valider un service applicatif actif et noter la substitution |
-| Aucun attribut métier | instrumentation technique seulement | compléter le contrat proposé sans l'appliquer |
-
-## Validation finale
-
-- [ ] Le relevé réel est daté et sa période est explicite.
-- [ ] L'analyse commence par les signaux agrégés du service.
-- [ ] Service, ressource, trace et span sont distingués.
-- [ ] La Dependency Map n'est pas interprétée comme une CMDB exhaustive.
-- [ ] Trois observations comparables précèdent la conclusion.
-- [ ] Le waterfall et les branches parallèles sont pris en compte.
-- [ ] Le chemin critique est distingué du simple span le plus long.
-- [ ] Une erreur observée n'est pas automatiquement appelée cause racine.
-- [ ] `eu-interfaces` réel et `orders-api` fictif ne sont jamais mélangés.
-- [ ] Le contrat logs-APM du module 5 est vérifié sans modifier sa vue.
-- [ ] L'instrumentation PHP est auditée sans changement de configuration.
-- [ ] Le résultat du pivot logs-traces est formulé sans surinterprétation.
-- [ ] Trois attributs métier bornés et non sensibles sont proposés.
-- [ ] Un pivot backend est préparé pour le module 7 sans prétendre que la corrélation RUM-APM existe.
-- [ ] Trois widgets APM sont spécifiés pour le module 8 sans créer de dashboard.
-- [ ] Fait, hypothèse, limite et test suivant sont séparés.
-- [ ] Le test suivant demande au moins une preuve complémentaire.
-- [ ] Aucun identifiant ou contenu sensible réel n'est conservé.
-- [ ] Aucune ressource Datadog n'a été modifiée.
-
-## Références officielles
-
-- [Tracing PHP Applications](https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/php/)
-- [Service Page](https://docs.datadoghq.com/tracing/services/service_page/)
-- [Correlate Logs and Traces](https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/)
-- [Correlating PHP Logs and Traces](https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/php/)
-- [Trace Retention](https://docs.datadoghq.com/tracing/trace_pipeline/trace_retention/)
+**Réponse expliquée :** trois traces ne suffisent pas à établir une tendance ; elles permettent seulement d'apprendre la lecture du waterfall et de formuler une prochaine vérification.

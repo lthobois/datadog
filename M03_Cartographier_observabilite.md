@@ -8,13 +8,13 @@ lang: fr-FR
 
 ## Objectif opérationnel
 
-Parcourir les principales vues d'exploitation de Datadog en lecture seule, comprendre la fonction de chacune et construire un chemin d'investigation autour du service réel `app-api`.
+Parcourir les principales vues d'exploitation de Datadog en lecture seule, comprendre la fonction de chacune et construire un chemin d'investigation autour du service réel `eu-interfaces`.
 
 ## Résultats produits
 
 À l'issue de l'atelier, vous disposez :
 
-- d'un relevé factuel et daté de `app-api` ;
+- d'un relevé factuel et daté de `eu-interfaces` ;
 - d'une carte simplifiée de ses dépendances ;
 - d'une cartographie des principales portes d'entrée Datadog ;
 - d'une matrice « question → signal → vue → réponse » ;
@@ -44,7 +44,7 @@ Si une commande de modification est ouverte par erreur, fermez-la sans enregistr
 
 - navigateur connecté à l'organisation Datadog ;
 - accès en lecture aux domaines utilisés ;
-- période contenant des données pour `app-api` ;
+- période contenant des données pour `eu-interfaces` ;
 - possibilité de prendre des notes dans ce document ou dans un éditeur de texte.
 
 ## Comment utiliser ce document
@@ -192,14 +192,14 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 ## Étape 6 — Lire la liste des services
 
 1. Repérez la liste ou le catalogue des services.
-2. Recherchez `app-api`.
+2. Recherchez `eu-interfaces`.
 3. Repérez les colonnes disponibles parmi **Requests**, **Error Rate**, **p95 Latency**, **Last Deploy**, **Env**, **Dashboards** et **Monitors**.
 4. Recopiez uniquement les valeurs visibles.
 5. Utilisez `non observé` lorsqu'une valeur manque.
 
 | Élément | Observation datée |
 |---|---|
-| Service | `app-api` |
+| Service | `eu-interfaces` |
 | Requests |  |
 | Error Rate |  |
 | p95 Latency |  |
@@ -237,9 +237,9 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 
 # Partie 3 — Naviguer dans la page du service
 
-## Étape 8 — Ouvrir `app-api`
+## Étape 8 — Ouvrir `eu-interfaces`
 
-1. Cliquez sur le lien `app-api`.
+1. Cliquez sur le lien `eu-interfaces`.
 2. Vérifiez que le service apparaît dans le titre ou le sélecteur.
 3. Repérez les filtres disponibles parmi **operation**, **env**, **version** et la période.
 4. Conservez leurs valeurs.
@@ -298,7 +298,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 ### Dependencies
 
 1. Ouvrez **Dependencies** ou repérez la carte équivalente.
-2. Identifiez `app-api`.
+2. Identifiez `eu-interfaces`.
 3. Relevez jusqu'à quatre dépendances visibles.
 4. Notez le sens de la relation uniquement s'il est lisible.
 
@@ -311,7 +311,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 ### Traces
 
 1. Ouvrez **Traces** ou **Trace Explorer**.
-2. Vérifiez que le filtre `service:app-api` est présent ou que le service est bien sélectionné.
+2. Vérifiez que le filtre `service:eu-interfaces` est présent ou que le service est bien sélectionné.
 3. Repérez les facettes **Duration**, **Status**, **Env**, **Service** et **Resource**.
 4. Ouvrez une trace représentative uniquement en lecture.
 5. Repérez son waterfall et ses spans.
@@ -349,7 +349,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 ### Logs
 
 1. Ouvrez **Logs** depuis le service si le lien est disponible.
-2. Vérifiez que la requête conserve `service:app-api` ou un filtre équivalent.
+2. Vérifiez que la requête conserve `service:eu-interfaces` ou un filtre équivalent.
 3. Vérifiez la période.
 4. Repérez les facettes **Service**, **Status**, **Host** et **Source**.
 5. Ouvrez un log représentatif sans modifier la configuration.
@@ -371,7 +371,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
               [         ]        [         ]
                   ^                  ^
                   |                  |
-               app-api ----------> [         ]
+               eu-interfaces ----------> [         ]
                   |
                   v
               [         ]
@@ -379,10 +379,10 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 
 ### Question — Quelle carte de référence est acceptable si les relations sont difficiles à lire ?
 
-**Réponse :** une carte peut placer `app-api` au centre et proposer, sous réserve de confirmation :
+**Réponse :** une carte peut placer `eu-interfaces` au centre et proposer, sous réserve de confirmation :
 
 ```text
-app-api
+eu-interfaces
   |-- accès SQL --------> pdo / mysqli ?
   |-- cache ------------> phpredis / memcached ?
   +-- appel HTTP -------> curl / guzzle ?
@@ -400,7 +400,7 @@ app-api
 2. Repérez les onglets **Home**, **Catalog**, **Scorecards**, **Reports** et **Actions** lorsqu'ils sont visibles.
 3. Ouvrez **Catalog**.
 4. Repérez les catégories disponibles : services, infrastructure, files, datastores, frontends, dépôts ou endpoints.
-5. Recherchez `app-api` si le champ de recherche est disponible.
+5. Recherchez `eu-interfaces` si le champ de recherche est disponible.
 6. Repérez les angles **Ownership**, **Reliability**, **Performance**, **Security**, **Costs** et **Delivery** lorsqu'ils sont visibles.
 
 ### Question — À quoi sert Developer Portal ?
@@ -456,7 +456,7 @@ app-api
 5. Si les données sont insuffisantes, sélectionnez les dernières 24 heures.
 6. Repérez la barre de requête.
 7. Repérez les facettes **Service**, **Status**, **Host** et **Source**.
-8. Filtrez en lecture avec `service:app-api` uniquement si des logs correspondants sont disponibles.
+8. Filtrez en lecture avec `service:eu-interfaces` uniquement si des logs correspondants sont disponibles.
 9. Retirez le filtre si aucun résultat n'existe et observez les services disponibles.
 
 ### Question — Quelle différence existe entre Log Explorer et Log Configuration ?
@@ -524,8 +524,8 @@ app-api
 
 1. Dans **Monitoring**, repérez l'entrée **SLOs** ou **Service Level Objectives** si elle est visible.
 2. Ouvrez la liste en lecture seule.
-3. Recherchez `app-api`.
-4. Si aucun SLO n'est trouvé, notez `aucun SLO app-api observé`.
+3. Recherchez `eu-interfaces`.
+4. Si aucun SLO n'est trouvé, notez `aucun SLO eu-interfaces observé`.
 5. Si un SLO existe, repérez son objectif, sa période, son indicateur et son budget d'erreur.
 
 ### Question — Qu'est-ce qu'un SLO ?
@@ -598,7 +598,7 @@ La matrice suivante contient directement les réponses attendues. Utilisez-la po
 | Le service est sain parce que le taux d'erreur est nul. | Conclusion prématurée | la latence, les erreurs métier et l'expérience utilisateur restent inconnues |
 | Une trace lente peut localiser le temps consommé. | Proposition de test | la trace est le signal adapté, mais son résultat n'est pas encore observé |
 | `No Data` signifie que le service est arrêté. | Conclusion prématurée | la collecte, la requête et la fenêtre doivent d'abord être vérifiées |
-| Aucun SLO n'est visible pour `app-api`. | Fait d'interface | cela ne prouve ni l'absence de suivi de fiabilité ni l'absence de contrat externe |
+| Aucun SLO n'est visible pour `eu-interfaces`. | Fait d'interface | cela ne prouve ni l'absence de suivi de fiabilité ni l'absence de contrat externe |
 
 ## Étape 20 — Suivre le parcours d'investigation de référence
 
@@ -624,7 +624,7 @@ La matrice suivante contient directement les réponses attendues. Utilisez-la po
 Votre document est complet lorsque vous avez :
 
 - relevé la période et l'environnement ;
-- décrit `app-api` sans extrapolation ;
+- décrit `eu-interfaces` sans extrapolation ;
 - cartographié au moins deux dépendances ;
 - identifié le rôle des principales vues APM ;
 - parcouru Dashboards, Developer Portal, Metrics, Logs, Monitoring et RUM ;
@@ -681,13 +681,13 @@ Votre document est complet lorsque vous avez :
 
 | Difficulté | Cause probable | Action en lecture seule |
 |---|---|---|
-| `app-api` absent | période ou instrumentation modifiée | élargir la période, puis choisir un service actif et noter la substitution |
+| `eu-interfaces` absent | période ou instrumentation modifiée | élargir la période, puis choisir un service actif et noter la substitution |
 | Vue vide | période, droits, filtre ou absence de données | vérifier période, requête, env et droits ; noter `non observé` |
 | Dépendances illisibles | carte dense ou données insuffisantes | utiliser les entités de la liste sans inventer le sens des liens |
 | Version absente | instrumentation ou période | noter `non observé` et poursuivre |
 | Aucun Service Health Monitor | autre stratégie d'alerte ou absence de configuration | expliquer l'apport attendu et constater l'absence sans créer |
 | Aucun SLO | indicateur ou cible non formalisés | expliquer la différence monitor/SLO et noter l'absence |
-| Aucun log `app-api` | collecte non activée ou nom différent | retirer le filtre et identifier les services réellement disponibles |
+| Aucun log `eu-interfaces` | collecte non activée ou nom différent | retirer le filtre et identifier les services réellement disponibles |
 | Aucun résultat RUM | période, application ou instrumentation | passer à 24 heures et noter la limite |
 | Commande d'édition ouverte | confusion de navigation | fermer sans enregistrer |
 | Interface différente | évolution ou droits Datadog | chercher la fonction par son objectif et la recherche globale |

@@ -1,712 +1,433 @@
 ---
-title: "Module 5 — Atelier V2 : exploiter les logs dans l'environnement partagé"
+title: "Module 5 — Atelier : ingérer, structurer et retrouver un log pédagogique"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
 
-# Exploiter les logs réels et préparer les analyses Datadog
+# Ingérer, structurer et retrouver un log pédagogique
 
 ## Objectif
 
-Parcourir les logs réels en lecture seule, évaluer leur aptitude à alimenter l'APM, les dashboards et l'investigation, puis concevoir pour PeopleShop un événement JSON corrélable, un traitement ordonné et une trajectoire contrôlée depuis Elasticsearch.
+Envoyer un événement pédagogique dans Datadog avec PowerShell ISE, vérifier son ingestion, extraire ses valeurs avec une règle Grok exécutée à la requête, puis enregistrer une vue personnelle permettant de retrouver les logs du service créé au module 4.
 
-## Livrable
+## Résultat produit
 
-Vous produisez :
+À la fin de l'atelier, vous disposez :
 
-- un relevé daté et une recherche temporaire anonymisée ;
-- une unique vue enregistrée préfixée `[TRAINING]` ;
-- une fiche de qualité du contexte `service/env/version` ;
-- un catalogue de trois requêtes réutilisables au module 8 ;
-- un événement JSON cible ;
-- une règle de regroupement multiligne ;
-- un pipeline logique ordonné ;
-- une matrice facette, mesure, attribut ou exclusion ;
-- une décision de réduction de volumétrie avec preuve et retour arrière.
-- une recommandation de coexistence ou de migration pour un cas d'usage Elastic.
+- de logs pédagogiques isolés par le nom unique de votre service ;
+- d'une preuve d'acceptation HTTP `202 Accepted` ;
+- d'une extraction Grok temporaire faisant apparaître les valeurs du message ;
+- d'une vue `[TRAINING]` filtrée sur votre service et vos logs pédagogiques ;
+- du nom exact de la vue à supprimer en fin de formation.
 
-## Règle de sécurité
+## Règles de sécurité
 
-Vous intervenez dans une organisation Datadog partagée correspondant à la production. Une seule écriture est autorisée : enregistrer **votre propre vue** préfixée `[TRAINING]` selon l'étape 13. Pour tout le reste, travaillez uniquement en lecture. Ne créez ni pipeline, index, archive, métrique, facette, mesure, monitor, dashboard ou règle d'exclusion. N'ouvrez pas une commande de modification dans **Log Configuration**. Ne recopiez aucun identifiant réel, nom d'hôte, adresse IP, secret, URL complète ou donnée personnelle.
+Vous travaillez dans une organisation Datadog partagée correspondant à la production. Les seules écritures autorisées dans cet atelier sont :
 
-Les productions PeopleShop sont écrites uniquement dans ce document. Une seule requête réelle peut rester enregistrée dans la vue pédagogique ; les autres recherches sont temporaires et doivent être retirées de la barre de recherche après observation.
+1. l'envoi de quelques logs pédagogiques via l'API HTTP ;
+2. la création ou la correction de votre propre Saved View préfixée `[TRAINING]`.
+
+La clé API dont l'identifiant est fourni reste un secret de production. Son utilisation doit avoir été autorisée par le formateur. Ne la communiquez à personne, ne la recopiez pas dans ce document, ne faites aucune capture de l'écran qui l'affiche et ne sauvegardez pas le script PowerShell qui la contient.
+
+Ne créez et ne modifiez aucun pipeline, index, filtre d'exclusion, archive, facette globale, métrique, monitor ou dashboard. L'extraction Grok est réalisée uniquement avec un **Calculated Field** personnel et temporaire dans le Log Explorer.
 
 ## Prérequis
 
-- Chrome connecté à Datadog ;
-- accès en lecture au **Log Explorer** ;
-- droit permettant d'enregistrer une Saved View ;
-- convention `env/service/version/team` du module 4 ;
-- service pédagogique créé au module 4 V2, si cette variante a été exécutée ;
-- scénario PeopleShop et un document de réponse.
+- Chrome connecté à l'organisation Datadog de la formation ;
+- accès à **Organization Settings > API Keys** avec le droit de consulter la clé autorisée ;
+- accès à **Logs > Live Tail** et **Logs > Log Explorer** ;
+- droit de créer une Saved View ;
+- PowerShell ISE disponible sur le poste ;
+- service `training-<participant>-<aaaammjj>-svc` créé au module 4 ;
+- identifiant de participant autorisé, sans espace ni donnée personnelle inutile.
 
-Le service pédagogique du module 4 ne contient normalement aucun log. Il sert à comprendre les métadonnées du Catalog, pas à alimenter cet atelier. Pour observer les logs, utilisez uniquement un service réel proposé par les facettes et validé par le formateur.
+Si la valeur de la clé n'est pas accessible, ne créez pas une autre clé. Le formateur exécute le script pour votre identifiant, puis vous poursuivez à partir de la recherche dans Live Tail.
 
-## Comment utiliser ce document
+## Comprendre le parcours
 
-Réalisez d'abord l'observation demandée, puis comparez-la à la réponse placée immédiatement après la question. Les volumes, services et facettes changent avec la période : votre relevé daté prévaut sur les exemples historiques. Ne laissez aucune question sans lire sa réponse et son explication. À partir de la partie 4, travaillez uniquement sur PeopleShop et n'utilisez plus de donnée réelle.
+Le champ JSON `service` envoyé à Datadog doit être exactement égal au nom du service créé au module 4. Cette égalité permet à Datadog de rapprocher le log de la même identité de service.
 
-## Place dans la progression
-
-Le module 4 a établi l'identité des services et la convention de tags. Cet atelier vérifie maintenant si les logs portent réellement ce contexte. Ses livrables seront repris :
-
-- au module 6, pour chercher les logs associés à une trace APM ;
-- au module 8, pour construire des widgets à partir de requêtes déjà comprises ;
-- au module 9, pour recouper chronologie, version, erreurs et attente PostgreSQL.
-
-### Pourquoi les logs sont-ils étudiés avant le dashboard ?
-
-**Réponse :** pour que chaque futur widget soit fondé sur une source, une requête et une limite déjà comprises.
-
-**Explication :** le dashboard synthétise les signaux ; il ne doit pas masquer leur qualité, leur période, leur structure ou leurs lacunes de corrélation.
-
-# Partie 1 — Comprendre le Log Explorer
-
-## Étape 1 — Ouvrir le Log Explorer
-
-1. Dans le menu gauche, ouvrez **Logs**, puis **Explorer** ou **Search**, selon le libellé disponible.
-2. Repérez la barre de requête, la période, la liste des événements et le panneau de facettes.
-3. Notez la date, l'heure, la période et la requête initiale.
-4. Vérifiez qu'aucun mode de configuration ou d'enregistrement n'est ouvert.
-
-| Élément | Observation |
-|---|---|
-| Date et heure |  |
-| Période |  |
-| Requête initiale |  |
-| Nombre de résultats, si affiché |  |
-
-### Pourquoi noter la période avant d'interpréter les résultats ?
-
-**Réponse :** parce que la présence des logs, les valeurs des facettes et les volumes dépendent de la fenêtre consultée.
-
-**Pourquoi :** zéro résultat sur une courte période ne signifie pas qu'aucun événement n'existe dans l'historique.
-
-**Limite :** lors de la conception, la période était **Past 15 Minutes** ; ce n'est pas une valeur attendue aujourd'hui.
-
-## Étape 2 — Parcourir les facettes
-
-1. Dans le panneau gauche, recherchez les groupes **Service**, **Status**, **Host**, **Source**, `env` et `version`, lorsqu'ils sont disponibles.
-2. Dépliez une facette sans sélectionner de valeur.
-3. Observez les valeurs et les volumes proposés.
-4. Refermez-la et recommencez sur une autre facette.
-5. Ne recopiez aucune valeur sensible.
-
-### Qu'est-ce qu'une facette ?
-
-**Réponse :** une facette rend un attribut utilisable pour filtrer, regrouper et explorer les valeurs présentes dans les logs.
-
-**Pourquoi :** elle transforme une dimension utile, comme `service` ou `status`, en axe de navigation.
-
-**Limite :** tous les attributs ne doivent pas devenir des facettes. Une facette doit répondre à un usage réel et sa liste dépend des données, de la période et des droits.
-
-## Étape 3 — Observer la diversité des sources
-
-1. Parcourez plusieurs événements sans recopier leur contenu.
-2. Identifiez, si disponibles, un accès HTTP, un message applicatif, un log d'Agent, un log Kubernetes et une stack trace.
-3. Notez seulement le type et le niveau de structure.
-
-| Type observé | Texte, clé-valeur ou JSON | Champs directement exploitables |
-|---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
-### Un message lisible est-il forcément un événement bien structuré ?
-
-**Réponse :** non. Un humain peut comprendre une phrase alors que Datadog ne dispose pas de champs stables pour filtrer, agréger et corréler.
-
-**Pourquoi :** la structure explicite évite de reparcourir le texte avec des parsers fragiles.
-
-## Étape 4 — Ouvrir un événement
-
-1. Cliquez sur un événement non sensible pour ouvrir son panneau de détail.
-2. Repérez le message, le timestamp et les attributs.
-3. Cherchez `service`, `status`, `env`, `version`, `trace_id` et `span_id`.
-4. Écrivez **non observé** pour chaque information absente de cette vue.
-5. Fermez le détail sans action de configuration.
-
-| Champ | État observé | Usage attendu |
-|---|---|---|
-| timestamp |  | ordonner et corréler dans le temps |
-| message |  | expliquer l'événement |
-| service |  | isoler la capacité concernée |
-| status |  | qualifier la sévérité |
-| env |  | isoler le contexte |
-| version |  | comparer les déploiements |
-| trace/span |  | naviguer entre logs et traces |
-
-### Un champ non visible dans un événement est-il absent de tous les logs ?
-
-**Réponse :** non. L'observation ne concerne que cet événement, cette source et cette vue.
-
-**Limite :** ne généralisez jamais à partir de quelques exemples et n'inventez aucune valeur manquante.
-
-## Étape 5 — Construire une recherche temporaire par facette
-
-1. Choisissez un service proposé par la facette **Service**.
-2. Cliquez sur sa valeur pour ajouter le filtre, ou saisissez `service:<valeur>`.
-3. Vérifiez que la requête et la liste sont mises à jour.
-4. Ajoutez un statut d'erreur proposé par la facette, si disponible.
-5. Notez une version générique et anonymisée de la requête.
-6. Retirez les filtres pour revenir à la requête initiale, sans sauvegarder.
+Le message envoyé reste volontairement textuel :
 
 ```text
-service:<service> status:error
+TRAINING participant=<participant> operation=login duration_ms=128 result=success
 ```
 
-### Que signifie une recherche sans résultat ?
+Grok transforme ensuite temporairement les parties du message en champs utilisables. Cette extraction ne modifie ni le log ingéré ni les pipelines de production.
 
-**Réponse :** aucun événement ne correspond aux critères dans la période et le périmètre actuels.
+# Partie 1 — Retrouver la clé API autorisée
 
-**Pourquoi :** cela ne prouve ni l'absence historique d'erreurs ni l'absence de logs sous un autre statut ou service.
+## Étape 1 — Ouvrir la gestion des clés
 
-## Étape 6 — Utiliser la chronologie des résultats
+1. Dans Datadog, cliquez sur votre profil en bas à gauche.
+2. Ouvrez **Organization Settings**.
+3. Dans la section **Access**, ouvrez **API Keys**.
+4. Restez sur l'onglet **API Keys** : une Application Key, un Personal Access Token ou un Service Access Token ne remplace pas la clé nécessaire à l'ingestion de logs.
 
-1. Repérez l'histogramme ou la série de volume au-dessus des événements.
-2. Identifiez un intervalle plus dense, sans changer la période globale.
-3. Comparez visuellement la chronologie avec la liste des événements.
-4. Notez ce que cette vue permettrait de décider pendant un incident.
+**Résultat attendu :** la liste des API Keys de l'organisation est visible.
 
-### Quelle information la chronologie ajoute-t-elle à la liste ?
+**Vérification :** le titre de la page ou de l'onglet contient **API Keys**.
 
-**Réponse :** elle montre quand le volume apparaît, augmente ou disparaît et aide à fixer une fenêtre d'investigation.
+**Interprétation :** une API Key authentifie la soumission de télémétrie. Elle ne donne pas, à elle seule, les droits d'administration associés à un utilisateur.
 
-**Limite :** une hausse de volume ne signifie pas automatiquement une hausse d'erreurs ; elle peut refléter davantage de trafic ou de verbosité.
+## Étape 2 — Identifier la clé imposée
 
-## Étape 7 — Repérer les fonctions de navigation détaillée
-
-1. Rouvrez un événement.
-2. Repérez, sans les déclencher si elles modifient l'état, les actions permettant de filtrer sur une valeur, exclure une valeur, afficher le contexte ou ouvrir une trace associée.
-3. Si un identifiant de trace est visible, notez seulement **corrélation disponible** ; ne recopiez pas l'identifiant.
-
-### Pourquoi la corrélation logs-traces est-elle utile ?
-
-**Réponse :** elle permet de passer du symptôme textuel au chemin d'exécution distribué qui a produit l'événement.
-
-**Pourquoi :** `service`, `env`, `version`, `dd.trace_id` et `dd.span_id` cohérents relient les signaux sans recherche manuelle fragile.
-
-## Étape 8 — Situer Live Tail sans l'utiliser comme historique
-
-1. Repérez **Live Tail** dans la navigation des logs, s'il est accessible.
-2. N'y entrez pas si cela expose des données sensibles supplémentaires.
-3. Notez sa place par rapport au Log Explorer.
-
-### Quelle différence existe entre Live Tail et une recherche indexée ?
-
-**Réponse :** Live Tail sert à observer le flux entrant en temps quasi réel, tandis que le Log Explorer interroge les événements disponibles pour la recherche selon les mécanismes d'indexation et de rétention.
-
-**Limite :** la visibilité exacte d'un événement exclu dépend de la configuration. Live Tail ne remplace ni un historique indexé ni un archivage.
-
-# Partie 2 — Auditer la qualité d'événements réels
-
-## Étape 9 — Comparer trois événements homogènes
-
-1. Choisissez trois événements du même service ou type de source.
-2. Vérifiez sans recopier leur contenu la présence et l'homogénéité des champs.
-
-| Champ | Présent et homogène ? | Amélioration potentielle |
-|---|:---:|---|
-| timestamp |  |  |
-| message |  |  |
-| service |  |  |
-| status |  |  |
-| env |  |  |
-| version |  |  |
-| trace/span |  |  |
-
-### Quelle observation est acceptable si `env` ou `version` manque ?
-
-**Réponse :** **non observé dans les trois événements et la vue consultés**.
-
-**Pourquoi :** c'est un écart potentiel de corrélation à confirmer, pas la preuve d'une mauvaise configuration générale.
-
-## Étape 10 — Identifier un motif répétitif
-
-1. Recherchez visuellement un message court et répétitif, sans recopier son contenu réel.
-2. Notez sa catégorie probable : health check, accès nominal, message d'Agent ou autre.
-3. Listez les usages qu'il pourrait encore servir.
-
-### Peut-on supprimer immédiatement un motif répétitif ?
-
-**Réponse :** non. Il faut mesurer son volume, identifier ses consommateurs, préserver les erreurs et prévoir un retour arrière.
-
-**Pourquoi :** un message bruyant peut encore alimenter une détection de disponibilité, un audit ou une investigation rare.
-
-# Partie 3 — Préparer l'APM, le dashboard et la migration
-
-## Étape 11 — Évaluer le contrat de contexte
-
-1. Conservez le service réel validé par le formateur.
-2. Sélectionnez une période contenant des événements, sans dépasser la fenêtre autorisée par le formateur.
-3. Examinez au moins trois événements comparables.
-4. Complétez la fiche sans recopier les valeurs réelles sensibles.
-
-| Élément | Observation | Conséquence pour la suite |
-|---|---|---|
-| `service` homogène |  | filtrage commun possible ou à corriger |
-| `env` homogène |  | séparation des environnements possible ou incertaine |
-| `version` présente |  | comparaison avant/après déploiement possible ou impossible |
-| `status` normalisé |  | taux d'erreur calculable ou fragile |
-| identifiants de trace |  | pivot APM possible ou non observé |
-| champs métier bornés |  | segmentation métier disponible ou à concevoir |
-
-### Quel est le contrat minimal pour préparer la corrélation ?
-
-**Réponse :** des valeurs cohérentes pour `service`, `env` et `version`, auxquelles s'ajoutent `dd.trace_id` et `dd.span_id` lorsqu'un événement appartient à une trace.
-
-**Explication :** l'Unified Service Tagging rapproche le même déploiement entre produits ; les identifiants de corrélation permettent de viser la trace et le span correspondant.
-
-**Limite :** un log peut contenir un identifiant de trace alors que la trace n'est plus disponible, car les logs et les traces peuvent être échantillonnés ou conservés indépendamment. Écrivez alors **identifiant présent, trace associée non vérifiée**.
-
-## Étape 12 — Préparer trois requêtes réutilisables
-
-Remplacez uniquement `<service-valide>` par une valeur proposée dans la facette **Service**. N'enregistrez aucune vue.
-
-### Requête A — erreurs d'un service
-
-```text
-service:<service-valide> status:error
-```
-
-1. Exécutez la recherche sur une période autorisée.
-2. Notez si elle retourne des événements.
-3. Observez la chronologie et les statuts sans recopier les messages.
-4. Retirez ensuite la requête.
-
-### À quoi servira cette requête dans le dashboard ?
-
-**Réponse :** à préparer une série de volume ou de taux d'erreur, sous réserve de disposer également d'un dénominateur cohérent pour calculer un taux.
-
-**Explication :** un nombre d'erreurs seul mélange évolution du trafic et évolution de la fiabilité. Le futur widget devra préciser s'il affiche un volume ou un taux.
-
-### Requête B — comparaison par version
-
-```text
-service:<service-valide> version:*
-```
-
-1. Exécutez la recherche.
-2. Vérifiez si `version` possède plusieurs valeurs exploitables.
-3. Notez **comparaison disponible**, **une seule version observée** ou **version non observée**.
-4. Retirez ensuite la requête.
-
-### Pourquoi la version est-elle indispensable dans le scénario PeopleShop ?
-
-**Réponse :** elle permet de vérifier si la dégradation se concentre sur `orders-api:2.4.0` après son déploiement.
-
-**Explication :** sans version, une hausse d'erreurs après un changement reste temporellement corrélée mais plus difficile à attribuer au nouveau déploiement.
-
-### Requête C — champ numérique ou métier
-
-Choisissez un attribut non sensible proposé par l'événement, puis adaptez l'un des modèles :
-
-```text
-service:<service-valide> @http.status_code:[500 TO 599]
-```
-
-```text
-service:<service-valide> @tenant_tier:enterprise
-```
-
-1. Utilisez seulement une clé réellement observée.
-2. Vérifiez la syntaxe proposée par l'autocomplétion.
-3. Notez la question métier ou technique à laquelle la recherche répond.
-4. Retirez ensuite la requête.
-
-### Faut-il créer une facette avant toute recherche d'attribut ?
-
-**Réponse :** non pour une recherche simple `@attribut:valeur`. En revanche, certaines comparaisons numériques, agrégations et visualisations nécessitent une facette ou une mesure correctement définie.
-
-**Explication :** la recherche et l'agrégation ne demandent pas toujours la même préparation de données.
-
-## Étape 13 — Enregistrer une unique vue pédagogique
-
-La vue enregistre la requête, la période et la présentation courante du Log Explorer. Elle permet de retrouver un point de départ commun sans modifier les logs ni leur traitement.
-
-### Construire le nom unique
-
-Utilisez le modèle suivant :
-
-```text
-[TRAINING] M05 Logs - <participant> - <aaaammjj>
-```
-
-Exemple vérifié :
-
-```text
-[TRAINING] M05 Logs - Loic - 20260720
-```
-
-Le participant doit utiliser son identifiant ou pseudonyme autorisé. Si le nom existe déjà, ajoutez le suffixe validé par le coordinateur.
-
-### Enregistrer la vue
-
-1. Appliquez la requête A avec le service réel validé par le formateur :
+1. Recherchez la clé portant exactement le Key ID suivant :
 
    ```text
-   service:<service-valide> status:error
+   650b6239-78e6-46c1-8233-749ae21ae904
    ```
 
-2. Attendez la mise à jour des résultats et vérifiez que la requête apparaît dans l'URL ou dans la barre de recherche.
-3. Conservez une période courte adaptée à la démonstration ; **Past 15 Minutes** était disponible lors de la vérification, mais ce n'est pas une valeur obligatoire.
-4. Cliquez sur **Views**.
-5. Cliquez sur **Save as new view**.
-6. Dans **Name**, saisissez le nom préfixé `[TRAINING]`.
-7. Laissez **Team(s)** vide, sauf si le coordinateur a explicitement validé une équipe pédagogique. N'associez aucune équipe métier réelle.
-8. Cliquez une seule fois sur **Save**.
-9. Attendez le message confirmant que la vue a été enregistrée.
-10. Vérifiez que son nom apparaît comme vue active et que l'URL contient un identifiant de vue enregistrée.
-11. Ajoutez son nom exact, son créateur et sa date au registre de nettoyage tenu par le coordinateur.
+2. Vérifiez visuellement l'identifiant complet avant de copier la valeur de la clé.
+3. Utilisez l'action **Copy key** ou l'action équivalente proposée par Datadog.
+4. Ne copiez jamais l'identifiant seul : le script attend la **valeur secrète** de la clé, pas son Key ID.
 
-| Contrôle | Valeur attendue |
-|---|---|
-| Préfixe | `[TRAINING]` |
-| Module | `M05 Logs` |
-| Participant | identifiant autorisé |
-| Requête | service réel validé et `status:error` |
-| Équipe | aucune par défaut |
-| Ressource créée | une Saved View uniquement |
+**Résultat attendu :** la valeur secrète de la clé autorisée est placée temporairement dans le presse-papiers.
 
-### La vue enregistrée modifie-t-elle les logs de production ?
+**Vérification :** le Key ID affiché reste exactement celui fourni ci-dessus.
 
-**Réponse :** non. Elle mémorise un état de consultation du Log Explorer ; elle ne modifie ni les événements, ni les pipelines, ni les index.
+**Interprétation :** le Key ID permet d'identifier la bonne ressource ; il ne permet pas d'authentifier l'appel HTTP.
 
-**Explication :** la ressource reste néanmoins visible dans l'organisation selon les droits et le partage appliqués. Son nom doit donc signaler clairement son caractère pédagogique.
+**Si la valeur n'est pas visible :** arrêtez cette étape et demandez au formateur d'exécuter l'envoi. Ne créez pas de clé et n'utilisez pas une clé portant un autre identifiant.
 
-### Pourquoi ne pas associer une équipe métier ?
+# Partie 2 — Générer un log avec PowerShell ISE
 
-**Réponse :** l'atelier crée une ressource temporaire qui n'exprime aucune responsabilité opérationnelle durable.
+## Étape 3 — Préparer le script sans l'enregistrer
 
-**Explication :** l'association d'une équipe pourrait laisser croire que cette vue fait partie de ses standards de production ou de son périmètre de maintenance.
+1. Ouvrez **Windows PowerShell ISE**.
+2. Créez un nouveau script avec **File > New** ou `Ctrl+N`.
+3. Ne sauvegardez pas ce fichier.
+4. Collez le script suivant dans le volet de script :
 
-### Faut-il supprimer immédiatement la vue ?
+```powershell
+$apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
+$participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
+$serviceName = "training-$participant-20260720-svc"
 
-**Réponse :** non, sauf instruction explicite du coordinateur.
+$payload = @{
+    message  = "TRAINING participant=$participant operation=login duration_ms=128 result=success"
+    service  = $serviceName
+    ddsource = "powershell-training"
+    ddtags   = "env:training,training:true,training_session:20260720,participant:$participant"
+    status   = "info"
+} | ConvertTo-Json
 
-**Explication :** la suppression est destructive. Le coordinateur doit vérifier le nom exact, le créateur et le registre avant le nettoyage.
+$response = Invoke-WebRequest `
+    -UseBasicParsing `
+    -Method Post `
+    -Uri "https://http-intake.logs.datadoghq.eu/api/v2/logs" `
+    -Headers @{ "DD-API-KEY" = $apiKey } `
+    -ContentType "application/json" `
+    -Body $payload
 
-## Étape 14 — Choisir un cas de coexistence avec Elasticsearch
+Write-Host "Code HTTP :" $response.StatusCode
+Write-Host "Service :" $serviceName
+```
 
-Sélectionnez un seul usage générique, sans nommer une application réelle : recherche d'erreurs, audit, accès HTTP, diagnostic de performance ou sécurité.
+5. Remplacez `COLLER_LA_VALEUR_SECRETE_ICI` par la valeur copiée depuis Datadog.
+6. Remplacez `REMPLACER_PAR_VOTRE_IDENTIFIANT` par le même identifiant que dans le service du module 4.
+7. Vérifiez la valeur construite dans `$serviceName` avant l'exécution. Elle doit être exactement égale au nom du service créé au module 4.
 
-| Question | Réponse du participant |
-|---|---|
-| Usage choisi |  |
-| Requête ou lecteur actuel |  |
-| Champs indispensables |  |
-| Rétention nécessaire |  |
-| Corrélation APM ou RUM attendue |  |
-| Critère de résultat comparable |  |
-| Risque d'un double flux |  |
-| Condition de retrait de l'ancien flux |  |
-
-### Faut-il migrer tous les logs en une seule fois ?
-
-**Réponse :** non. La trajectoire recommandée consiste à choisir un cas d'usage borné, normaliser les événements, comparer temporairement les résultats, mesurer les coûts et faire valider les usages avant de retirer l'ancien flux.
-
-**Explication :** le compte rendu client décrit une collecte Datadog encore partielle et une centralisation importante dans Elasticsearch. Une migration progressive réduit le risque de perdre une recherche, une obligation de rétention ou une pratique d'exploitation encore utile.
-
-### Le double envoi constitue-t-il une solution permanente ?
-
-**Réponse :** non. C'est éventuellement une phase de validation limitée dans le temps, soumise à l'accord des responsables de la plateforme, de la sécurité et des coûts.
-
-**Explication :** un double flux augmente ingestion, stockage, exposition des données et complexité opérationnelle.
-
-# Partie 4 — Concevoir le format PeopleShop
-
-À partir d'ici, utilisez uniquement `orders-api`, `env:training` et les identifiants fictifs fournis.
-
-## Étape 15 — Transformer le log legacy
-
-Événement source :
+Exemple de correspondance :
 
 ```text
-2026-07-16 10:31:14 ERROR Order validation timed out tenant_tier=enterprise db_pool_wait_ms=1820 status=504
+participant : loic-thobois
+service     : training-loic-thobois-20260720-svc
 ```
 
-Produisez puis comparez votre résultat à la référence.
+**Résultat attendu :** le script contient la clé secrète, votre identifiant et le nom exact de votre service.
 
-```json
-{
-  "timestamp": "2026-07-16T10:31:14.000Z",
-  "status": "error",
-  "message": "Order validation timed out while waiting for database",
-  "service": "orders-api",
-  "env": "training",
-  "version": "2.4.0",
-  "dd.trace_id": "training-trace-slow",
-  "dd.span_id": "training-span-db",
-  "tenant_tier": "enterprise",
-  "db.pool.wait_ms": 1820,
-  "http.status_code": 504
-}
-```
+**Vérification :** aucune valeur `COLLER_...` ou `REMPLACER_...` ne reste dans le script.
 
-### Pourquoi privilégier JSON à la source ?
+**Interprétation :** l'identifiant du participant dans le nom du service isole ses logs de ceux des autres participants. Plusieurs exécutions du même script produisent plusieurs événements dans ce même périmètre pédagogique.
 
-**Réponse :** JSON fournit des noms et types explicites, réduit les parsers fragiles et facilite une convention commune entre services.
+## Étape 4 — Exécuter l'envoi
 
-**Limite :** JSON ne garantit pas à lui seul la qualité : les clés, types, données sensibles et valeurs doivent rester gouvernés.
+1. Exécutez le script une seule fois avec **Run Script** ou `F5`.
+2. Lisez la sortie dans la console PowerShell ISE.
 
-## Étape 16 — Vérifier le rôle des champs
-
-| Champ | Réponse de référence |
-|---|---|
-| `service/env/version` | filtrer et comparer le même déploiement entre signaux |
-| `dd.trace_id/dd.span_id` | ouvrir la trace et le span associés |
-| `tenant_tier` | comparer des catégories métier bornées |
-| `db.pool.wait_ms` | mesurer et agréger l'attente du pool |
-| `http.status_code` | filtrer et regrouper les réponses HTTP |
-
-### Pourquoi `1820` et `504` doivent-ils rester numériques ?
-
-**Réponse :** un type numérique permet des comparaisons, seuils et agrégations cohérents.
-
-**Pourquoi :** une chaîne de caractères est principalement recherchable comme texte et peut produire des tris incorrects.
-
-## Étape 17 — Exclure les données sensibles
-
-1. Vérifiez l'absence de nom, email, adresse, secret, token et donnée de paiement.
-2. Vérifiez que le message ne contient pas de contenu libre utilisateur inutile.
-3. Classez `order_id` comme attribut de recherche seulement si l'usage et la protection sont validés.
-
-### Pourquoi `customer_email` ne doit-il pas devenir une facette ?
-
-**Réponse :** c'est une donnée personnelle et de forte cardinalité qui n'est pas nécessaire à l'analyse opérationnelle proposée.
-
-**Pourquoi :** la collecte minimale réduit le risque de confidentialité et évite une dimension coûteuse et peu agrégable.
-
-## Étape 18 — Préserver une stack trace
-
-Considérez des événements dont chaque première ligne commence par un timestamp ISO, suivie éventuellement de lignes `#0`, `#1`, etc.
+**Résultat attendu :**
 
 ```text
-Début d'événement : ligne commençant par le motif de timestamp validé
-Lignes suivantes : rattachées à l'événement précédent jusqu'au prochain timestamp
+Code HTTP : 202
+Service : training-<participant>-20260720-svc
 ```
 
-### Pourquoi faut-il regrouper les lignes d'une stack trace ?
+**Vérification :** le code HTTP vaut `202`.
 
-**Réponse :** pour conserver l'exception, son message et sa pile dans un seul événement logique.
+**Interprétation :** `202 Accepted` confirme que Datadog a accepté la requête pour traitement. Il ne prouve pas encore que le log a été indexé et conservé dans le Log Explorer.
 
-**Pourquoi :** sans regroupement, le volume est artificiellement multiplié, les recherches sont fragmentées et une exception peut déclencher plusieurs alertes.
+## Étape 5 — Retirer immédiatement le secret
 
-**Limite :** le motif doit être testé sur les vrais formats ; une regex trop large ou trop restrictive fusionne ou découpe incorrectement les événements.
+1. Fermez le nouveau script sans l'enregistrer.
+2. Si PowerShell ISE demande d'enregistrer les modifications, choisissez **Don't Save** ou **Ne pas enregistrer**.
 
-# Partie 5 — Concevoir le pipeline logique
+**Résultat attendu :** la clé n'est plus présente dans le volet de script, dans la variable PowerShell.
 
-## Étape 19 — Choisir le filtre d'entrée
+**Vérification :** aucun fichier `.ps1` n'a été créé.
 
-```text
-service:orders-api
+**Interprétation :** cette procédure limite l'exposition pédagogique du secret. En production, une clé doit normalement être injectée depuis un gestionnaire de secrets plutôt qu'inscrite dans un script.
+
+# Partie 3 — Vérifier l'ingestion
+
+## Étape 6 — Retrouver l'événement dans Live Tail
+
+1. Dans Datadog, ouvrez **Logs > Live Tail**.
+2. Saisissez la requête suivante en remplaçant les valeurs :
+
+   ```text
+   service:training-<participant>-20260720-svc source:powershell-training training:true
+   ```
+
+3. Attendez quelques secondes et actualisez si nécessaire.
+4. Ouvrez l'événement le plus récent.
+5. Vérifiez `message`, `service`, `source`, `status` et les tags de formation.
+
+**Résultat attendu :** au moins un événement récent contient votre identifiant et le message commençant par `TRAINING`.
+
+**Vérification :** l'attribut `service` est exactement égal au nom du service créé au module 4.
+
+**Interprétation :** la présence dans Live Tail prouve que le flux est arrivé à l'ingestion. Elle ne garantit pas que l'événement est conservé dans un index.
+
+## Étape 7 — Retrouver l'événement dans le Log Explorer
+
+1. Ouvrez **Logs > Log Explorer**.
+2. Choisissez une période relative couvrant l'envoi, par exemple **Past 15 Minutes** ou **Past 1 Hour**.
+3. Saisissez la même requête :
+
+   ```text
+   service:training-<participant>-20260720-svc source:powershell-training training:true
+   ```
+
+4. Ouvrez le résultat le plus récent et comparez ses attributs avec ceux vus dans Live Tail.
+
+**Résultat attendu :** le log est visible dans la liste des événements indexés.
+
+**Vérification :** le message et le service correspondent à votre exécution. Plusieurs lignes identiques sont normales si le script a été exécuté plusieurs fois.
+
+**Interprétation :** la présence dans Log Explorer confirme que l'événement est interrogeable dans la période et le stockage sélectionnés.
+
+**Si le log apparaît dans Live Tail mais pas dans Log Explorer :** l'envoi fonctionne, mais un filtre d'index, une exclusion, un quota, une restriction d'accès ou la période sélectionnée peut empêcher son affichage. Ne modifiez aucune configuration ; conservez ce constat et prévenez le formateur.
+
+# Partie 4 — Extraire les valeurs du message avec Grok
+
+## Étape 8 — Comprendre la règle utilisée
+
+Le log a été transmis en JSON, mais son champ `message` contient plusieurs valeurs dans une chaîne de caractères. La règle Grok suivante les extrait temporairement :
+
+```grok
+TRAINING participant=%{notSpace:participant} operation=%{word:operation} duration_ms=%{integer:duration_ms} result=%{word:result}
 ```
 
-### Le filtre peut-il utiliser un champ créé par un parser du même pipeline ?
-
-**Réponse :** non. Le filtre est évalué avant les processeurs.
-
-**Pourquoi :** il doit utiliser un contexte déjà présent à l'ingestion, par exemple `service` ou `source`.
-
-## Étape 20 — Ordonner les processeurs
-
-| Ordre | Opération | Résultat attendu |
-|---:|---|---|
-| 1 | parser JSON ou texte | extraire les champs et identifier les échecs |
-| 2 | remapper la date | définir le timestamp officiel et maîtriser le fuseau |
-| 3 | remapper le statut | convertir `ERROR` vers `error` |
-| 4 | normaliser les attributs réservés | aligner service, message, trace et types |
-| 5 | masquer les séquences sensibles | éviter leur exposition après traitement |
-| 6 | enrichir ou catégoriser | ajouter seulement des catégories bornées utiles |
-
-### Pourquoi l'ordre des processeurs est-il important ?
-
-**Réponse :** chaque processeur ne peut utiliser que les champs déjà présents ou créés par les étapes précédentes.
-
-**Limite :** le masquage peut devoir intervenir plus tôt selon l'architecture ; aucune donnée sensible ne doit attendre inutilement avant d'être protégée.
-
-## Étape 21 — Tester conceptuellement le pipeline
-
-| Cas de test | Résultat attendu |
-|---|---|
-| événement d'un autre service | non traité par ce pipeline |
-| JSON PeopleShop valide | champs normalisés et typés |
-| texte legacy conforme | champs extraits puis remappés |
-| format non reconnu | échec identifiable, événement non silencieusement corrompu |
-| séquence sensible | valeur masquée selon la règle validée |
-
-### Pourquoi conserver un cas de format non reconnu ?
-
-**Réponse :** pour détecter les régressions de format plutôt que perdre ou mal classer silencieusement des événements.
-
-# Partie 6 — Choisir facettes, mesures et attributs
-
-## Étape 22 — Classer les attributs
-
-| Attribut | Classement de référence | Justification |
+| Matcher | Valeur extraite | Pourquoi ce matcher ? |
 |---|---|---|
-| `service` | attribut standard et facette | filtrage commun |
-| `env` | attribut standard et facette | séparation des contextes |
-| `version` | facette si comparaison nécessaire | comparaison de déploiements |
-| `tenant_tier` | facette bornée | segmentation métier contrôlée |
-| `http.status_code` | facette | regroupement des réponses |
-| `db.pool.wait_ms` | mesure numérique | agrégation de l'attente |
-| `order_id` | attribut de recherche si autorisé | presque unique, pas facette par défaut |
-| `customer_email` | exclu | donnée personnelle |
+| `notSpace` | participant | l'identifiant peut contenir des tirets |
+| `word` | opération | `login` est un mot simple |
+| `integer` | durée | la valeur doit être interprétée comme un entier |
+| `word` | résultat | `success` est un mot simple |
 
-### Quelle différence existe entre une facette et une mesure ?
+**Résultat attendu :** vous savez quelles parties du message deviendront des champs calculés.
 
-**Réponse :** une facette sert à filtrer et regrouper des catégories ; une mesure permet d'agréger une valeur numérique.
+**Interprétation :** Grok est utile lorsque la source fournit du texte stable. Pour une journalisation durable, produire directement des attributs JSON structurés reste préférable.
 
-**Pourquoi :** `tenant_tier` crée quelques groupes interprétables, tandis que `db.pool.wait_ms` peut être moyenné, classé ou analysé par percentile selon les capacités disponibles.
+## Étape 9 — Créer l'extraction Grok personnelle
 
-## Étape 23 — Vérifier la cardinalité et l'usage
+La fonction **Calculated Fields Extractions** est une fonction Preview. Les libellés peuvent varier et elle peut ne pas être activée dans l'organisation.
 
-1. Pour chaque facette proposée, écrivez la question qu'elle permet de traiter.
-2. Retirez toute facette sans usage défini.
-3. Vérifiez que les valeurs attendues sont bornées.
+1. Conservez dans le Log Explorer la requête portant sur votre service.
+2. Cliquez sur **Add** à côté de la barre de recherche.
+3. Sélectionnez **Calculated field**.
+4. Choisissez le type **Extraction**.
+5. Dans **Extract from**, sélectionnez le message complet ou `message`.
+6. Utilisez votre log comme **Log sample**.
+7. Dans **Parsing rule**, saisissez :
 
-### Pourquoi ne faut-il pas créer une facette pour chaque champ ?
+   ```grok
+   TRAINING participant=%{notSpace:participant} operation=%{word:operation} duration_ms=%{integer:duration_ms} result=%{word:result}
+   ```
 
-**Réponse :** parce que les facettes augmentent la surface de gouvernance et doivent servir des recherches ou agrégations réelles.
+8. Vérifiez dans l'aperçu que les quatre valeurs sont extraites.
+9. Validez la création du champ calculé.
 
-# Partie 7 — Maîtriser le cycle économique du log
+**Résultat attendu :** les champs `#participant`, `#operation`, `#duration_ms` et `#result` apparaissent dans la session du Log Explorer.
 
-## Étape 24 — Remettre les étapes dans l'ordre
+**Vérification :** ouvrez le log et repérez la section des champs calculés, ou observez les colonnes ajoutées automatiquement dans la vue en liste.
+
+**Interprétation :** le préfixe `#` désigne un champ calculé à la requête. Il ne s'agit pas d'un attribut réécrit dans le log.
+
+## Étape 10 — Filtrer avec le résultat Grok
+
+1. Ajoutez temporairement à la requête :
+
+   ```text
+   #participant:<participant> #result:success
+   ```
+
+2. Vérifiez que votre événement reste visible.
+3. Remplacez temporairement `success` par `failure`.
+4. Constatez que l'événement disparaît.
+5. Rétablissez `success`.
+
+**Résultat attendu :** le filtre utilisant `#result:success` retrouve l'événement, tandis que `#result:failure` ne le retrouve pas.
+
+**Vérification :** la valeur `#duration_ms` vaut `128` dans les champs calculés.
+
+**Interprétation :** l'extraction rend le contenu textuel filtrable et exploitable sans retraitement à l'ingestion.
+
+# Partie 5 — Analyser les filtres des pipelines
+
+## Étape 11 — Lire la liste des pipelines
+
+Un pipeline applique ses processeurs uniquement aux logs qui correspondent à son filtre. L'analyse de cette page permet de comprendre le traitement sans modifier la configuration.
+
+1. Dans le menu **Logs**, ouvrez **Configuration**.
+2. Dans la section **Processing**, ouvrez **Pipelines**.
+3. Repérez le nombre de pipelines actifs et désactivés affiché au-dessus de la liste.
+4. Repérez les colonnes **Pipeline Name** et **Filters**.
+5. Lisez les filtres de quelques pipelines sans ouvrir leur édition :
+
+   | Pipeline | Filtre observé sur la plateforme |
+   |---|---|
+   | Nginx | `source:nginx` |
+   | PHP | `source:php` |
+   | Redis | `source:redis` |
+   | N8N | `source:n8n` |
+   | Datadog Agent | ensemble de sources Agent |
+
+6. N'utilisez pas **New Pipeline**, **Add a new pipeline**, un interrupteur d'activation ou une action d'édition.
+
+**Résultat attendu :** la liste des pipelines et leurs filtres sont visibles en lecture seule.
+
+**Vérification :** la colonne **Filters** contient principalement des expressions commençant par `source:`.
+
+**Interprétation :** `source` représente la technologie ou l'origine déclarée du log. Un pipeline d'intégration limite son périmètre aux sources qu'il sait traiter.
+
+## Étape 12 — Déterminer le pipeline applicable au log pédagogique
+
+1. Rappelez la source envoyée par le script PowerShell :
+
+   ```text
+   powershell-training
+   ```
+
+2. Dans la zone **Filter pipelines**, recherchez successivement :
+
+   ```text
+   powershell-training
+   ```
+
+   puis :
+
+   ```text
+   source:powershell-training
+   ```
+
+3. Si aucun pipeline n'est retourné, effacez le filtre pour restaurer la liste complète.
+4. Comparez directement la source pédagogique avec les filtres affichés.
+5. Complétez l'analyse :
+
+   | Question | Réponse vérifiée |
+   |---|---|
+   | Quelle source porte le log ? | `powershell-training` |
+   | Un pipeline personnalisé possède-t-il le filtre `source:powershell-training` ? | Non sur la plateforme vérifiée |
+   | Le log est-il malgré tout ingéré et indexé ? | Oui, sa présence dans Live Tail et Log Explorer le prouve |
+   | Le message est-il découpé par un pipeline personnalisé ? | Non, il reste textuel |
+   | Où les valeurs sont-elles extraites dans l'atelier ? | Dans un Calculated Field Grok exécuté à la requête |
+
+**Résultat attendu :** aucun des pipelines personnalisés visibles ne correspond à `source:powershell-training`.
+
+**Vérification :** le message du log reste affiché sous la forme complète :
 
 ```text
-source → collecte/ingestion → traitement → indexation
-       → recherche et analyse
-       → archivage éventuel / métrique dérivée selon la configuration
+TRAINING participant=<participant> operation=login duration_ms=128 result=success
 ```
 
-### Une exclusion d'index empêche-t-elle l'ingestion ?
+**Interprétation :** l'ingestion, le prétraitement JSON et l'indexation ne nécessitent pas qu'un pipeline personnalisé corresponde au log. En revanche, les processeurs d'un pipeline filtré sur `source:nginx`, `source:php` ou une autre source ne s'appliquent pas à `powershell-training`.
 
-**Réponse :** non. L'événement a déjà été reçu ; l'exclusion agit sur son indexation selon la règle configurée.
+### Pourquoi ne pas créer un pipeline pédagogique ?
 
-**Pourquoi :** réduire l'indexation ne supprime pas automatiquement le coût, le risque ou les autres usages liés à l'ingestion.
+**Réponse :** un pipeline est une configuration partagée qui affecte les nouveaux logs correspondant à son filtre. Le créer dans l'organisation de production introduirait une modification durable et un risque de périmètre.
 
-**Limite :** les possibilités de Live Tail, d'archivage ou de métriques dérivées dépendent de la configuration réelle.
+**Explication :** le Calculated Field permet de démontrer Grok de manière personnelle, rétroactive et temporaire. Un pipeline serait pertinent seulement après validation du format, du filtre, des droits, des tests et du retour arrière dans un environnement autorisé.
 
-## Étape 25 — Réduire les health checks
+# Partie 6 — Créer la vue personnelle
 
-Complétez la décision en utilisant la référence suivante.
+## Étape 13 — Préparer la requête durable
 
-| Décision | Réponse de référence |
-|---|---|
-| Motif | succès nominaux répétitifs de health checks |
-| Point préféré | réduire à la source ou éviter une collecte en double |
-| Événements conservés | tous les échecs, changements d'état et échantillon de validation |
-| Remplacement possible | métrique de disponibilité et compteur d'échecs |
-| Preuve | comparaison des volumes et validation des recherches/monitors dépendants |
-| Retour arrière | désactiver la règle et vérifier le retour des événements |
-
-### Quel est l'ordre de préférence pour réduire le bruit ?
-
-**Réponse :** réduire l'inutile à la source, supprimer les doublons de collecte, filtrer ou échantillonner avant envoi si autorisé, puis seulement agir sur l'indexation selon les usages.
-
-**Pourquoi :** une action plus proche de la source évite de transporter et traiter un événement inutile.
-
-**Limite :** n'échantillonnez jamais aveuglément une erreur rare, un changement d'état ou un événement de sécurité.
-
-## Étape 26 — Préparer la recherche d'une trace lente
+Retirez les filtres commençant par `#`. Utilisez pour la vue la requête suivante :
 
 ```text
-service:orders-api env:training trace_id:<trace_id_fictif>
+service:training-<participant>-20260720-svc source:powershell-training training:true
 ```
 
-### Comment retrouver les logs d'une trace lente sans conclure trop vite à la cause ?
+Conservez une période relative, par exemple **Past 3 Days**, puis préparez l'affichage avec les libellés réellement utilisés dans cette version de Datadog :
 
-**Réponse :** partir de l'identifiant de trace, conserver le même service, environnement et intervalle, examiner la séquence des logs puis revenir aux spans et dépendances contributrices.
+1. Cliquez sur **Table Options** au-dessus de la liste des logs.
+2. Activez **Date Column** : cette colonne affiche le timestamp du log sous le libellé **Date**.
+3. Activez **Content Column** : cette colonne affiche le champ `message` sous le libellé **Content**.
+4. Dans **Add a column**, ajoutez **Service** s'il n'est pas déjà présent.
+5. Ouvrez de nouveau **Add a column** et ajoutez **Source**.
+6. Ouvrez une troisième fois **Add a column** et ajoutez **Status**.
+7. Supprimez également les colonnes Grok `#participant`, `#operation`, `#duration_ms` et `#result` si elles sont encore actives.
 
-**Explication :** un message d'erreur proche de la trace est un indice. La cause doit être confirmée en confrontant chronologie, spans, métriques et comportement de la dépendance.
+La table doit donc présenter au minimum :
 
-### Que faut-il prévoir pour les applications PHP du contexte client ?
+- **Date**, qui correspond au timestamp réservé ;
+- **Service** ;
+- **Source** ;
+- **Status** ;
+- **Content**, qui correspond au message réservé ;
 
-**Réponse :** produire de préférence les logs applicatifs en JSON, configurer de manière cohérente `DD_ENV`, `DD_SERVICE` et `DD_VERSION`, puis vérifier que les identifiants de corrélation injectés par le tracer deviennent bien les attributs réservés attendus par Datadog.
+**Pourquoi retirer les champs `#` ?**
 
-**Explication :** le tracer PHP peut injecter automatiquement le contexte de corrélation dans les bibliothèques compatibles, notamment les loggers PSR-3. Si le pipeline d'intégration ne réalise pas le parsing attendu, un parsing et un Trace Remapper peuvent rester nécessaires.
+**Réponse :** les champs calculés sont temporaires, personnels et ne persistent pas au-delà de la session du Log Explorer. Une Saved View conserve la requête, la période et la présentation, mais ne transforme pas l'extraction Grok en configuration permanente.
 
-**Limite :** cet atelier ne modifie ni l'agent PHP, ni le logger, ni le pipeline de production. La version du tracer, la bibliothèque de logs et le format réellement déployé doivent être confirmés avant toute mise en œuvre.
+## Étape 14 — Enregistrer la Saved View
 
-### Pourquoi la requête utilise-t-elle `trace_id` plutôt que le nom du champ JSON source ?
+1. Cliquez sur **Views**.
+2. Cliquez sur **Save as new view**.
+3. Saisissez le nom :
 
-**Réponse :** `trace_id` représente l'attribut réservé normalisé utilisé pour la recherche et la navigation. Le JSON ou le contexte PHP peut initialement contenir `dd.trace_id` ; le traitement doit alors le reconnaître ou le remapper correctement.
+   ```text
+   [TRAINING] M05 Logs API - <participant> - 20260720
+   ```
 
-**Explication :** le participant doit utiliser le nom affiché et proposé par l'interface réelle, sans inventer un remapping absent.
+4. Laissez **Team(s)** vide, sauf consigne explicite du formateur.
+5. Vérifiez une dernière fois la requête et votre identifiant.
+6. Cliquez une seule fois sur **Save**.
+7. Attendez la confirmation de l'enregistrement.
 
-## Questions de synthèse corrigées
+**Résultat attendu :** votre vue devient la vue active et son nom commence par `[TRAINING]`.
 
-### Pourquoi JSON ne remplace-t-il pas une convention de journalisation ?
+**Vérification :** rouvrez **Views**, sélectionnez votre vue et contrôlez la présence de la requête sur votre service.
 
-**Réponse :** JSON fournit une structure, mais la convention définit les clés, types, valeurs, données interdites et responsabilités communes.
+**Interprétation :** la vue mémorise un point d'entrée reproductible vers vos logs pédagogiques. Elle ne modifie ni les logs ni leur traitement.
 
-### Quelle information doit exister avant l'entrée dans un pipeline ?
+## Étape 15 — Vérifier le rattachement au service
 
-**Réponse :** toute information utilisée par son filtre, par exemple `service` ou `source`.
+1. Ouvrez **Developer Portal > Catalog**.
+2. Recherchez le nom exact de votre service :
 
-### Que faut-il préserver lors d'une réduction de logs ?
+   ```text
+   training-<participant>-20260720-svc
+   ```
 
-**Réponse :** les usages démontrés, les erreurs, les transitions d'état, les obligations d'audit, une preuve avant/après et un retour arrière.
+3. Ouvrez sa fiche.
+4. Consultez les informations de télémétrie, de logs ou **Setup Guidance**, selon les fonctions disponibles.
+5. Si un lien vers les logs est proposé, ouvrez-le et vérifiez qu'il applique le même filtre `service`.
+6. Choisissez une période relative couvrant l'envoi, par exemple **Past 15 Minutes** ou **Past 1 Hour**.
 
-### Quels livrables doivent être repris dans le dashboard du module 8 ?
+**Résultat attendu :** la définition du service et le log utilisent le même nom.
 
-**Réponse :** les trois requêtes préparées, leur période pertinente, le type de représentation envisagé et leurs limites d'interprétation.
+**Vérification :** la recherche `service:training-<participant>-20260720-svc` retrouve l'événement dans Log Explorer, même si la fiche Catalog met plus de temps à actualiser son état.
 
-**Explication :** chaque widget doit pouvoir être relié à une question déjà formulée et à une source de données réellement comprise.
+**Interprétation :** un log enrichit la télémétrie Logs du service. Il ne crée pas de traces APM, de dépendances, de latence ni de taux d'erreur APM.
 
-### Pourquoi le service fictif du module 4 reste-t-il vide dans le Log Explorer ?
+# Références officielles
 
-**Réponse :** parce qu'une définition dans le Catalog ajoute des métadonnées, mais n'instrumente aucune application et n'envoie aucun log.
+- [Datadog — Send Logs API](https://docs.datadoghq.com/api/latest/logs/send-logs/)
+- [Datadog — Calculated Fields](https://docs.datadoghq.com/logs/explorer/calculated_fields/)
+- [Datadog — Grok Extractions](https://docs.datadoghq.com/logs/explorer/calculated_fields/extractions/)
+- [Datadog — Saved Views](https://docs.datadoghq.com/logs/explorer/saved_views/)
+- [Datadog — Set Up Catalog](https://docs.datadoghq.com/internal_developer_portal/catalog/set_up/)
 
-**Explication :** l'observation réelle de cet atelier porte sur un service déjà alimenté ; PeopleShop reste le support fictif des livrables pédagogiques.
-
-## Aide au diagnostic
-
-| Difficulté | Interprétation | Action en lecture seule |
-|---|---|---|
-| Aucun log | période, droits ou source inactive | vérifier la période ou utiliser les captures fournies |
-| Service de référence absent | évolution du flux | choisir une valeur proposée par la facette et l'anonymiser |
-| Zéro erreur | période sans événement correspondant | noter le résultat sans généraliser |
-| Facette absente | attribut non facetté, droits ou données absentes | écrire **non observé** et poursuivre conceptuellement |
-| Log difficile à lire | format texte hétérogène | identifier uniquement les champs visibles |
-| Trace non liée | identifiants absents ou corrélation non configurée | noter l'écart potentiel sans inventer de lien |
-| Identifiant de trace présent mais trace indisponible | échantillonnage ou rétention indépendants | écrire **identifiant présent, trace associée non vérifiée** |
-| Service `training-...` sans log | définition du Catalog sans télémétrie | utiliser un service réel validé pour l'observation |
-| **Save as new view** absent | droit insuffisant ou interface différente | rester en lecture et remettre le nom et la requête préparés |
-| nom de vue déjà présent | collision entre participants ou sessions | ne pas l'écraser ; ajouter le suffixe validé |
-| confirmation absente après **Save** | résultat incertain | rechercher le nom dans **Views** avant toute nouvelle soumission |
-| Donnée sensible visible | télémétrie réelle | ne pas la recopier et suivre la procédure client de signalement |
-
-## Validation finale
-
-- [ ] Le relevé du Log Explorer est daté et sa période est indiquée.
-- [ ] Les recherches réelles sont temporaires et anonymisées.
-- [ ] Une seule Saved View préfixée `[TRAINING]` a été créée.
-- [ ] Son nom exact figure dans le registre de nettoyage.
-- [ ] Aucune équipe métier ne lui est associée.
-- [ ] Le service fictif du module 4 n'est pas confondu avec une source de logs.
-- [ ] Le contrat `service/env/version` est évalué sur plusieurs événements comparables.
-- [ ] Trois requêtes et leurs limites sont prêtes pour le module 8.
-- [ ] Un cas d'usage borné de coexistence avec Elasticsearch est documenté.
-- [ ] Les absences sont formulées **non observé**, sans généralisation.
-- [ ] Le livrable fictif utilise `orders-api`, `training` et `2.4.0`.
-- [ ] Le JSON est valide, typé, corrélable et non sensible.
-- [ ] La stack trace reste un seul événement logique.
-- [ ] Le filtre du pipeline repose sur un champ préexistant.
-- [ ] Les processeurs sont ordonnés et testables.
-- [ ] Facettes et mesures répondent à un usage réel.
-- [ ] Les données personnelles et secrets sont exclus.
-- [ ] Ingestion, traitement, indexation et archivage sont distingués.
-- [ ] La réduction du bruit préserve les erreurs et possède une preuve et un retour arrière.
-- [ ] La corrélation d'une trace ne vaut pas preuve automatique de causalité.
-- [ ] Aucune autre ressource Datadog n'a été créée ou modifiée.
-
-## Références officielles
-
-- [Datadog — Search Logs](https://docs.datadoghq.com/logs/explorer/search/)
-- [Datadog — Log Search Syntax](https://docs.datadoghq.com/logs/explorer/search_syntax/)
-- [Datadog — Pipelines](https://docs.datadoghq.com/logs/log_configuration/pipelines/)
-- [Datadog — Correlate Logs and Traces](https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/)
-- [Datadog — Correlating PHP Logs and Traces](https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/php/)
-- [Datadog — Indexes and Exclusion Filters](https://docs.datadoghq.com/logs/log_configuration/indexes/)

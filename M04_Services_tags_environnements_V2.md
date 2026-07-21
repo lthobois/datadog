@@ -4,7 +4,7 @@ subtitle: "Document participant autonome — création contrôlée dans le Catal
 lang: fr-FR
 ---
 
-# Créer et qualifier un service fictif unique
+# Créer et qualifier un service pédagogique unique
 
 ## Objectif
 
@@ -15,15 +15,16 @@ Auditer le Catalog réel, créer une définition de service strictement pédagog
 Vous produisez :
 
 - un identifiant de service unique et normalisé ;
-- une définition de service fictive enregistrée dans le Catalog ;
+- une définition de service pédagogique enregistrée dans le Catalog ;
 - une fiche de contrôle avant et après création ;
 - une convention minimale de nommage et de tags ;
 - une analyse distinguant métadonnées déclarées et télémétrie observée ;
-- une entrée dans le registre de nettoyage.
+
+Cette définition reste volontairement sans télémétrie. Elle ne reprend le nom d'aucun service existant et ne reçoit aucune donnée des modules 5 à 7.
 
 ## Règle de sécurité
 
-Cet atelier autorise une seule écriture : la création puis la modification de **votre propre définition de service fictive**.
+Cet atelier autorise une seule écriture : la création puis la modification de **votre propre définition de service pédagogique**.
 
 Vous ne devez pas :
 
@@ -33,9 +34,8 @@ Vous ne devez pas :
 - utiliser `env:prod`, `env:production` ou un nom ressemblant à un service réel ;
 - ajouter une adresse email, un numéro, un identifiant client ou une autre donnée personnelle ;
 - instrumenter une application ou envoyer de la télémétrie ;
-- exécuter vous-même le nettoyage final sauf autorisation explicite du coordinateur.
+- exécuter vous-même le nettoyage final sauf autorisation explicite du formateur.
 
-En cas de doute, arrêtez la création et conservez uniquement la fiche préparatoire.
 
 ## Prérequis
 
@@ -43,10 +43,9 @@ En cas de doute, arrêtez la création et conservez uniquement la fiche prépara
 - droit **Service Catalog Write** limité à l'activité pédagogique ;
 - accès à **Developer Portal > Catalog** ;
 - une équipe pédagogique Datadog existante, si l'ownership est obligatoire ;
-- un registre de créations tenu par le coordinateur ;
 - accord du participant pour utiliser un identifiant dérivé de son nom.
 
-Si le participant ne souhaite pas afficher son nom dans l'organisation partagée, utilisez le pseudonyme fourni par le coordinateur. Le principe d'unicité reste identique.
+Si le participant ne souhaite pas afficher son nom dans l'organisation partagée, utilisez le pseudonyme fourni par le formateur. Le principe d'unicité reste identique.
 
 ## Convention de l'atelier
 
@@ -56,7 +55,7 @@ Le nom technique suit ce modèle :
 training-<prenom-nom>-<aaaammjj>-svc
 ```
 
-Exemple fictif :
+Exemple de nom unique :
 
 ```text
 training-alex-martin-20260720-svc
@@ -72,249 +71,105 @@ Règles de normalisation :
 - aucun titre, société, email ou identifiant RH ;
 - date de la session ajoutée pour limiter les collisions.
 
-Si deux participants produisent encore le même nom, ajoutez un suffixe fourni par le coordinateur : `-a`, `-b`, etc.
+Si deux participants produisent encore le même nom, ajoutez un suffixe fourni par le formateur : `-a`, `-b`, etc.
 
 ## Comment utiliser ce document
 
 Chaque question est suivie de sa réponse. Effectuez d'abord l'observation ou rédigez votre proposition, puis comparez-la à la référence. Les libellés de l'interface peuvent varier ; n'utilisez jamais une commande qui affecte une autre entité.
 
-# Partie 1 — Préparer la création
+# Partie 1 — Créer la définition dans Datadog
 
-## Étape 1 — Ouvrir le Catalog en lecture
+## Étape 1 — Vérifier que le futur nom est disponible
 
-1. Dans le menu gauche, ouvrez **Developer Portal**.
-2. Dans la barre supérieure de l'Internal Developer Portal, ouvrez **Catalog**.
-3. Dans le panneau gauche, sélectionnez **Services**.
-4. Conservez **Env = \***, puis sélectionnez l'onglet **Ownership** : une définition manuelle sans télémétrie peut ne pas être visible de manière pertinente dans la vue **Performance**.
-5. Repérez la recherche **Search by name or tags**, les filtres et la colonne du nom.
-6. N'ouvrez encore aucune commande de création.
+1. Dans **Developer Portal > Catalog > Services**, ouvrez l'onglet **Ownership**.
+2. Conservez **Env = \***.
+3. Construisez votre nom sous la forme `training-<participant>-<aaaammjj>-svc`.
+4. Utilisez uniquement votre identifiant pédagogique autorisé, en minuscules et avec des tirets.
+5. Recherchez ce nom exact dans **Search by name or tags**.
+6. Si le nom existe, ajoutez le suffixe fourni par le formateur et recommencez la recherche.
 
-### Pourquoi commencer en lecture ?
+**Résultat attendu :** aucune entité existante ne porte le nom retenu.
 
-**Réponse :** pour comprendre le catalogue existant et vérifier que le futur nom ne chevauche aucune entité réelle.
+## Étape 2 — Ouvrir le formulaire de création
 
-**Pourquoi :** un nom en conflit pourrait enrichir ou remplacer les métadonnées d'un service existant au lieu de créer une entité isolée.
+1. Ouvrez **Developer Portal > Settings**.
+2. Dans **Entities Sources**, cliquez sur **Create More Entities**.
+3. Cliquez sur **Add manually**.
+4. Dans **Add a new entry in Software Catalog**, choisissez **Kind = Service**.
+5. Conservez **Schema Version = v3**.
+6. Vérifiez qu'il s'agit d'une nouvelle entrée et non de l'édition d'un service existant.
 
-## Étape 2 — Construire l'identifiant participant
+**Droit nécessaire :** **Service Catalog Write**. Si vous ne le possédez pas, arrêtez avant toute saisie et suivez la démonstration du formateur.
 
-Complétez uniquement avec le nom ou pseudonyme autorisé :
+## Étape 3 — Saisir immédiatement l'identité
 
-| Élément | Valeur |
+Dans le formulaire ouvert, saisissez maintenant :
+
+| Champ affiché | Valeur à saisir |
 |---|---|
-| Prénom ou pseudonyme normalisé |  |
-| Nom normalisé |  |
-| Date `aaaammjj` |  |
-| Suffixe éventuel |  |
-| Nom technique final |  |
-
-### Quel résultat est conforme ?
-
-**Réponse :** un nom de la forme `training-<participant>-<date>-svc`, en minuscules et tirets, ne contenant aucune donnée autre que l'identifiant pédagogique autorisé.
-
-**Limite :** le préfixe et la date réduisent les collisions mais ne les éliminent pas ; la recherche du Catalog reste obligatoire.
-
-## Étape 3 — Vérifier l'unicité
-
-1. Dans **Catalog > Services > Ownership**, recherchez le nom technique exact.
-2. Conservez `Env = *` afin de ne masquer aucune occurrence.
-3. Attendez la fin du chargement de la table avant de conclure.
-4. Vérifiez également le nom sans le suffixe final.
-5. Notez le résultat.
-
-| Recherche | Résultat |
-|---|---|
-| Nom exact |  |
-| Nom sans suffixe |  |
-| Collision détectée ? |  |
-
-### Que faire si le nom exact existe déjà ?
-
-**Réponse :** ne l'ouvrez pas en édition et ne le réutilisez pas. Ajoutez le suffixe validé par le coordinateur, puis recommencez les recherches.
-
-**Pourquoi :** l'atelier ne doit jamais prendre possession d'une définition existante, même si son nom semble pédagogique.
-
-## Étape 4 — Enregistrer la réservation
-
-Avant la création, ajoutez une ligne au registre partagé :
-
-| Champ | Valeur à enregistrer |
-|---|---|
-| Nom technique | nom final validé |
-| Participant | nom ou pseudonyme autorisé |
-| Date de création | date de la session |
-| Type | `service` |
-| Owner de nettoyage | coordinateur de la formation |
-| Échéance de nettoyage | date fixée par le coordinateur |
-| État | `réservé` |
-
-### Pourquoi réserver le nom avant de créer ?
-
-**Réponse :** pour éviter que deux participants créent simultanément la même entité et pour garantir qu'une ressource pédagogique ne devienne pas orpheline.
-
-# Partie 2 — Préparer les métadonnées
-
-## Étape 5 — Définir l'identité du service fictif
-
-Utilisez cette référence :
-
-| Champ | Valeur de référence |
-|---|---|
-| Kind | `Service` |
-| Name | nom technique unique |
+| Name | `training-<participant>-<aaaammjj>-svc` |
 | Display name | `[TRAINING] Service de <participant>` |
-| Description | `Service fictif créé pour la formation Datadog ; aucune télémétrie de production. Il sert à expérimenter le Catalog, les métadonnées, le lifecycle, le type, les tags personnalisés et les fonctions de recherche.` |
-| Lifecycle | `experimental` |
-| Type | `Custom` |
-| Tier | `4` |
-| Languages | `Python` |
+| Description | `Service pédagogique créé pour la formation Datadog ; aucune télémétrie de production.` |
 
-### Pourquoi choisir un cycle de vie expérimental ?
+Remplacez `<participant>` et `<aaaammjj>` par vos valeurs. Ne saisissez aucune équipe, application ou donnée métier réelle dans le nom ou la description.
 
-**Réponse :** pour signaler que l'entité n'est pas un service exploité en production.
+## Étape 4 — Saisir les caractéristiques
 
-**Pourquoi le tier 4 ?** Il matérialise le niveau de criticité le plus faible retenu pour cette ressource pédagogique. Il ne transforme pas le service en ressource de production et ne configure aucune alerte.
+Dans le même formulaire :
 
-**Pourquoi Python ?** Le langage donne un exemple de métadonnée technique consultable et filtrable. Il ne signifie pas qu'une application Python est déployée ou instrumentée.
+1. Dans **Lifecycle**, sélectionnez `experimental`.
+2. Dans **Type**, sélectionnez `Custom`.
+3. Dans **Tier**, sélectionnez `4`.
+4. Dans **Languages**, sélectionnez `Python`.
 
-**Limite :** si `experimental`, `4` ou `Python` ne sont pas proposés par l'interface, n'improvisez pas une valeur de production ; laissez le champ concerné vide et notez l'écart.
+Si une valeur n'est pas proposée, laissez uniquement ce champ vide et notez l'écart. N'utilisez pas une valeur de production en remplacement.
 
-## Étape 6 — Définir les tags
+**Explication :** ces valeurs signalent une ressource pédagogique de faible criticité. Elles ne déploient aucun service et ne créent aucune télémétrie.
 
-Dans **Custom Tags**, ajoutez uniquement les tags personnalisés acceptés par le formulaire et la convention locale :
+## Étape 5 — Saisir les tags
+
+Dans **Custom Tags**, saisissez un tag, appuyez sur **Entrée**, puis passez au suivant :
 
 ```text
 managed_by:training
 purpose:datadog-course
-training_participant:<identifiant-normalisé>
+training_participant:<participant>
 expires_on:<aaaammjj>
 ```
 
-N'ajoutez pas `env:training`, `service:...` ou `version:...` dans **Custom Tags**. L'interface v3 indique que ces tags sont réservés à l'Unified Service Tagging et doivent rester distincts des tags personnalisés de l'entité.
+Après le quatrième tag, appuyez sur **Échap** et vérifiez que les quatre tags apparaissent comme sélectionnés.
 
-### Le tag `env:training` crée-t-il un environnement contenant de la télémétrie ?
+N'ajoutez pas `env:training`, `service:...` ou `version:...` : ces clés relèvent de l'Unified Service Tagging et aucune télémétrie n'est créée ici.
 
-**Réponse :** non. Cet atelier ne renseigne pas `env:training` dans **Custom Tags**. Sans télémétrie corrélée, la page du service affiche `env:none` ; elle ne génère ni métrique, ni log, ni trace.
+## Étape 6 — Traiter l'owner, les contacts et les liens
 
-**Pourquoi :** le Catalog peut contenir une définition manuelle même lorsqu'aucun signal n'est détecté pour le service.
+1. Si **Owner** est obligatoire, sélectionnez uniquement la Team pédagogique déjà validée.
+2. Si aucune Team pédagogique n'est proposée, laissez le champ vide si le formulaire l'autorise ; ne créez pas de Team.
+3. Laissez vides les contacts, PagerDuty, Slack, Teams, dépôts, runbooks et liens internes.
+4. Laissez vides **Depends On**, **Component Of**, On-Call, pipelines et emplacements de code.
 
-## Étape 7 — Définir l'ownership
 
-1. Si le formulaire exige un owner, sélectionnez uniquement l'équipe pédagogique déjà créée et validée.
-2. N'ajoutez pas votre équipe métier réelle par défaut.
-3. Ne créez pas de Team pendant cet atelier.
+Si l'interface propose un aperçu YAML ou JSON, ouvrez-le sans utiliser le cURL généré. Vérifiez :
 
-### Pourquoi ne pas utiliser le participant comme owner ?
+- le nom unique et le préfixe `training-` ;
+- `kind: service` et le schéma v3 ;
+- la description pédagogique ;
+- `experimental`, `Custom`, `4` et `Python` lorsqu'ils sont disponibles ;
+- les quatre tags ;
+- l'absence de contact, relation ou intégration réelle.
 
-**Réponse :** l'ownership doit représenter une responsabilité durable, tandis que la ressource pédagogique sera nettoyée après la session.
+Corrigez directement le champ concerné dans le formulaire.
 
-**Pourquoi :** le nom du participant assure ici l'unicité ; l'équipe pédagogique assure le suivi et le nettoyage.
 
-## Étape 8 — Définir les contacts et liens
-
-Référence :
-
-| Élément | Décision |
-|---|---|
-| PagerDuty/astreinte | interdit |
-| Email personnel | interdit |
-| Slack/Teams réel | interdit sauf canal pédagogique validé |
-| Dépôt privé | interdit |
-| Runbook de production | interdit |
-| Documentation publique Datadog | facultative si le coordinateur l'autorise |
-
-### Pourquoi limiter les liens ?
-
-**Réponse :** une entité fictive ne doit ni déclencher un workflow réel ni exposer une ressource interne à des participants qui n'en ont pas besoin.
-
-## Étape 9 — Effectuer le contrôle avant écriture
-
-- [ ] Le nom commence par `training-`.
-- [ ] Le nom contient l'identifiant participant autorisé.
-- [ ] La date ou le suffixe garantit l'unicité.
-- [ ] La recherche exacte ne retourne aucune entité.
-- [ ] Le lifecycle n'est pas `production`.
-- [ ] Aucun contact ou lien opérationnel réel n'est présent.
-- [ ] Les tags indiquent `training` et une expiration.
-- [ ] Le registre contient une réservation.
-- [ ] L'owner de nettoyage est identifié.
-
-### Peut-on créer si une case reste non validée ?
-
-**Réponse :** non. Corrigez la fiche ou demandez une validation avant d'ouvrir le formulaire de création.
-
-# Partie 3 — Créer la définition dans Datadog
-
-## Étape 10 — Ouvrir le workflow de création
-
-1. Dans **Developer Portal**, ouvrez **Settings**.
-2. Dans **Entities Sources**, cliquez sur **Create More Entities**.
-3. Cliquez sur **Add manually**.
-4. Dans la fenêtre **Add a new entry in Software Catalog**, vérifiez **Kind = Service**.
-5. Conservez le schéma **v3**, sélectionné par défaut sur la plateforme vérifiée.
-6. Vérifiez que le formulaire concerne une nouvelle entrée et non un service existant.
-
-### Quel droit permet d'enregistrer cette définition ?
-
-**Réponse :** le droit **Service Catalog Write**.
-
-**Pourquoi :** les utilisateurs en lecture peuvent consulter le Catalog, mais l'enregistrement d'une définition exige une permission d'écriture dédiée.
-
-## Étape 11 — Saisir les métadonnées contrôlées
-
-1. Recopiez le nom technique final.
-2. Ajoutez le display name et la description pédagogiques exactement comme préparés à l'étape 5.
-3. Saisissez `experimental` dans **Lifecycle**.
-4. Saisissez `4` dans **Tier**.
-5. Sélectionnez **Custom** dans **Type**.
-6. Dans **Languages**, sélectionnez `Python`.
-7. Dans **Custom Tags**, saisissez successivement les quatre tags préparés à l'étape 6 et validez chaque tag avec **Entrée**.
-8. Fermez la liste de saisie des tags avec **Échap**, puis vérifiez que les quatre valeurs apparaissent comme des éléments sélectionnés.
-9. Ajoutez l'owner pédagogique uniquement si une Team validée est proposée ; le champ peut rester vide.
-10. Laissez vides les contacts, liens, relations **Depends On/Component Of**, intégrations On-Call, pipelines et emplacements de code.
-
-### Pourquoi ne faut-il pas improviser une valeur dans le formulaire ?
-
-**Réponse :** chaque métadonnée devient visible dans l'organisation partagée et peut influencer les recherches, regroupements ou contrôles du Catalog.
-
-## Étape 12 — Examiner la définition générée
-
-1. Si l'interface propose **YAML** ou **JSON**, ouvrez cet aperçu sans utiliser le cURL généré.
-2. Vérifiez le nom, le kind, la description, le lifecycle, le tier, le type, le langage et les tags.
-3. Repérez les éventuelles erreurs de validation et confirmez que **Schema Version = v3**.
-4. Revenez au formulaire guidé si nécessaire.
-
-### Pourquoi examiner le YAML ou JSON sans l'exécuter ?
-
-**Réponse :** pour comprendre qu'une entité du Catalog est une définition structurée et vérifier précisément ce qui sera enregistré.
-
-**Limite :** n'utilisez ni API, ni cURL, ni Terraform dans cet atelier ; ils élargiraient les moyens d'écriture au-delà du formulaire contrôlé.
-
-## Étape 13 — Enregistrer l'entrée
-
-1. Relisez le nom une dernière fois.
+1. Relisez une dernière fois le champ **Name**.
 2. Cliquez une seule fois sur **Save Entry**.
-3. Attendez la fin du traitement sans recharger ni soumettre à nouveau. La plateforme peut revenir directement à **Entities Sources** sans afficher durablement de confirmation.
-4. En cas d'erreur ou de résultat incertain, recherchez d'abord le nom exact dans **Catalog > Services > Ownership** avant toute nouvelle tentative.
+3. Attendez la fin du traitement sans recharger la page.
+4. Recherchez le nom exact dans **Catalog > Services > Ownership** avant toute seconde tentative.
 
-### Que faire si Datadog signale un conflit ?
+En cas de conflit, annulez et recommencez à l'étape 1 avec un suffixe validé. N'écrasez aucune entrée existante.
+# Partie 2 — Vérifier le résultat
 
-**Réponse :** annulez la création, retournez à la recherche d'unicité et choisissez un nouveau suffixe. Ne tentez jamais d'écraser l'entrée existante.
-
-## Étape 14 — Mettre à jour le registre
-
-Après confirmation :
-
-| Champ | Nouvelle valeur |
-|---|---|
-| État | `créé` |
-| Heure de création |  |
-| Créateur | participant autorisé |
-| Nom final vérifié |  |
-| Nettoyage requis | `oui` |
-
-# Partie 4 — Vérifier le résultat
-
-## Étape 15 — Retrouver le service
+## Étape 7 — Retrouver le service
 
 1. Revenez au **Catalog**.
 2. Sélectionnez **Services**, `Env = *` et l'onglet **Ownership**.
@@ -327,15 +182,15 @@ Après confirmation :
 
 **Réponse :** une seule définition portant le nom unique et les métadonnées pédagogiques validées.
 
-**Limite :** si plusieurs lignes ou une fusion inattendue apparaissent, n'effectuez aucune autre modification et prévenez le coordinateur.
+**Limite :** si plusieurs lignes ou une fusion inattendue apparaissent, n'effectuez aucune autre modification et prévenez le formateur.
 
-## Étape 16 — Auditer les métadonnées enregistrées
+## Étape 8 — Auditer les métadonnées enregistrées
 
 | Métadonnée | Valeur attendue | Valeur observée |
 |---|---|---|
 | Name | nom technique unique |  |
 | Display name | `[TRAINING] ...` |  |
-| Description | texte complet de l'étape 5 |  |
+| Description | texte saisi à l'étape 3 |  |
 | Lifecycle | `experimental` |  |
 | Tier | `4` |  |
 | Owner | équipe pédagogique ou `Not Provided` |  |
@@ -343,7 +198,7 @@ Après confirmation :
 | Languages | `Python` |  |
 | Source de métadonnées | `UI` |  |
 | Schéma | `v3` |  |
-| Custom Tags | les quatre tags de l'étape 6 |  |
+| Custom Tags | les quatre tags de l'étape 5 |  |
 | Contacts/liens | aucun |  |
 | Relations/On-Call | aucun |  |
 
@@ -351,7 +206,7 @@ Après confirmation :
 
 **Réponse :** pour détecter immédiatement une valeur manquante ou imprévue avant que la définition reste dans l'organisation partagée.
 
-## Étape 17 — Vérifier la recherche par métadonnées
+## Étape 9 — Vérifier la recherche par métadonnées
 
 1. Revenez à **Developer Portal > Catalog > Services > Ownership**.
 2. Dans **Search by name or tags**, recherchez `training_participant:<identifiant-normalisé>`.
@@ -366,7 +221,7 @@ Après confirmation :
 
 **Limite :** cette capacité de recherche repose sur les métadonnées du Catalog. Elle ne prouve toujours pas l'existence de traces, métriques ou logs.
 
-## Étape 18 — Examiner Setup Guidance et la télémétrie
+## Étape 10 — Examiner Setup Guidance et la télémétrie
 
 1. Sur **Service Page**, vérifiez que l'environnement affiché est `none` et que **Service Summary** indique **No APM or USM metrics**.
 2. Ouvrez **Setup Guidance** et relevez les contrôles détectés et non détectés.
@@ -392,7 +247,7 @@ Après confirmation :
 
 **Pourquoi :** le Catalog distingue les métadonnées déclarées de la télémétrie automatiquement découverte.
 
-## Étape 19 — Distinguer service déclaré et service observé
+## Étape 11 — Distinguer service déclaré et service observé
 
 | Propriété | Service déclaré dans cet atelier | Service APM observé |
 |---|---|---|
@@ -406,60 +261,27 @@ Après confirmation :
 
 **Réponse :** non. Elle prouve ici qu'une définition existe, pas qu'une application est déployée ou instrumentée.
 
-# Partie 5 — Modifier uniquement sa définition
+# Partie 3 — Modifier uniquement sa définition
 
-## Étape 20 — Préparer une modification pédagogique
+## Étape 12 — Modifier directement sa description
 
-La seule modification demandée est :
+1. Vérifiez que le nom affiché commence par `training-` et contient votre identifiant.
+2. Si l'un de ces contrôles échoue, n'ouvrez pas l'édition et prévenez le formateur.
+3. Sur **Service Page**, ouvrez **Entity Metadata > Edit**. N'utilisez pas le bouton **Edit** placé près du sélecteur `env`.
+4. À la fin de la description existante, saisissez exactement :
 
 ```text
-Ajouter à la description :
-"Convention vérifiée pendant l'atelier du module 4."
+Convention vérifiée pendant l'atelier du module 4.
 ```
 
-### Pourquoi limiter la modification à la description ?
+5. Vérifiez qu'aucun autre champ n'a changé et que le schéma reste **v3**.
+6. Cliquez une seule fois sur **Save Entry**.
+7. Rouvrez **Entity Metadata > Edit** pour vérifier la persistance de la phrase, puis cliquez sur **Cancel**.
 
-**Réponse :** elle démontre le cycle de mise à jour sans modifier l'identité, l'owner, le lifecycle ou les relations de l'entité.
+**Réponse expliquée :** cette modification démontre le cycle de mise à jour sans toucher à l'identité, l'owner, le lifecycle ou les relations.
+# Partie 4 — Produire la convention et organiser le nettoyage
 
-## Étape 21 — Vérifier à nouveau l'identité
-
-Avant d'ouvrir l'édition :
-
-1. vérifiez le nom technique complet ;
-2. vérifiez qu'il contient votre identifiant participant ;
-3. vérifiez le préfixe `training-` ;
-4. vérifiez sa présence dans le registre avec l'état `créé`.
-
-### Que faire si l'une des vérifications échoue ?
-
-**Réponse :** ne cliquez pas sur **Edit** et prévenez le coordinateur.
-
-## Étape 22 — Modifier et enregistrer
-
-1. Sur **Service Page**, repérez la section **Entity Metadata**.
-2. Dans cette section, cliquez sur **Edit**. N'utilisez pas le bouton **Edit** placé près du sélecteur `env`, qui ne cible pas explicitement les métadonnées du Catalog.
-3. Ajoutez la phrase prévue à la description.
-4. Vérifiez qu'aucun autre champ n'a changé et que le schéma reste **v3**.
-5. Enregistrez une seule fois avec **Save Entry**.
-6. Revenez en lecture, puis rouvrez **Entity Metadata > Edit** afin de contrôler la persistance de la description, du lifecycle `experimental`, du tier `4`, du type `Custom`, du langage `Python` et des quatre tags.
-7. Cliquez sur **Cancel** après ce contrôle : aucune nouvelle modification n'est nécessaire.
-
-### Quelle preuve faut-il conserver ?
-
-**Réponse :** le nom du service, la description finale et l'heure de contrôle, sans capture contenant d'autres services ou informations sensibles.
-
-## Étape 23 — Mettre à jour le registre après modification
-
-| Champ | Valeur |
-|---|---|
-| État | `créé et vérifié` |
-| Modification autorisée | `description uniquement` |
-| Contrôle effectué | `oui` |
-| Incident ou anomalie | `aucun` ou description factuelle |
-
-# Partie 6 — Produire la convention et préparer le nettoyage
-
-## Étape 24 — Formaliser les règles apprises
+## Étape 13 — Formaliser les règles apprises
 
 ```text
 Convention V2 — Service pédagogique
@@ -471,7 +293,7 @@ Convention V2 — Service pédagogique
 - owner durable pour chaque ressource ;
 - métadonnées déclarées distinguées de la télémétrie observée ;
 - aucun contact, secret ou workflow opérationnel réel ;
-- registre et expiration obligatoires pour toute création pédagogique.
+- préfixe et expiration obligatoires pour toute création pédagogique.
 ```
 
 ### Pourquoi la date est-elle acceptée dans ce nom alors qu'une version ou un environnement est normalement exclu ?
@@ -480,25 +302,14 @@ Convention V2 — Service pédagogique
 
 **Limite :** cette exception ne doit pas être transposée à la convention de nommage des services de production.
 
-## Étape 25 — Préparer le nettoyage contrôlé
+## Étape 14 — Identifier la ressource à supprimer en fin de formation
 
-Complétez le registre :
+1. Conservez le nom exact de votre service affiché dans **Service Page**.
+2. À la fin de la formation, recherchez ce nom exact.
+3. Ne supprimez la ressource que si le formateur vous l'autorise et si le nom contient votre préfixe et votre identifiant.
+4. Sinon, communiquez simplement le nom exact au formateur.
 
-| Élément | Valeur |
-|---|---|
-| Nom exact |  |
-| État final de l'atelier | `à nettoyer` |
-| Date cible |  |
-| Responsable | coordinateur |
-| Vérification préalable | nom préfixé et créateur confirmé |
-| Vérification après nettoyage | recherche exacte sans résultat |
-
-### Pourquoi le participant ne supprime-t-il pas immédiatement le service ?
-
-**Réponse :** la suppression est une opération destructive. Le coordinateur doit vérifier le registre, le nom exact et l'absence de dépendance avant de suivre la procédure de nettoyage autorisée.
-
-**Pourquoi :** ce contrôle centralisé évite qu'un participant supprime une entité homonyme ou une ressource qui ne lui appartient pas.
-
+**Réponse expliquée :** le préfixe `[TRAINING]` et l'identifiant participant suffisent à reconnaître la ressource avec un processus simple.
 ## Questions de synthèse corrigées
 
 ### Qu'a réellement créé l'atelier ?
@@ -515,7 +326,7 @@ Complétez le registre :
 
 ### Pourquoi le nom du participant est-il traité comme une donnée contrôlée ?
 
-**Réponse :** il permet l'unicité mais reste une information personnelle. Son usage nécessite l'accord du participant et peut être remplacé par un pseudonyme fourni par le coordinateur.
+**Réponse :** il permet l'unicité mais reste une information personnelle. Son usage nécessite l'accord du participant et peut être remplacé par un pseudonyme fourni par le formateur.
 
 ### Quelle est la différence entre tags de métadonnées et Unified Service Tagging observé ?
 
@@ -525,14 +336,12 @@ Complétez le registre :
 
 | Difficulté | Interprétation | Action sûre |
 |---|---|---|
-| **Create a New Entry** absent | droit insuffisant ou interface différente | rester en lecture et remettre la fiche préparatoire |
+| **Create a New Entry** absent | droit insuffisant ou interface différente | rester en lecture et noter que la création est impossible |
 | nom déjà présent | collision | ajouter un suffixe validé et recommencer la recherche |
-| owner pédagogique absent | Team non préparée | laisser vide si autorisé ou arrêter ; ne pas créer de Team |
+| owner pédagogique absent | aucune Team autorisée proposée | laisser vide si autorisé ou arrêter ; ne pas créer de Team |
 | valeur `experimental` absente | schéma différent | utiliser la valeur validée ou laisser vide ; jamais `production` par défaut |
-| tier ou langage absent après sauvegarde | valeur non persistée ou formulaire incomplet | rouvrir **Entity Metadata > Edit**, corriger uniquement le champ manquant et enregistrer une fois |
-| tags absents après sauvegarde | saisie non validée ou liste restée ouverte | ressaisir chaque tag avec **Entrée**, fermer la liste avec **Échap**, puis enregistrer une fois |
 | validation YAML/JSON en erreur | champ invalide | revenir au formulaire et corriger sans API |
-| plusieurs services après création | conflit ou corrélation inattendue | arrêter toute modification et prévenir le coordinateur |
+| plusieurs services après création | conflit ou corrélation inattendue | arrêter toute modification et prévenir le formateur |
 | service absent de la vue Performance | aucune télémétrie à afficher | utiliser **Services > Ownership** |
 | retour immédiat à Entities Sources après Save | comportement observé | rechercher le nom exact avant toute nouvelle soumission |
 | `env:none` sur Service Page | aucun environnement corrélé par télémétrie | ne pas ajouter `env` dans Custom Tags pour masquer ce constat |
@@ -544,7 +353,6 @@ Complétez le registre :
 - [ ] L'utilisation du nom ou pseudonyme est autorisée.
 - [ ] Le nom est normalisé et commence par `training-`.
 - [ ] La date et le contrôle par recherche garantissent l'unicité.
-- [ ] Le registre a été complété avant la création.
 - [ ] Une seule définition de service a été créée.
 - [ ] Le lifecycle n'est pas productif.
 - [ ] Le tier `4` et le langage `Python` sont visibles après réouverture de l'éditeur.
@@ -555,7 +363,6 @@ Complétez le registre :
 - [ ] L'absence de télémétrie est correctement interprétée.
 - [ ] La seule modification porte sur la description du service créé.
 - [ ] Les métadonnées déclarées sont distinguées des signaux observés.
-- [ ] Le registre indique que le nettoyage reste à effectuer.
 - [ ] Aucun service existant n'a été modifié ou supprimé.
 
 ## Références officielles

@@ -1,34 +1,51 @@
 ---
-title: "Module 8 — Atelier : dashboards et requêtes"
+title: "Module 8 — Atelier V2 : construire un dashboard à partir des signaux explorés"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
 
-# Concevoir un dashboard opérationnel à partir des données existantes
+# Construire un dashboard pédagogique contrôlé
 
 ## Objectif
 
-Parcourir un dashboard réel en lecture seule pour comprendre sa logique, puis concevoir hors plateforme le dashboard PeopleShop **Validation de commande** pour `orders-api`.
+Auditer un dashboard réel, puis créer un dashboard pédagogique unique à partir des logs, traces et événements RUM réellement présents sur la plateforme.
 
 ## Livrable
 
-Vous produisez un dossier de conception comprenant :
+Vous produisez :
 
 - l'audit daté d'un dashboard existant ;
+- un dashboard réel `[TRAINING] M08 - <participant> - <date>` ;
+- trois widgets agrégés fondés sur `sigman`, `eu-interfaces` et `peopulse` ;
 - cinq questions opérationnelles et les actions associées ;
 - la définition de cinq requêtes et de cinq widgets au maximum ;
 - les variables du dashboard ;
 - une disposition allant de l'impact vers le diagnostic ;
 - une grille de recette.
 
-## Règle de sécurité
+## Place dans la progression
 
-Travaillez uniquement en lecture dans Datadog. N'utilisez aucune commande **New Dashboard**, **Add Widgets**, **Configure**, **Edit**, **Clone**, **Save**, **Share** ou autre commande susceptible d'enregistrer une modification. Concevez le dashboard cible uniquement dans ce document.
+Le module 5 a exploré les logs `sigman`. Le module 6 a qualifié l'APM de `eu-interfaces` avec l'opération `console`. Le module 7 a validé les agrégats RUM de `peopulse`, tout en interdisant la copie des noms d'actions et des URL paramétrées. Les valeurs exactes à saisir sont données ci-dessous lors de la création de chaque widget.
+
+L'atelier n'utilise aucun service, métrique ou incident fictif. Les trois sources retenues (`sigman`, `eu-interfaces` et `peopulse`) sont réelles mais indépendantes : leur juxtaposition sert à apprendre les widgets et ne démontre aucune corrélation technique.
+
+## Règle d'écriture contrôlée
+
+Vous êtes autorisé à créer et modifier uniquement votre dashboard :
+
+```text
+[TRAINING] M08 - <identifiant-participant> - <AAAAMMJJ>
+```
+
+L'identifiant participant doit être professionnel, court et non sensible, par exemple `loic-thobois`. N'éditez, ne clonez, ne partagez et ne supprimez aucun dashboard existant. Ne créez ni monitor, SLO, vue enregistrée, ressource applicative ou configuration. N'utilisez aucune donnée personnelle, nom d'action RUM, URL détaillée, message de log ou identifiant réel dans les titres, filtres et descriptions.
+
+Si vous ne disposez pas du droit de créer un dashboard, exécutez les étapes de construction comme une recette documentée et utilisez les captures fournies.
 
 ## Prérequis
 
 - Chrome connecté à Datadog ;
-- accès en lecture aux dashboards et à APM ;
+- accès en lecture aux dashboards, logs, APM et RUM ;
+- droit de créer un dashboard, ou parcours de repli sans écriture ;
 - convention de services et de tags du module 4 ;
 - requêtes et observations issues des logs du module 5 ;
 - hypothèse et indicateurs APM du module 6 ;
@@ -37,7 +54,7 @@ Travaillez uniquement en lecture dans Datadog. N'utilisez aucune commande **New 
 
 ## Comment utiliser ce document
 
-Effectuez chaque observation avant de lire la réponse de référence qui la suit. Les nombres, périodes et widgets de la plateforme peuvent évoluer : votre relevé daté prévaut sur l'état historique indiqué. À partir de la partie 3, vous quittez les données réelles de `app-api` pour concevoir le cas fictif PeopleShop ; ne mélangez jamais ces deux sources.
+Effectuez chaque observation avant de lire la réponse de référence qui la suit. Les nombres, périodes et widgets de la plateforme peuvent évoluer : votre relevé daté prévaut sur l'état historique indiqué. Toutes les parties utilisent uniquement les données réelles sous forme agrégée. Ne déduisez aucune corrélation entre les trois sources sans preuve technique.
 
 # Partie 1 — Parcourir les dashboards
 
@@ -65,7 +82,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 ## Étape 2 — Rechercher le dashboard de référence
 
-1. Saisissez `Monitoring API` dans **Search dashboards**.
+1. Saisissez `Monitoring EU-Interfaces` dans **Search dashboards**.
 2. Attendez la mise à jour de la liste.
 3. Ouvrez la ligne portant exactement ce titre.
 4. Vérifiez qu'aucun mode d'édition n'est actif.
@@ -125,9 +142,9 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 | 6 |  |  |  |
 | 7 |  |  |  |
 
-### Quels widgets étaient visibles lors de la conception ?
+### Quels widgets étaient visibles lors de la vérification ?
 
-**Réponse :** **Appels par resource**, **Appels par status http**, **Appels par centre de gestion**, **Appels `/api/token`**, **Signatures Crit**, **Toutes les traces** et **Temps d'execution**.
+**Réponse :** le dashboard **Monitoring EU-Interfaces** présentait notamment **Nombre d'interfaces (cron) uniques**, **Nombre d'exécutions d'interfaces (cron)**, **Nombre de cron en erreur**, **Nombre de CG exécutant des interfaces**, **Exécutions par Interfaces**, **Exécutions par CG**, **Statuts d'Exécution** et **Dernières exécutions d'interfaces**.
 
 **Pourquoi :** cette référence aide à vérifier que vous êtes sur la bonne vue, mais votre inventaire actuel reste la source de vérité.
 
@@ -137,7 +154,6 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 1. Choisissez une série temporelle visible.
 2. Repérez son titre, sa légende, ses unités et les séries affichées.
-3. Survolez un point si l'interface le permet sans enregistrer d'action.
 4. Notez ce que l'infobulle apporte : horodatage, valeur et série.
 5. Répétez l'observation sur un widget de classement ou de valeur, s'il existe.
 
@@ -184,7 +200,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 **Pourquoi :** accumuler toutes les métriques rend la lecture lente et duplique les outils d'investigation spécialisés.
 
-# Partie 2 — Revoir les dimensions de contexte
+# Partie 2 — Comprendre la navigation depuis un dashboard
 
 ## Étape 8 — Examiner la variable réelle
 
@@ -192,9 +208,9 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 2. Déterminez si son libellé explique clairement son usage.
 3. Notez les dimensions absentes qui seraient utiles pour comparer des déploiements.
 
-### Que permettait la variable historique de `Monitoring API` ?
+### Que permettent les variables observées dans `Monitoring EU-Interfaces` ?
 
-**Réponse :** lors de la conception, `status_code` était visible avec la valeur `*` ; elle permettait une lecture par statut HTTP.
+**Réponse :** `managementCenter`, `CmdName` et `version` étaient visibles avec la valeur `*`. Elles permettent de réduire respectivement le centre de gestion, la commande et la version lorsque les widgets les utilisent.
 
 **Pourquoi :** ce filtre peut être pertinent pour isoler des réponses, mais il ne remplace pas `env`, `service` et `version` pour contextualiser un déploiement.
 
@@ -202,8 +218,8 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 ## Étape 9 — Passer du dashboard à la page APM
 
-1. Ouvrez **APM**, puis **Services** dans le menu gauche.
-2. Recherchez `app-api`.
+1. Ouvrez **APM Home**.
+2. Recherchez `eu-interfaces` dans la liste des services.
 3. Ouvrez sa page de service en lecture seule.
 4. Repérez les filtres **env** et **version** ainsi que la période.
 5. Revenez au dashboard avec l'onglet précédent du navigateur.
@@ -214,300 +230,248 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 **Pourquoi :** le module 4 a défini un contrat commun ; le dashboard doit le réutiliser pour faciliter le passage vers APM.
 
-**Limite :** `app-api` sert uniquement à apprendre la navigation. Ses valeurs et seuils ne constituent aucune preuve pour PeopleShop.
+**Limite :** `eu-interfaces` sert à apprendre la navigation et à alimenter un widget agrégé de formation. Ses valeurs ne prouvent aucune relation avec les données Logs ou RUM retenues dans les autres widgets.
 
-## Étape 10 — Définir les variables du dashboard cible
+# Partie 3 — Construire le dashboard réel de formation
 
-Comparez votre proposition à la référence.
+Les trois widgets suivants utilisent des sources réelles différentes. Ils servent à apprendre la construction et la lecture croisée ; ils ne décrivent pas un même incident et ne doivent pas être corrélés entre eux.
 
-| Variable | Valeur par défaut de référence | Usage |
-|---|---|---|
-| `env` | `training` | éviter de mélanger les contextes |
-| `service` | `orders-api` | conserver le service cible explicite |
-| `version` | `*` | comparer puis isoler une version |
+## Étape 10 — Créer le dashboard et saisir son identité
 
-### Pourquoi limiter les variables à trois ?
-
-**Réponse :** chaque variable ajoute de la flexibilité mais aussi une charge cognitive et un risque de combinaison incohérente.
-
-**Pourquoi :** ces trois dimensions répondent aux usages récurrents du dashboard et reprennent la convention du module 4.
-
-# Partie 3 — Concevoir les décisions PeopleShop
-
-À partir de cette partie, toutes les valeurs concernent le scénario fictif PeopleShop.
-
-## Étape 11 — Définir le lecteur et la situation
-
-| Élément | Réponse de référence |
-|---|---|
-| Lecteur principal | équipe applicative propriétaire |
-| Situation | qualification d'incident |
-| Décision attendue | confirmer l'impact, dater la rupture, isoler une version et choisir la prochaine vue |
-| Service | `orders-api` |
-| Environnement par défaut | `training` |
-
-### Pourquoi définir le lecteur avant les métriques ?
-
-**Réponse :** parce qu'une équipe applicative, l'exploitation et un Product Owner ne prennent pas les mêmes décisions à partir d'une vue.
-
-**Pourquoi :** le lecteur et la situation déterminent le niveau de détail, l'ordre et les actions attendues.
-
-## Étape 12 — Formuler cinq questions
-
-| Niveau | Question de référence | Action si dégradation |
-|---|---|---|
-| Impact | Le service présente-t-il plus d'échecs ? | confirmer l'incident ou poursuivre la surveillance |
-| Chronologie | Quand la dégradation commence-t-elle ? | fixer la fenêtre d'investigation |
-| Version | Une version concentre-t-elle la latence ou les erreurs ? | comparer le déploiement |
-| Ressource | Quelle opération contribue le plus ? | ouvrir l'endpoint ou les traces |
-| Dépendance | Quel composant aval devient lent ? | ouvrir APM ou Infrastructure sur la dépendance |
-
-### Pourquoi commencer par des questions plutôt que par les métriques disponibles ?
-
-**Réponse :** la décision détermine la question, puis la source, la requête, le widget et l'action.
-
-**Pourquoi :** l'ordre inverse produit facilement des widgets décoratifs ajoutés seulement parce que la donnée existe.
-
-# Partie 4 — Spécifier les cinq widgets
-
-Les noms exacts des métriques seront validés avec les données réellement disponibles. Une source conceptuelle clairement décrite vaut mieux qu'un nom de métrique inventé.
-
-## Étape 13 — Widget 1 : impact immédiat
-
-| Propriété | Réponse de référence |
-|---|---|
-| Question | Le taux d'erreur de `orders-api` est-il anormal ? |
-| Source | métriques APM de requêtes et d'erreurs |
-| Filtre | `service:$service`, `env:$env` |
-| Calcul | erreurs / requêtes totales × 100 |
-| Widget | Query Value |
-| Unité | `%` |
-| Titre | `Taux d'erreur — $service — env:$env` |
-| Action | ouvrir la chronologie si la valeur se dégrade |
-
-### Pourquoi préférer un taux au seul nombre d'erreurs ?
-
-**Réponse :** le taux rapporte les erreurs au trafic et rend deux périodes comparables.
-
-**Limite :** le numérateur et le dénominateur doivent avoir le même périmètre, et le cas d'absence de trafic doit être traité.
-
-## Étape 14 — Widget 2 : chronologie
-
-| Propriété | Réponse de référence |
-|---|---|
-| Question | Quand le trafic et les erreurs changent-ils ? |
-| Source | métriques APM |
-| Filtre | `service:$service`, `env:$env` |
-| Agrégation | volume ou taux selon la série |
-| Regroupement | aucun par défaut |
-| Événement | déploiement, s'il est disponible |
-| Widget | Timeseries |
-| Titre | `Trafic et erreurs dans le temps — $service` |
-| Action | fixer la fenêtre et rechercher un changement concomitant |
-
-### Un déploiement proche d'une hausse prouve-t-il la causalité ?
-
-**Réponse :** non. La proximité temporelle produit une hypothèse à tester.
-
-**Pourquoi :** une dépendance, une variation de trafic ou un autre changement peut expliquer la même chronologie.
-
-## Étape 15 — Widget 3 : comparaison des versions
-
-| Propriété | Réponse de référence |
-|---|---|
-| Question | Une version concentre-t-elle la latence ? |
-| Source | distribution de latence APM |
-| Filtre | `service:$service`, `env:$env`, toutes les versions |
-| Mesure | p95 |
-| Regroupement | `version` |
-| Widget | Timeseries |
-| Titre | `Latence p95 par version — $service` |
-| Action | filtrer les traces de la version concernée |
-
-### Quelle différence existe entre filtrer et regrouper par version ?
-
-**Réponse :** filtrer conserve une ou plusieurs valeurs choisies ; regrouper crée une série par valeur.
-
-**Pourquoi :** pour comparer les versions, il faut conserver plusieurs versions puis grouper par `version`.
-
-## Étape 16 — Widget 4 : ressources prioritaires
-
-| Propriété | Réponse de référence |
-|---|---|
-| Question | Quelle ressource est la plus lente ou la plus erronée ? |
-| Source | APM Resources ou Endpoints |
-| Filtre | `service:$service`, `env:$env` |
-| Regroupement | ressource ou opération |
-| Classement | p95 ou taux d'erreur |
-| Limite | quelques éléments actionnables |
-| Widget | Top List ou Table |
-| Titre | `Top ressources par p95 — $service` |
-| Action | ouvrir la ressource dans APM |
-
-### Pourquoi limiter le nombre de ressources affichées ?
-
-**Réponse :** une liste courte fait ressortir les principaux contributeurs et prépare une action.
-
-**Limite :** un Top N peut masquer une ressource moins fréquente ; la vue APM détaillée reste nécessaire.
-
-## Étape 17 — Widget 5 : dépendance PostgreSQL
-
-| Propriété | Réponse de référence |
-|---|---|
-| Question | Le pool PostgreSQL contribue-t-il à la latence ? |
-| Source pédagogique | `peopleshop.db.pool.used` ou attente du pool |
-| Filtre | contexte PeopleShop validé |
-| Widget | Timeseries |
-| Titre | `Utilisation ou attente du pool PostgreSQL` |
-| Vue suivante | APM Dependencies, traces ou Infrastructure |
-| Action | corréler saturation, appels SQL et latence de validation |
-
-### Pourquoi cette métrique doit-elle être validée avant construction ?
-
-**Réponse :** son nom est pédagogique et sa présence réelle dans l'organisation n'est pas garantie.
-
-**Pourquoi :** si elle n'existe pas, il faut choisir un signal réellement disponible ou utiliser le jeu de données préparé, sans inventer une requête exécutable.
-
-**Limite :** dans l'environnement réel, une dépendance SQL, Redis ou HTTP visible peut servir à apprendre la navigation, mais elle ne prouve rien sur PostgreSQL dans PeopleShop.
-
-# Partie 5 — Contrôler les requêtes
-
-## Étape 18 — Vérifier filtres, regroupements et variables
-
-Complétez cette recette pour vos cinq widgets.
-
-| Widget | Filtre | Regroupement | Variables appliquées ? | Cardinalité maîtrisée ? |
-|---:|---|---|:---:|:---:|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  | `version` |  |  |
-| 4 |  | ressource |  |  |
-| 5 |  |  |  |  |
-
-### Quels regroupements doivent être évités sans besoin explicite ?
-
-**Réponse :** pod, `order_id`, `tenant_id` et toute dimension presque unique ou éphémère.
-
-**Pourquoi :** ils produisent trop de séries, surchargent la légende et rendent la lecture instable.
-
-## Étape 19 — Vérifier agrégations et rollup
-
-1. Justifiez une somme pour un volume additif.
-2. Utilisez un percentile adapté pour une distribution de latence.
-3. Vérifiez la compatibilité des séries d'un taux.
-4. Notez l'effet possible d'une période plus longue.
-5. N'imposez un rollup explicite que si son effet est compris.
-
-### Pourquoi le p95 complète-t-il mieux la moyenne pour une latence dégradée ?
-
-**Réponse :** la moyenne peut masquer la partie lente de la distribution ; le p95 rend visible une population d'observations lentes.
-
-**Limite :** le p95 ne signifie pas que 95 % des requêtes ont exactement cette valeur, mais que 95 % sont inférieures ou égales à cette valeur.
-
-### Que peut provoquer l'élargissement de la période ?
-
-**Réponse :** Datadog peut utiliser des intervalles de rollup plus larges, ce qui lisse des pics courts.
-
-**Pourquoi :** le nombre de points affichables est limité ; les données sont agrégées dans le temps.
-
-## Étape 20 — Vérifier la formule du taux
+1. Dans **Dashboards > Dashboard List**, cliquez sur **New Dashboard**.
+2. Dans le champ du titre, saisissez directement :
 
 ```text
-a = requêtes en erreur sur service:$service et env:$env
-b = requêtes totales sur service:$service et env:$env
-taux = 100 × a / b
+[TRAINING] M08 - <identifiant-participant> - <AAAAMMJJ>
 ```
 
-### Quelles conditions rendent cette formule interprétable ?
-
-**Réponse :** mêmes service, environnement, période, regroupements et définition de requête pour `a` et `b`, avec un traitement explicite de `b = 0`.
-
-**Pourquoi :** diviser des séries de périmètres différents donne un résultat mathématique mais trompeur.
-
-# Partie 6 — Organiser et recetter le dashboard
-
-## Étape 21 — Dessiner la disposition
+3. Remplacez les deux valeurs entre chevrons par votre identifiant autorisé et la date du jour.
+4. Avant de valider, vérifiez dans la liste qu'aucun dashboard ne porte déjà ce titre ; ajoutez uniquement le suffixe fourni par le formateur en cas de collision.
+5. Choisissez le format **Dashboard** ou la disposition libre proposée.
+6. N'activez aucun partage public.
+7. Si une description est proposée, saisissez :
 
 ```text
-+----------------------+--------------------------------------+
-| Widget 1             | Widget 2                             |
-| Impact immédiat      | Chronologie                          |
-+----------------------+--------------------------------------+
-| Widget 3                                                    |
-| Comparaison des versions                                    |
-+--------------------------------+----------------------------+
-| Widget 4                       | Widget 5                   |
-| Ressources prioritaires        | Dépendance                 |
-+--------------------------------+----------------------------+
+Atelier ORSYS Datadog — agrégats de formation issus des modules 5 à 7.
+Ne pas utiliser comme dashboard de production. Nettoyage en fin de formation.
 ```
 
-1. Recopiez les titres finaux dans les cadres.
-2. Nommez le dashboard `[TRAINING] Service — Orders API`.
-3. Indiquez l'owner `team-orders`.
-4. Vérifiez que l'impact précède le diagnostic.
+8. Validez la création.
+9. Lorsque le dashboard s'affiche, vérifiez que son titre contient bien votre identifiant.
 
-### Pourquoi le dashboard contient-il cinq widgets au maximum ?
+**Réponse expliquée :** le dashboard interroge les données existantes ; il ne modifie ni les logs, ni l'instrumentation APM, ni le RUM. Le préfixe et votre identifiant permettent de reconnaître la ressource à supprimer en fin de formation.
+## Étape 11 — Ajouter le cadre de lecture
 
-**Réponse :** chacun répond à l'une des cinq décisions du scénario ; cette limite force à retirer les vues sans action associée.
+1. Cliquez sur **Add Widgets**.
+2. Ajoutez un widget **Note & Links** ou **Note**.
+3. Saisissez le contenu suivant :
 
-## Étape 22 — Tester cinq scénarios
+```markdown
+## Télémétrie explorée pendant la formation
 
-| Scénario | Réponse de référence |
+- Logs : `sigman`
+- APM : `eu-interfaces`, opération `console`
+- RUM : application `peopulse`, agrégats uniquement
+
+Ces trois sources ne décrivent pas un même incident.
+Le dashboard ne contient aucun jeu de données de démonstration.
+```
+
+4. N'ajoutez aucun lien externe, identifiant ou donnée personnelle.
+
+### Pourquoi commencer par une note ?
+
+**Réponse :** elle empêche le lecteur de supposer une corrélation entre trois sources choisies pour leur valeur pédagogique et non parce qu'elles appartiennent au même parcours.
+
+## Étape 12 — Ajouter le widget Logs
+
+1. Cliquez sur **Add Widgets**, puis choisissez **Timeseries**.
+2. Choisissez la source **Log Events** ou **Logs**.
+3. Sélectionnez l'agrégation **Count**.
+4. Dans le champ de requête, saisissez directement :
+
+```text
+service:sigman status:error
+```
+
+5. Ne regroupez pas par message, utilisateur, hôte ou identifiant.
+6. Donnez au widget le titre :
+
+```text
+Logs — erreurs sigman
+```
+
+
+### Que signifie une courbe vide ?
+
+**Réponse :** aucun événement correspondant n'est retourné pour la période et le périmètre actuels. Cela ne prouve ni l'absence historique d'erreur ni l'absence de collecte.
+
+**Plan de repli :** conservez le widget et ajoutez dans sa description **aucun événement sur la période de recette** ; n'élargissez pas la requête à tous les logs de production.
+
+## Étape 13 — Ajouter le widget APM
+
+1. Ajoutez un widget **Timeseries**.
+2. Choisissez la source **APM Metrics**. Si ce libellé n'est pas proposé, choisissez **Indexed Spans** et restez sur un comptage.
+3. Sélectionnez le service `eu-interfaces`.
+4. Sélectionnez l'opération `console` lorsqu'elle est proposée.
+5. Choisissez une mesure de requêtes, hits, spans ou traces comptées par Datadog. N'inventez pas de nom de métrique.
+6. Ne regroupez pas par ressource de commande, hôte ou identifiant métier.
+7. Donnez au widget le titre :
+
+```text
+APM — activité eu-interfaces / console
+```
+
+8. Si l'aperçu est vide sur une heure, utilisez **Past 4 Hours**, puis **Past 1 Day** pour la recette.
+
+### Pourquoi utiliser un volume avant une latence p95 ?
+
+**Réponse :** le faible débit de `eu-interfaces` rend un percentile instable sur une fenêtre courte. Le volume confirme d'abord que la source alimente le widget ; la latence p95 reste une amélioration possible lorsque l'échantillon est suffisant.
+
+## Étape 14 — Ajouter le widget RUM
+
+1. Ajoutez un widget **Timeseries** ou **Query Value**.
+2. Choisissez la source **RUM**.
+3. Sélectionnez le type d'événement **Views**.
+4. Filtrez sur l'application `peopulse` au moyen du sélecteur d'application ou de la facette proposée par l'interface.
+5. Choisissez l'agrégation **Count**.
+6. Ne regroupez pas par `view.name`, action, utilisateur ou URL.
+7. Donnez au widget le titre :
+
+```text
+RUM — vues peopulse
+```
+
+
+### Pourquoi ne pas afficher les actions ou les URL réelles ?
+
+**Réponse :** la vérification du module 7 a montré que des noms d'actions et URL peuvent contenir du texte métier, des paramètres ou des données personnelles. Le comptage agrégé des vues suffit pour apprendre la source RUM sans exposer ces valeurs.
+
+
+1. Placez la note en haut du dashboard.
+2. Placez les trois séries dans l'ordre **Logs**, **APM**, **RUM**.
+3. Choisissez une période commune permettant d'afficher des données, sans dépasser **Past 1 Day** pour la recette sauf consigne du formateur.
+4. Vérifiez que les titres ne contiennent aucune valeur sensible.
+5. Ajoutez une variable `env` uniquement si elle est proposée et applicable aux widgets concernés ; conservez `*` par défaut.
+6. N'ajoutez pas de variable `service` globale : les trois widgets ciblent volontairement trois services ou applications différents.
+7. Vérifiez que le dashboard est enregistré et que son titre est exact.
+
+| Contrôle | Résultat attendu |
 |---|---|
-| Taux d'erreur élevé, trafic normal | confirmer l'impact, puis identifier la ressource en erreur |
-| p95 élevé sur une seule version | isoler la version dans APM et examiner le déploiement |
-| Latence élevée sans erreur | rechercher une dépendance lente ou une saturation |
-| Une ressource domine la Top List | ouvrir Endpoints ou Traces sur cette ressource |
-| La dépendance devient lente | corréler trace, métrique de dépendance et infrastructure |
+| Nom unique et préfixé | conforme |
+| Note de non-corrélation | visible |
+| Widget Logs | enregistré, donnée ou absence expliquée |
+| Widget APM | enregistré, périmètre `eu-interfaces` / `console` |
+| Widget RUM | agrégé, sans action, URL ou utilisateur |
+| Partage public | désactivé |
 
-### Que démontre cette recette sur papier ?
+### Pourquoi limiter le dashboard à ces trois widgets ?
 
-**Réponse :** elle vérifie que chaque widget conduit à une décision et à une vue suivante avant toute construction dans Datadog.
+**Réponse :** cette première version valide une source par produit et la sécurité des périmètres. Les autres spécifications constituent un backlog ; elles ne sont ajoutées qu'après revue de leur question, coût, cardinalité et confidentialité.
 
-**Limite :** elle ne valide ni la disponibilité des sources ni la syntaxe exacte des requêtes ; une recette technique sera nécessaire dans un environnement autorisé.
+# Partie 4 — Exploiter le dashboard sans inventer de corrélation
+
+## Étape 15 — Comparer les comportements des widgets
+
+1. Placez le dashboard sur **Past 1 Hour**.
+2. Notez quels widgets contiennent des données.
+3. Étendez à **Past 4 Hours**, puis **Past 1 Day** si nécessaire.
+4. Pour chaque widget, relevez la source, le filtre, la période minimale utile et la question à laquelle il répond.
+
+| Widget | Source réelle | Question autorisée |
+|---|---|---|
+| Logs — erreurs sigman | logs `service:sigman status:error` | Des erreurs `sigman` sont-elles indexées sur la période ? |
+| APM — activité eu-interfaces / console | APM `service:eu-interfaces`, opération `console` | Une activité APM est-elle visible pour cette opération ? |
+| RUM — vues peopulse | vues RUM de l'application `peopulse` | Des vues RUM agrégées sont-elles reçues sur la période ? |
+
+**Réponse expliquée :** les périodes de disponibilité peuvent différer en raison du trafic, de la rétention et de l'échantillonnage. Une variation simultanée ne suffit pas à relier ces trois sources.
+
+## Étape 16 — Tester les filtres sans perdre le contexte
+
+1. Modifiez temporairement la période globale.
+2. Si la variable `env` existe, testez une valeur réellement proposée par Datadog puis revenez à `*`.
+3. Vérifiez que chaque widget reste compréhensible lorsqu'il est vide.
+4. N'ajoutez pas de variable globale `service` : elle masquerait deux des trois sources.
+
+**Résultat attendu :** le dashboard reste lisible sans suggérer que `sigman`, `eu-interfaces` et `peopulse` appartiennent à une même chaîne de service.
+
+## Étape 17 — Examiner une requête en mode édition
+
+Pour chacun de vos trois widgets :
+
+1. Ouvrez son mode d'édition.
+2. Identifiez la source, l'agrégation, les filtres et l'unité.
+3. Vérifiez que le titre cite explicitement la source réelle.
+4. Fermez ou annulez sans ajouter de nouvelle source.
+
+**Interprétation :** un widget fiable rend visibles sa portée et ses limites. Les titres génériques tels que « erreurs » ou « trafic » sont insuffisants dans un environnement partagé.
+
+## Étape 18 — Utiliser les pivots de navigation en lecture seule
+
+1. Depuis le widget Logs, ouvrez le détail dans le Log Explorer si le lien est proposé.
+3. Depuis le widget APM, ouvrez le détail APM si le lien est proposé.
+4. Pour le RUM, restez sur les agrégats ; n'ouvrez ni nom d'action sensible, ni session, ni replay.
+
+**Réponse expliquée :** le dashboard sert de point d'entrée. Le diagnostic détaillé se poursuit dans l'explorateur correspondant, avec les mêmes filtres et la même période lorsque Datadog sait les transmettre.
+
+# Partie 5 — Recette et nettoyage
+
+## Étape 19 — Effectuer la recette fonctionnelle
+
+Vérifiez les points suivants :
+
+- le nom commence par `[TRAINING] M08` et contient votre identifiant et la date ;
+- la note supérieure indique que les trois sources ne représentent pas un incident commun ;
+- les widgets utilisent uniquement `sigman`, `eu-interfaces` et `peopulse` ;
+- aucune donnée nominative, URL détaillée ou action RUM sensible n'est affichée ;
+- aucun partage public ni notification n'est configuré ;
+- aucun dashboard existant n'a été modifié.
+
+## Étape 20 — Restituer sans surinterpréter
+
+Présentez le dashboard en répondant aux trois questions suivantes :
+
+1. Quel widget sert à apprendre la recherche de logs ?
+2. Quel widget sert à apprendre une requête APM ?
+3. Quel widget sert à apprendre une agrégation RUM respectueuse de la confidentialité ?
+
+**Réponse de référence :** chaque widget illustre une famille de données distincte. Le dashboard est un support de navigation et de requêtage, pas la preuve d'un incident transversal.
+
+## Étape 21 — Identifier le dashboard à supprimer
+
+1. Vérifiez que le titre commence par `[TRAINING] M08` et contient votre identifiant.
+2. À la fin de la formation, supprimez uniquement ce dashboard si le formateur vous l'autorise.
+3. Si vous ne disposez pas du droit de suppression, communiquez simplement son titre exact au formateur.
+
+Ne supprimez aucune autre ressource.
 
 ## Questions de synthèse corrigées
 
-### Comment vérifier qu'une variable visible filtre réellement les widgets concernés ?
+### Peut-on conclure que les erreurs `sigman` affectent `peopulse` ?
 
-**Réponse :** inspecter la requête de chaque widget dans un environnement où cette lecture est autorisée, ou tester des valeurs contrastées sans enregistrer de modification.
+**Réponse :** non. Aucun identifiant de corrélation ni aucune relation de service n'a été validé entre ces sources.
 
-**Explication :** la présence de la variable dans le bandeau ne garantit pas son utilisation par toutes les sources.
+### Pourquoi conserver néanmoins trois sources sur le même dashboard ?
 
-### Pourquoi un dashboard n'est-il pas un catalogue de métriques ?
+**Réponse :** pour apprendre à sélectionner plusieurs types de données, configurer des widgets et comprendre leurs différences dans l'interface Datadog.
 
-**Réponse :** sa valeur vient de l'enchaînement décision, question, source, requête, widget et action, pas du nombre de courbes affichées.
+### Que faut-il faire avant de construire un dashboard d'incident corrélé ?
 
-### Quelle est la prochaine vue après une ressource lente ?
-
-**Réponse :** la ressource ou l'endpoint APM, puis les traces correspondantes afin d'examiner les spans et dépendances contributrices.
-
-## Aide au diagnostic
-
-| Difficulté | Interprétation | Action en lecture seule |
-|---|---|---|
-| `Monitoring API` absent | renommage, suppression ou droits | choisir une vue API lisible et noter la substitution |
-| Dashboard sans données | période, filtres ou source inactive | analyser la structure sans inventer de valeurs |
-| `app-api` absent d'APM | activité ou période différente | choisir un service applicatif actif et noter la substitution |
-| Source exacte inconnue | métrique non exposée | conserver une spécification conceptuelle et noter **à valider** |
-| Métrique PostgreSQL absente | jeu PeopleShop non chargé | utiliser le support de repli ou une source préparée |
-| Trop de widgets proposés | logique de catalogue | supprimer tout widget sans question et action distinctes |
-| Variables trop nombreuses | flexibilité non justifiée | conserver `env`, `service` et `version` |
+**Réponse :** choisir un service réel disposant de signaux reliés par des attributs vérifiés, puis confirmer la chaîne de corrélation dans les explorateurs avant de l'afficher.
 
 ## Validation finale
 
-- [ ] Le dashboard réel a été audité sans modification.
-- [ ] La période, les variables et les observations ont été datées.
-- [ ] `app-api` réel et `orders-api` fictif ne sont jamais confondus.
-- [ ] Le dashboard cible est nommé `[TRAINING] Service — Orders API`.
-- [ ] Il contient exactement cinq widgets répondant à cinq questions.
-- [ ] Chaque widget prépare une action ou une navigation détaillée.
-- [ ] `service`, `env` et `version` sont utilisés de manière cohérente.
-- [ ] La comparaison des versions utilise un regroupement par `version`.
-- [ ] Le taux utilise un numérateur et un dénominateur compatibles.
-- [ ] Les unités, périodes et agrégations sont explicites.
-- [ ] L'effet du rollup est pris en compte.
-- [ ] Aucun regroupement à forte cardinalité n'est injustifié.
-- [ ] La vue va de l'impact vers le diagnostic.
-- [ ] Les sources pédagogiques non disponibles sont marquées **à valider**.
-- [ ] Aucune ressource Datadog n'a été modifiée.
+- [ ] Seules des données réellement présentes sur la plateforme sont utilisées.
+- [ ] Aucun service, métrique, seuil ou incident fictif n'est mentionné.
+- [ ] Les trois sources réelles ne sont jamais présentées comme corrélées.
+- [ ] Une seule ressource a été créée : le dashboard du participant.
+- [ ] La confidentialité RUM est respectée.
+- [ ] Le titre exact du dashboard à supprimer est conservé.
+
+## Références officielles
+
+- [Dashboards](https://docs.datadoghq.com/dashboards/)
+- [Widgets](https://docs.datadoghq.com/dashboards/widgets/)
+- [Timeseries Widget](https://docs.datadoghq.com/dashboards/widgets/timeseries/)
+- [Template Variables](https://docs.datadoghq.com/dashboards/template_variables/)
+- [Widget Configuration](https://docs.datadoghq.com/dashboards/widgets/configuration/)

@@ -1,5 +1,5 @@
 ---
-title: "Module 7 — Atelier V2 : analyser le RUM et concevoir l'observation d'une modale"
+title: "Module 7 — Atelier : naviguer dans le RUM réel en sécurité"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
@@ -8,71 +8,83 @@ lang: fr-FR
 
 ## Objectif
 
-Parcourir l'organisation RUM réellement disponible en lecture seule, qualifier ce qui peut être relié à l'APM après le module 6, concevoir trois actions respectueuses de la confidentialité et préparer les indicateurs du dashboard du module 8.
+Parcourir l'organisation RUM réellement disponible en lecture seule, comprendre les types d'événements et qualifier les pivots accessibles sans exposer de donnée sensible.
 
 ## Livrable
 
 Vous produisez :
 
 - un relevé daté de l'organisation RUM visible ;
-- trois actions personnalisées et leurs attributs bornés ;
-- une matrice des données interdites et des protections ;
-- un indicateur d'usage avec ses limites ;
-- un chemin d'investigation RUM vers APM et logs ;
-- trois spécifications de widgets RUM pour le module 8 ;
+- un relevé des types d'événements et facettes utilisables en sécurité ;
+- une analyse des risques liés aux actions, URL et sessions ;
+- un constat sur le pivot éventuel vers l'APM ;
 - une conclusion séparant constat réel, hypothèse et limite ;
-- une checklist de validation avant instrumentation réelle.
+- une checklist de confidentialité.
 
 ## Place dans la progression
 
 Au module 6, vous avez étudié `eu-interfaces`, dont l'opération `console` ne correspond pas à une requête issue d'un navigateur. Cet atelier ne force donc aucune relation entre ce service et le RUM. Il recherche un service web corrélable uniquement si l'interface en fournit la preuve.
 
-Les résultats préparent :
+Les observations servent ensuite à :
 
-- le module 8, avec trois widgets RUM spécifiés mais non créés ;
+- le module 8, qui donnera directement les paramètres du widget RUM agrégé ;
 - le module 9, avec un chemin d'investigation allant de l'impact utilisateur à une ressource puis, si disponible, à une trace backend et à ses logs.
 
 ## Règle de sécurité
 
-Travaillez uniquement en lecture. Ne créez ni application, vue sauvegardée, mesure, funnel, monitor, dashboard ou configuration. Ne cliquez pas sur un bouton d'enregistrement ou de modification. N'ouvrez aucun Session Replay réel non préparé et non validé. Ne recopiez aucun nom d'application sensible, nom, email, identifiant d'application ou de session, token client, URL détaillée, saisie ou contenu utilisateur réel.
+Travaillez uniquement en lecture. Ne créez ni application, vue sauvegardée, mesure, funnel, monitor, dashboard ou configuration. Ne cliquez pas sur un bouton d'enregistrement ou de modification. N'ouvrez aucun Session Replay réel non explicitement autorisé. Ne recopiez aucun nom d'application sensible, nom, email, identifiant d'application ou de session, token client, URL détaillée, saisie ou contenu utilisateur réel.
 
 ## Prérequis
 
 - Chrome connecté à Datadog ;
 - accès en lecture à **Digital Experience** et au **RUM Explorer**, ou captures anonymisées ;
-- scénario fictif PeopleShop ;
+- application RUM réelle `peopulse` ;
 - vocabulaire `env/service/version` ;
-- connaissance du parcours `POST /api/orders/validate`.
-- fiche de pivot APM préparée au module 6.
+- accès en lecture aux agrégats RUM autorisés.
+- constat de disponibilité des pivots APM réalisé au module 6.
 
 ## Comment utiliser ce document
 
-Effectuez d'abord l'observation demandée, puis lisez la réponse qui suit la question. Les applications, sessions et volumes évoluent avec la période, le consentement et l'échantillonnage : votre relevé daté prévaut sur l'instantané historique. Les parties 1 et 2 utilisent une application RUM réelle autorisée uniquement pour apprendre la navigation ; les parties PeopleShop reposent exclusivement sur le scénario fictif. Ne mélangez jamais leurs preuves.
+Effectuez d'abord l'observation demandée, puis lisez la réponse qui suit la question. Les applications, sessions et volumes évoluent avec la période, le consentement et l'échantillonnage : votre relevé daté prévaut. Toutes les étapes utilisent uniquement les agrégats réels de `peopulse`.
 
-## Contexte de plateforme pris en compte
+## Contexte réel vérifié sur la plateforme
 
-Lors de la dernière vérification, trois applications RUM actives étaient visibles : deux applications JavaScript et une application Flutter. Certaines proposaient Product Analytics. Une application RUM était déjà ouverte dans Chrome sur sa page d'installation SDK.
+Le parcours a été vérifié le 20 juillet 2026 sur l'application Browser JavaScript autorisée `peopulse` :
 
-Cette page peut afficher des identifiants techniques nécessaires à l'installation. Ne les copiez pas dans le livrable. Pour l'atelier, choisissez une application **Browser JavaScript** autorisée depuis la liste des applications, puis restez dans les vues d'exploitation.
+| Élément | Implémentation observée |
+|---|---|
+| Accès depuis le menu | **Digital Experience** ouvre d'abord Synthetic Monitoring |
+| Accès direct recommandé | **Search Datadog > Real User Monitoring** ou **Explorer > RUM** |
+| Application | `peopulse`, événements reçus par le Browser SDK |
+| Navigation RUM | **Summary**, **Optimization**, **Feature Flag Tracking**, **Profiling**, **Session Replay**, **Explorer**, **Error Tracking**, **Product Analytics** |
+| Filtres Summary | `env`, `service`, `version`, pays et navigateur |
+| Types d'événements Explorer | **Sessions**, **Views**, **Actions**, **Errors**, **Resources**, **Long tasks**, **Vitals** ; le volume de **Vitals** peut être nul sur la période |
+| Période affichée lors du contrôle | **Past 1 Week** |
 
-# Scénario PeopleShop
+L'application contient un volume important de sessions, vues, actions et ressources. Les nombres changent en continu et ne sont pas des résultats attendus. La page **SDK Configuration** confirme que des événements sont reçus, mais elle peut afficher des identifiants techniques nécessaires à l'installation : ne copiez ni identifiant, ni token, ni extrait d'initialisation.
 
-La modale legacy de validation ne change ni l'URL ni la route. Les clics automatiques peuvent être absents ou porter un nom instable. L'équipe veut mesurer l'ouverture, la tentative de validation et l'annulation, puis rejoindre la ressource `POST /api/orders/validate`.
+**Alerte de confidentialité vérifiée :** certains noms d'actions automatiques reprennent le texte cliqué et peuvent contenir des informations personnelles ou métier. Certaines URL de ressources contiennent aussi des identifiants ou paramètres. Ne lisez pas ces valeurs à voix haute, ne les projetez pas et ne les recopiez pas.
+
+
+
+
 
 # Partie 1 — Comprendre l'organisation du RUM
 
-## Étape 1 — Ouvrir Digital Experience
+## Étape 1 — Ouvrir le RUM depuis la recherche Datadog
 
-1. Dans le menu gauche, ouvrez **Digital Experience**.
-2. Repérez **RUM**, **Session Replay**, **Error Tracking** ou **Product Analytics**, selon les fonctionnalités visibles.
-3. Ouvrez l'accueil RUM ou la liste des applications.
-4. Notez la date, l'heure et les modules visibles.
+1. Cliquez sur **Search Datadog** ou utilisez `Ctrl+K`.
+2. Dans la liste des produits, ouvrez **Real User Monitoring** sous **Digital Experience**.
+3. Si vous souhaitez aller directement aux événements, l'entrée **Explorer** sous **RUM** est également disponible.
+4. Ne choisissez pas **Create RUM Application**.
+5. Vérifiez que l'application sélectionnée est `peopulse`.
+6. Notez la date, l'heure, la période et les onglets visibles.
 
 | Élément | Observation |
 |---|---|
 | Date et heure |  |
 | Modules visibles |  |
-| Nombre d'applications, si affiché |  |
+| Application sélectionnée | `peopulse` |
 
 ### Quel est le rôle du RUM ?
 
@@ -80,33 +92,36 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 
 **Pourquoi :** il qualifie l'impact utilisateur et les populations affectées, tandis que l'APM explique le traitement backend lorsque la corrélation existe.
 
-## Étape 2 — Examiner la liste des applications
+## Étape 2 — Vérifier l'application autorisée
 
-1. Repérez les applications sans ouvrir leur configuration.
-2. Notez uniquement leur type générique : Browser JavaScript, Flutter, mobile ou autre.
-3. Choisissez une application **Browser JavaScript** autorisée pour la suite, sans recopier son nom si celui-ci est sensible.
-4. Si la navigation vous conduit à une page **SDK Installation**, revenez aux vues d'exploitation sans copier `applicationId`, `clientToken` ou extrait d'initialisation.
+1. Vérifiez que l'en-tête indique l'application `peopulse`.
+2. Si vous arrivez sur **Application Management**, ouvrez uniquement `peopulse`.
+3. Vérifiez son type **JavaScript** et la présence du message **Events received**, sans développer les étapes d'installation.
+4. Ouvrez **Real User Monitoring — Optimize app performance**.
+5. Ne cliquez pas sur **Edit Application** et ne copiez ni `applicationId`, ni `clientToken`, ni extrait d'initialisation.
 
 ### Quel était l'état observé lors de la conception ?
 
-**Réponse :** trois applications RUM actives étaient visibles : deux JavaScript et une Flutter ; certaines proposaient également Product Analytics.
+**Réponse :** l'application `peopulse` utilise le Browser SDK, envoie des événements et donne accès au RUM ainsi qu'à Product Analytics.
 
-**Limite :** cet instantané du 19 juillet 2026 ne constitue pas une métrique contractuelle ni un résultat attendu.
+**Limite :** ce constat du 20 juillet 2026 décrit l'état de la plateforme pendant la vérification ; il ne garantit ni la configuration complète du SDK ni la représentativité des données.
 
 ## Étape 3 — Parcourir Summary
 
 1. Ouvrez **Summary** ou la page de synthèse de l'application autorisée.
-2. Repérez la période, les filtres et les indicateurs disponibles.
-3. Identifiez les accès vers sessions, vues, actions, erreurs et ressources.
-4. Ne changez pas la configuration de l'application.
+2. Repérez les onglets **Optimization**, **Feature Flag Tracking**, **Profiling**, **Session Replay**, **Explorer**, **Error Tracking** et **Product Analytics**.
+3. Repérez la période et les filtres `env`, `service`, `version`, pays et navigateur.
+4. Dans la navigation de la page, repérez **Overview**, **Optimize Vitals**, **Frontend Errors**, **Deployments** et **Resources**.
+5. Observez uniquement les agrégats de vues, performance et erreurs. Ne changez pas la configuration de l'application.
 
 | Élément | Observation non sensible |
 |---|---|
 | Type d'application | Browser JavaScript |
 | Période |  |
-| Sessions ou vues visibles |  |
-| Session Replay disponible | oui / non observé |
-| Product Analytics disponible | oui / non observé |
+| Vues visibles |  |
+| Session Replay disponible | oui |
+| Product Analytics disponible | oui |
+| Core Web Vitals visibles | oui / non observé |
 
 ### Pourquoi commencer par une synthèse agrégée ?
 
@@ -116,11 +131,12 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 
 ## Étape 4 — Ouvrir le RUM Explorer
 
-1. Ouvrez **RUM > Explorer**.
-2. Repérez la barre de recherche, la période, les facettes et la liste des événements.
-3. Repérez le sélecteur de type d'événement.
-4. Vérifiez qu'aucun filtre nominatif ou identifiant utilisateur n'est appliqué.
-5. Ne sauvegardez aucune vue.
+1. Dans l'en-tête RUM, ouvrez **Explorer**.
+2. Repérez **Views**, **My View**, le sélecteur de type d'événement et les modes **Simple Search** et **Advanced Search**.
+3. Conservez **Simple Search** pour l'atelier.
+4. Repérez les visualisations disponibles : **List**, **Timeseries**, **Top List**, **Bar Chart**, **Table**, **Distribution**, **Geomap**, **Funnel**, **Tree Map** et **Pie Chart**. Certaines options dépendent du type d'événement.
+5. Vérifiez qu'aucun filtre **User Email** ou identifiant utilisateur n'est appliqué.
+6. Ne sauvegardez aucune vue et n'utilisez pas **Open in Sheets**.
 
 ### À quoi sert le RUM Explorer ?
 
@@ -143,15 +159,16 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 
 ## Étape 6 — Examiner les facettes
 
-1. Repérez les facettes d'application, type d'événement, vue, navigateur, appareil, version, action, statut ou autres dimensions disponibles.
+1. Repérez les filtres proposés pour le type courant. Pour **Sessions**, l'interface présente notamment `Env`, **User Email**, **Initial View Name**, **Session Type** et **Error Count**.
 2. Dépliez une facette sans sélectionner de valeur sensible.
-3. Notez quelles dimensions permettraient de comparer des populations ou versions.
+3. Ne dépliez pas **User Email**.
+4. Notez quelles dimensions non nominatives permettraient de comparer des populations ou versions.
 
 ### Pourquoi une facette utilisateur nominative n'est-elle pas nécessaire ici ?
 
 **Réponse :** la question porte sur des catégories et un parcours, pas sur l'identité d'une personne.
 
-**Pourquoi :** des dimensions bornées comme `tenant_tier` ou `frontend_version` suffisent pour qualifier l'impact avec moins de risque de confidentialité.
+**Pourquoi :** des dimensions non nominatives réellement proposées, comme `env`, `service`, `version`, le pays ou le navigateur, suffisent pour qualifier de nombreux périmètres avec moins de risque de confidentialité.
 
 ## Étape 7 — Examiner la liste des sessions sans ouvrir de replay
 
@@ -164,7 +181,7 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 
 **Réponse :** vue concernée, action ou erreur présente, durée cohérente, segment pertinent et replay disponible et autorisé.
 
-**Limite :** lors de la conception, 421 sessions étaient visibles sur un jour ; ce nombre dépend de la période, du trafic, du consentement et de l'échantillonnage.
+**Limite :** lors de la vérification, environ 20 000 sessions étaient retournées sur une semaine. Ce nombre évolue continuellement et dépend de la période, du trafic, du consentement et de l'échantillonnage.
 
 ## Étape 8 — Examiner les vues
 
@@ -181,9 +198,10 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 ## Étape 9 — Examiner les actions
 
 1. Sélectionnez le type **Actions**.
-2. Repérez les noms, durées et nombres de ressources, erreurs ou tâches longues associés.
-3. Observez si les noms semblent stables ou dépendants du texte de l'interface.
-4. Ouvrez un détail uniquement s'il ne révèle aucune donnée sensible.
+2. Repérez uniquement les colonnes **Action Type**, **Action Name**, **Action Frustration Type** et **View Name**.
+3. Ne lisez pas les valeurs d'**Action Name** à voix haute et ne les copiez pas : la vérification a montré que certaines reprennent du texte contenant des informations personnelles ou métier.
+4. Constatez simplement si les noms sont techniques, génériques ou dépendants du texte de l'interface.
+5. N'ouvrez aucun détail d'action réel.
 
 ### Pourquoi une action automatique peut-elle être mal nommée sur une modale legacy ?
 
@@ -194,325 +212,84 @@ La modale legacy de validation ne change ni l'URL ni la route. Les clics automat
 ## Étape 10 — Examiner les ressources
 
 1. Sélectionnez le type **Resources**.
-2. Repérez méthode, type, URL normalisée ou ressource, durée et statut.
-3. Privilégiez une ressource XHR ou Fetch dont le nom est générique et non sensible.
-4. Ouvrez son détail et recherchez **View Trace**, **Trace**, **APM** ou un accès équivalent, sans recopier d'identifiant.
-5. Notez **trace liée observée**, **aucune trace liée** ou **non vérifiable avec mes droits**, puis revenez à la liste.
+2. Repérez les colonnes **View Name**, **Resource Url**, **Duration**, **Size**, **Status Code** et **Type**.
+3. Utilisez le filtre **Resource Type** pour isoler `xhr` ou `fetch` si nécessaire.
+4. Ne copiez aucune URL : la plateforme contient des chemins paramétrés, identifiants et chaînes de requête.
+5. Si une ressource générique et manifestement non sensible peut être ouverte, recherchez **View Trace**, **Trace**, **APM** ou un accès équivalent sans recopier d'identifiant.
+6. Sinon, notez **pivot APM non vérifiable en sécurité sur les données réelles** et n'inventez aucune ressource de remplacement.
 
 ### Que représente une ressource RUM ?
 
 **Réponse :** un chargement ou appel réseau, notamment XHR ou Fetch, observé depuis le frontend.
 
-**Pourquoi :** elle constitue le pont naturel entre l'action de soumission et la trace backend de `orders-api`.
+**Pourquoi :** lorsqu'elle existe réellement et sans donnée sensible, une ressource RUM peut constituer un pivot vers une trace backend. Ce lien n'est pas supposé pour `peopulse`.
 
 **Contexte du module 6 :** ne recherchez pas `eu-interfaces` comme cible de cette corrélation. Son opération `console` n'est pas une requête web déclenchée par une ressource navigateur.
 
 ## Étape 11 — Examiner erreurs et tâches longues
 
-1. Sélectionnez successivement **Errors** puis **Long Tasks**, si disponibles.
+1. Sélectionnez successivement **Errors**, **Long tasks** puis **Vitals**.
 2. Repérez les agrégats sans ouvrir de contenu sensible.
-3. Notez la question que chaque type permet de tester.
+3. Si **Vitals** affiche zéro événement, notez **aucun événement Vital observé sur la période** ; le type reste néanmoins disponible dans l'Explorer.
+4. Notez la question que chaque type permet de tester.
 
-### Quelle différence existe entre une erreur et une tâche longue ?
+### Quelle différence existe entre une erreur, une tâche longue et un Vital ?
 
-**Réponse :** une erreur décrit une exception ou un échec frontend collecté ; une tâche longue indique un blocage prolongé du thread principal qui peut rendre l'interface peu réactive.
+**Réponse :** une erreur décrit une exception ou un échec frontend collecté ; une tâche longue indique un blocage prolongé du thread principal ; un événement Vital porte une mesure d'expérience telle que LCP, CLS ou INP.
 
 **Limite :** ni l'une ni l'autre ne prouve automatiquement que la requête backend a échoué.
 
-# Partie 2 — Décider quoi instrumenter
+# Partie 2 — Exploiter les agrégats réels en sécurité
 
-À partir de cette partie, quittez les données réelles. Toutes les actions, valeurs, ressources et conclusions suivantes appartiennent au scénario fictif PeopleShop. Une absence d'action ou de trace dans l'application réelle peut justifier une proposition d'amélioration, mais ne constitue pas une preuve dans le scénario.
+## Étape 12 — Comparer les types d'événements
 
-## Étape 12 — Choisir action ou vue pour la modale
+1. Dans RUM Explorer, sélectionnez successivement **Sessions**, **Views**, **Actions**, **Errors**, **Resources**, **Long tasks** et **Vitals**.
+2. Pour chaque type, notez uniquement le volume agrégé et les facettes non sensibles disponibles.
+3. Ne lisez pas à voix haute et ne recopiez pas les noms d'actions, URL, identifiants ou contenus métier.
 
-```text
-[ouverture] -> [tentative de validation]
-            -> [ressource réseau ou annulation]
-```
+## Étape 13 — Étudier les vues
 
-### Faut-il créer une vue manuelle pour cette modale ?
+1. Revenez sur **Views**.
+2. Filtrez l'application `peopulse` avec le sélecteur réellement proposé.
+3. Comparez deux périodes.
+4. Relevez les Web Vitals agrégés disponibles.
 
-**Réponse :** non dans ce scénario. Elle ne change pas l'URL et ne représente pas un état de navigation durable autonome ; trois actions personnalisées sont plus adaptées.
+**Réponse expliquée :** une vue représente une page ou un état de navigation suivi par le SDK. Les volumes et performances varient avec le trafic et l'échantillonnage.
 
-**Limite :** une vue manuelle serait justifiable si la modale devenait un état logique durable que l'équipe souhaite analyser comme une page.
+## Étape 14 — Étudier les actions sans exposer leur contenu
 
-## Étape 13 — Définir les trois actions
+1. Ouvrez **Actions**.
+2. Observez uniquement la structure des colonnes et les agrégations.
+3. N'ouvrez aucun détail dont le nom peut contenir une information personnelle ou métier.
+4. Notez les risques de confidentialité constatés au niveau des noms automatiques.
 
-| Interaction | Action de référence | Déclencheur exact |
-|---|---|---|
-| ouverture | `checkout_modal_open` | modale effectivement affichée |
-| soumission | `checkout_modal_submit` | tentative de validation envoyée |
-| annulation | `checkout_modal_cancel` | fermeture ou annulation explicite |
+## Étape 15 — Étudier les ressources
 
-### Pourquoi utiliser des noms `snake_case` indépendants du DOM et de la langue ?
+1. Ouvrez **Resources**.
+2. Utilisez des facettes agrégées telles que type, statut ou domaine si elles sont disponibles et autorisées.
+3. Ne copiez aucune URL contenant un identifiant ou une chaîne de requête.
+4. Vérifiez si un pivot APM est proposé sans l'ouvrir sur une donnée sensible.
 
-**Réponse :** ils restent stables malgré une traduction, un changement de texte ou une refonte HTML et facilitent les requêtes communes.
+Si aucun lien sûr n'est validé, écrivez **corrélation RUM–APM non démontrée**.
 
-### Pourquoi ne pas ajouter une quatrième action `success` ?
+## Questions de synthèse
 
-**Réponse :** la tentative de soumission ne prouve pas le succès métier. Dans cet exercice, la réussite doit venir du statut de la ressource backend ou d'un événement métier fiable défini ultérieurement.
+### Peut-on ouvrir un Session Replay pendant cet atelier ?
 
-## Étape 14 — Choisir des attributs bornés
+**Réponse :** non. L'environnement est partagé et peut contenir des données personnelles ou métier.
 
-| Attribut | Valeurs contrôlées | Question traitée |
-|---|---|---|
-| `checkout_step` | `validation` | quelle étape est concernée ? |
-| `tenant_tier` | `standard`, `enterprise` | quelle catégorie est affectée ? |
-| `frontend_version` | versions déployées contrôlées | une version frontend diffère-t-elle ? |
-| `modal_variant` | `legacy`, `new` | quelle variante est utilisée ? |
+### Peut-on conclure que `peopulse` appelle `eu-interfaces` ?
 
-Choisissez deux ou trois attributs par action, pas nécessairement les quatre.
+**Réponse :** non, sauf si un pivot technique réel et sûr le démontre. Cette relation n'a pas été validée.
 
-### Pourquoi exclure `tenant_id`, email et identifiant de commande brut ?
+### Quelle donnée RUM peut être utilisée sans exposer de détail sensible ?
 
-**Réponse :** ils sont personnels ou presque uniques, augmentent la cardinalité et ne sont pas nécessaires pour la segmentation proposée.
-
-## Étape 15 — Écrire l'instrumentation conceptuelle
-
-```javascript
-datadogRum.addAction('checkout_modal_submit', {
-  checkout_step: 'validation',
-  tenant_tier: 'enterprise',
-  frontend_version: '5.8.0'
-})
-```
-
-### Ce code est-il directement prêt pour la production ?
-
-**Réponse :** non. Il faut vérifier le mode d'import, la version du Browser SDK, son initialisation, le consentement, l'échantillonnage et la nomenclature des attributs.
-
-**Pourquoi :** l'exemple décrit l'intention pédagogique, pas toute l'intégration technique.
-
-# Partie 3 — Protéger les données avant collecte
-
-## Étape 16 — Classer les zones et données
-
-| Donnée ou zone | Protection de référence | Justification |
-|---|---|---|
-| nom, email et adresse | ne pas collecter ; masquer dans le replay | données personnelles |
-| paiement | cacher ou exclure complètement | données financières sensibles |
-| commentaire libre | ne pas collecter ; masquer | contenu imprévisible |
-| résumé du panier | masquer par défaut | autorisation sélective seulement après validation |
-
-### Quel niveau de protection faut-il choisir par défaut ?
-
-**Réponse :** partir du niveau le plus protecteur, généralement `mask`, puis n'autoriser explicitement que les éléments nécessaires et validés.
-
-**Limite :** la politique juridique et sécurité, le consentement, les rôles d'accès et la rétention du client prévalent sur l'exemple.
-
-## Étape 17 — Distinguer masquer, cacher et autoriser
-
-| Décision | Sens conceptuel |
-|---|---|
-| `mask` | remplacer le contenu par une représentation masquée |
-| `mask-user-input` | protéger principalement les saisies utilisateur |
-| `hidden` ou exclusion ciblée | ne pas rendre la zone exploitable dans le replay |
-| `allow` | autoriser explicitement une zone après validation |
-
-### Pourquoi `allow` ne doit-il pas être activé globalement par facilité ?
-
-**Réponse :** il peut exposer des contenus qui n'ont pas été inventoriés ou validés.
-
-**Pourquoi :** la protection doit être conçue avant l'envoi, car une donnée non collectée sous sa forme originale réduit durablement le risque d'exposition.
-
-## Étape 18 — Définir les préconditions d'un replay
-
-### Quand peut-on ouvrir un Session Replay ?
-
-**Réponse :** après avoir mesuré l'ampleur par agrégats, choisi une session représentative, vérifié que le replay est autorisé et correctement masqué, puis formulé une question précise.
-
-**Exemple de question :** la modale s'est-elle ouverte avant l'abandon ?
-
-### Session Replay est-il une vidéo brute ?
-
-**Réponse :** non. Il reconstruit l'expérience à partir du DOM, de ses mutations et des événements collectés.
-
-**Limite :** il contextualise un cas individuel et ne constitue ni une mesure d'ampleur ni une preuve causale suffisante.
-
-# Partie 4 — Mesurer le parcours
-
-## Étape 19 — Définir le taux de soumission
-
-```text
-taux de soumission = checkout_modal_submit / checkout_modal_open
-```
-
-### Que mesure ce taux ?
-
-**Réponse :** la proportion des ouvertures observées qui aboutissent à une tentative de validation observée.
-
-### Que ne mesure-t-il pas ?
-
-**Réponse :** ni le succès backend, ni la commande finalisée, ni l'expérience des sessions non collectées.
-
-## Étape 20 — Documenter les limites de mesure
-
-| Limite | Effet possible |
-|---|---|
-| échantillonnage | toutes les sessions ne sont pas observées |
-| consentement refusé | population collectée différente de la population totale |
-| blocage ou panne du SDK | événements manquants |
-| double clic | plusieurs soumissions pour une ouverture |
-| session interrompue | ouverture sans événement final |
-| fenêtres différentes | numérateur et dénominateur non comparables |
-
-### Pourquoi l'échantillonnage RUM et celui du replay doivent-ils être distingués ?
-
-**Réponse :** une session peut contribuer aux agrégats RUM sans disposer d'un replay ; les deux taux répondent à des coûts et usages différents.
-
-# Partie 5 — Relier expérience et backend
-
-## Étape 21 — Construire le chemin d'investigation
-
-```text
-agrégats d'actions sur la vue checkout
-  -> session représentative et autorisée
-  -> action checkout_modal_submit
-  -> ressource POST /api/orders/validate
-  -> trace orders-api
-  -> span de dépendance dominant
-  -> logs corrélés
-```
-
-### Pourquoi commencer par les agrégats plutôt que par un replay ?
-
-**Réponse :** les agrégats mesurent fréquence et segments ; le replay explique seulement le contexte d'un cas choisi.
-
-### Ce chemin a-t-il été validé sur `eu-interfaces` au module 6 ?
-
-**Réponse :** non. `eu-interfaces` a servi à apprendre l'APM avec une opération `console`. Le chemin RUM-APM doit partir d'une ressource navigateur XHR ou Fetch et rejoindre un service web distinct uniquement si un lien explicite est disponible.
-
-## Étape 22 — Examiner la ressource frontend
-
-Pour la ressource, vérifiez conceptuellement :
-
-- méthode et nom normalisé ;
-- durée ;
-- statut HTTP ;
-- action et vue parentes ;
-- éventuelle trace backend liée.
-
-### Une ressource sans trace liée prouve-t-elle l'absence de traitement backend ?
-
-**Réponse :** non. La corrélation peut manquer à cause des origines autorisées, de CORS, de la propagation du contexte, de l'instrumentation APM, de l'échantillonnage ou de la rétention.
-
-## Étape 23 — Vérifier la frontière entre versions frontend et backend
-
-### `frontend_version:5.8.0` prouve-t-elle que `orders-api:2.4.0` a traité la requête ?
-
-**Réponse :** non. La version frontend décrit le code du navigateur ; seule la ressource corrélée à la trace backend permet d'associer le parcours à la version du service.
-
-## Étape 24 — Produire la checklist de corrélation
-
-- [ ] L'origine backend est autorisée pour la propagation RUM-APM.
-- [ ] CORS accepte les en-têtes nécessaires.
-- [ ] Le backend est instrumenté par APM.
-- [ ] La ressource et la trace partagent le bon contexte.
-- [ ] Les périodes de rétention et d'échantillonnage sont compatibles.
-- [ ] Les logs portent les identifiants de trace remappés.
-- [ ] Aucune donnée sensible n'est ajoutée au contexte.
-
-### Que permet une corrélation réussie ?
-
-**Réponse :** passer d'une action utilisateur à l'appel réseau, puis au chemin backend, à la dépendance dominante et aux logs du même parcours.
-
-## Étape 25 — Préparer trois widgets RUM pour le module 8
-
-Ne créez aucun dashboard dans cet atelier. Complétez les spécifications et conservez-les pour le module 8.
-
-| Widget à construire | Source | Périmètre | Mesure | Regroupement | Représentation | Interprétation et limite |
-|---|---|---|---|---|---|---|
-| Sessions avec erreur frontend | RUM Sessions | application et environnement autorisés | nombre ou taux de sessions avec erreur | `version` ou `browser.name` | série temporelle | mesure l'impact collecté ; dépend du consentement et de l'échantillonnage |
-| Latence des vues principales | RUM Views | vues autorisées et normalisées | p75 ou p95 de `view.loading_time` | `view.name`, puis `version` | série temporelle ou toplist | compare les vues ; une vue mal nommée fragmente les résultats |
-| Ressources XHR/Fetch lentes ou en erreur | RUM Resources | application, environnement et type XHR/Fetch | p95 de durée et taux d'erreur | ressource normalisée ou statut | toplist | prépare le pivot backend ; une ressource lente ne prouve pas la cause serveur |
-
-### Pourquoi utiliser les données structurées plutôt que le nombre de replays ?
-
-**Réponse :** les événements structurés permettent de compter, segmenter et suivre une tendance. Un replay contextualise un cas individuel et sa disponibilité dépend d'un échantillonnage spécifique.
-
-## Étape 26 — Rédiger la conclusion de passage vers le module 8
-
-Complétez le modèle sans ajouter de donnée réelle sensible :
-
-```text
-Constat réel : l'application Browser autorisée expose [types d'événements]
-                sur la période [période].
-
-Corrélation : une trace backend liée a été [observée / non observée /
-              non vérifiable] depuis une ressource XHR ou Fetch.
-
-Limite : ce constat dépend de la période, des droits, du consentement,
-         de l'échantillonnage et de la rétention.
-
-Conception PeopleShop : trois actions stables décrivent la modale et
-                        la ressource POST porte la preuve du traitement.
-
-Préparation dashboard : trois widgets RUM sont spécifiés ; ils seront
-                        construits et confrontés aux logs et à l'APM
-                        au module 8.
-```
-
-### Pourquoi séparer constat réel et conception PeopleShop ?
-
-**Réponse :** le premier démontre seulement que vous maîtrisez la navigation sur l'organisation existante ; la seconde décrit un dispositif pédagogique fictif. Les fusionner produirait une conclusion non vérifiable sur la production partagée.
-
-## Questions de synthèse corrigées
-
-### Quelle différence existe entre une vue et une action ?
-
-**Réponse :** une vue représente une page ou un état de navigation durable ; une action représente une interaction dans ce contexte.
-
-### Quels sont les trois noms d'actions PeopleShop ?
-
-**Réponse :** `checkout_modal_open`, `checkout_modal_submit` et `checkout_modal_cancel`.
-
-### Une action submit prouve-t-elle la réussite de la commande ?
-
-**Réponse :** non. Elle prouve une tentative observée ; la réussite doit être confirmée par la ressource ou un événement métier fiable.
-
-### Quel est le rôle respectif des agrégats et du replay ?
-
-**Réponse :** les agrégats mesurent l'ampleur et les segments ; le replay contextualise un cas autorisé et masqué.
-
-## Aide au diagnostic
-
-| Difficulté | Interprétation | Action en lecture seule |
-|---|---|---|
-| RUM indisponible | droits ou fonctionnalité non activée | utiliser les captures anonymisées |
-| Page SDK Installation ouverte | navigation restée dans la configuration | revenir à Summary ou Explorer sans copier d'identifiant |
-| Aucune action visible | suivi absent ou période différente | utiliser ce manque pour justifier les actions personnalisées |
-| Nom d'action instable | dépendance au texte ou DOM | définir un nom métier explicite et stable |
-| Confusion vue/action | état logique non défini | demander si l'état possède une durée et une navigation autonomes |
-| Replay non autorisé | confidentialité ou droits | ne pas l'ouvrir ; poursuivre avec les événements structurés |
-| Trace non liée | corrélation incomplète | parcourir la checklist de l'étape 24 |
-| Seul `eu-interfaces` est connu en APM | service `console` sans relation navigateur attendue | chercher un service web depuis une ressource RUM ou noter **non vérifiable** |
-| Attribut trop cardinal | identifiant presque unique | le remplacer par une catégorie bornée |
+**Réponse :** le nombre agrégé de vues de l'application réelle `peopulse`, sans regroupement par utilisateur, action, URL ou session. La saisie correspondante sera donnée directement lors de la création du widget.
 
 ## Validation finale
 
-- [ ] Le relevé RUM est daté et ne conserve aucune donnée sensible.
-- [ ] Session, vue, action, ressource, erreur et tâche longue sont distinguées.
-- [ ] La modale est modélisée par exactement trois actions stables.
-- [ ] Les déclencheurs ne dépendent ni du texte ni d'un sélecteur DOM.
-- [ ] Les attributs sont bornés, utiles et non sensibles.
-- [ ] Les données interdites et le niveau de protection sont explicites.
-- [ ] `allow` n'est jamais proposé globalement sans validation.
-- [ ] `submit/open` n'est pas présenté comme un taux de succès.
-- [ ] L'échantillonnage et le consentement sont pris en compte.
-- [ ] Les agrégats mesurent l'ampleur et le replay contextualise un cas.
-- [ ] Le chemin vers la ressource, la trace et les logs est complet.
-- [ ] L'absence de trace liée n'est pas interprétée comme absence de backend.
-- [ ] `eu-interfaces` n'est pas présenté comme un backend RUM corrélé.
-- [ ] Versions frontend et backend ne sont pas confondues.
-- [ ] Trois widgets RUM sont spécifiés pour le module 8 sans créer de dashboard.
-- [ ] Le constat réel est séparé de la conception fictive PeopleShop.
-- [ ] Aucune ressource Datadog n'a été créée ou modifiée.
-
-## Références officielles
-
-- [RUM Browser Monitoring](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/)
-- [RUM Browser Data Collected](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/data_collected/)
-- [Tracking User Actions](https://docs.datadoghq.com/real_user_monitoring/application_monitoring/browser/tracking_user_actions/)
-- [Monitoring Resource Performance](https://docs.datadoghq.com/real_user_monitoring/browser/monitoring_resource_performance/)
-- [Connect RUM and Traces](https://docs.datadoghq.com/real_user_monitoring/correlate_with_other_telemetry/apm/?tab=browserrum)
-- [Session Replay Browser Privacy Options](https://docs.datadoghq.com/session_replay/browser/privacy_options/)
+- [ ] Seule l'application réelle `peopulse` est utilisée.
+- [ ] Aucun replay, détail de session ou action sensible n'a été ouvert.
+- [ ] Aucune URL détaillée ni donnée personnelle n'a été copiée.
+- [ ] Aucun lien RUM–APM n'est affirmé sans preuve.
+- [ ] Les observations restent strictement agrégées.
