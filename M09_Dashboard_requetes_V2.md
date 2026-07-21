@@ -392,7 +392,7 @@ APM — activité eu-interfaces / console
 1. Ajoutez un widget **Query Value**.
 2. Choisissez **Indexed Spans** ou la source APM équivalente.
 3. Sélectionnez `eu-interfaces`, puis l'opération `console` lorsqu'elle est proposée.
-4. Filtrez sur le statut **Error** au moyen du sélecteur proposé par l'éditeur.
+4. Filtrez sur le statut **error** au moyen du sélecteur proposé par l'éditeur.
 5. Choisissez **Count**.
 6. Donnez au widget le titre :
 
@@ -450,7 +450,7 @@ RUM — vues peopulse
 
 1. Ajoutez un widget **Timeseries** ou **Query Value**.
 2. Choisissez la source **RUM**.
-3. Sélectionnez le type d'événement **Errors**.
+3. Sélectionnez le type d'événement **errors**.
 4. Filtrez sur l'application `peopulse`.
 5. Choisissez **Count**.
 6. Ne regroupez pas par utilisateur, session, URL ou message d'erreur.
