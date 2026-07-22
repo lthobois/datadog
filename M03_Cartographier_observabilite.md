@@ -127,7 +127,7 @@ L'absence d'une information attendue constitue un résultat à part entière.
 ## Étape 5 — Ouvrir APM Home
 
 1. Dans le menu gauche, cliquez sur **APM**.
-2. Vérifiez que **APM Home** est affiché.
+2. Vérifiez que **APM Home** est affiché dans le nom de la page.
 3. Repérez le filtre **Env**.
 4. Observez sa valeur sans la modifier.
 5. Repérez le sélecteur de période.
@@ -387,7 +387,7 @@ eu-interfaces
 5. Si les données sont insuffisantes, sélectionnez les dernières 24 heures.
 6. Repérez la barre de requête.
 7. Repérez les facettes **Service**, **Status**, **Host** et **Source**.
-8. Si des logs correspondants sont disponibles, filtrez avec `service:eu-interfaces`.
+8. Si des logs correspondants sont disponibles, filtrez avec `service:sigman`.
 9. Retirez le filtre si aucun résultat n'existe et observez les services disponibles.
 
 ### Question — Quelle différence existe entre Log Explorer et Log Configuration ?

@@ -421,9 +421,9 @@ La table doit donc présenter au minimum :
    training-<participant>-20260720-svc
    ```
 
-3. Ouvrez sa fiche.
-4. Consultez les informations de télémétrie, de logs ou **Setup Guidance**, selon les fonctions disponibles.
-5. Si un lien vers les logs est proposé, ouvrez-le et vérifiez qu'il applique le même filtre `service`.
+3. Ouvrez sa 'Service Page', puis cliquez sur l'onglet 'Service' en haut à gauche de la page.
+4. Consultez les informations de logs.
+5. Modifiez l'environnement en haut à gauche pour supprimer les filtres d'environnements (et obtenir Env:All).
 6. Choisissez une période relative couvrant l'envoi, par exemple **Past 15 Minutes** ou **Past 1 Hour**.
 
 **Résultat attendu :** la définition du service et le log utilisent le même nom.
