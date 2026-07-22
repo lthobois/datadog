@@ -14,7 +14,7 @@ Parcourir les principales vues APM sur un service réel, vérifier les pivots r�
 
 Vous produisez :
 
-- un relevé daté du contexte APM réel ;
+- une vue du contexte APM réel ;
 - une comparaison de trois observations comparables ;
 - une représentation du chemin critique d'une trace ;
 - un audit de l'instrumentation PHP et de la corrélation logs-traces ;
@@ -33,19 +33,19 @@ Cet atelier vient après l'exploration des logs du module 5. Il observe directem
 
 ## Règle de sécurité
 
-Travaillez uniquement en lecture. Ne créez ni règle APM, service, monitor, dashboard, vue sauvegardée, instrumentation, attribut, règle d'échantillonnage ou configuration. N'utilisez pas **Save**, **Create**, **Edit**, **Configure** ou une commande équivalente. Les filtres et requêtes temporaires nécessaires à l'exploration sont autorisés, mais ne doivent pas être enregistrés. Ne recopiez aucun `trace_id` réel, paramètre sensible, URL complète, requête SQL, nom d'hôte ou donnée personnelle.
+Utilisez les filtres et requêtes temporaires nécessaires à l'exploration. Ne observez aucun `trace_id` réel, paramètre sensible, URL complète, requête SQL, nom d'hôte ou donnée personnelle.
 
 ## Prérequis
 
 - Chrome connecté à Datadog ;
-- accès en lecture à **APM**, aux services et au Trace Explorer ;
+- accès à **APM**, aux services et au Trace Explorer ;
 - convention `env/service/version` du module 4 ;
 - vue de logs `[TRAINING] M05 Logs API - <participant> - 20260720` créée au module 5, si ce parcours a été réalisé ;
-- accès en lecture au service réel `eu-interfaces`.
+- accès au service réel `eu-interfaces`.
 
 ## Comment utiliser ce document
 
-Effectuez chaque manipulation avant de lire la réponse de référence qui suit la question. Les métriques et traces changent selon la période, les droits, l'ingestion et la rétention : votre relevé daté prévaut. Toutes les étapes utilisent uniquement `eu-interfaces` et l'opération réelle `console`.
+Effectuez chaque manipulation avant de lire la réponse de référence qui suit la question. Les métriques et traces changent selon la période, les droits, l'ingestion et la rétention : utilisez les valeurs visibles. Toutes les étapes utilisent `eu-interfaces` et l'opération réelle `console`.
 
 Une recherche de traces vide ne signifie pas nécessairement qu'il n'y a eu aucun trafic. Les statistiques APM agrégées et les spans conservés pour la recherche ne représentent pas exactement le même ensemble. De plus, logs et traces peuvent être échantillonnés et conservés indépendamment.
 
@@ -61,7 +61,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 | Opération principale | `console` |
 | Page du service | **Service Summary**, **Resources**, **Deployments**, **Dependencies**, **Traces**, **Errors**, **Live Debugger**, **Infrastructure**, **Logs**, **Security** et **Costs** |
 | Santé du service | aucun Service Health Monitor ni SLO associé au moment de la vérification |
-| Contexte de déploiement | sélecteurs `operation`, `env` et `version` présents ; valeur de version à relever ou déclarer non observée |
+| Contexte de déploiement | sélecteurs `operation`, `env` et `version` présents ; version visible ou absente |
 | Trace Explorer | ouverture en mode **Spans** ; bascule manuelle vers **Traces** nécessaire pour afficher une trace complète et son waterfall |
 
 `eu-interfaces` peut produire peu de traces sur une période courte. Le Trace Explorer s'ouvre actuellement sur **Past 15 Minutes**. Si vous ne trouvez pas trois observations comparables, élargissez progressivement à **Past 1 Hour**, **Past 4 Hours**, puis **Past 1 Day**. Ce changement de période est temporaire et ne modifie aucune ressource.
@@ -74,13 +74,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 2. Dans l'en-tête APM, repérez **Service**, **Traces**, **Profiles** et **Settings**.
 3. Dans **Your system at a glance**, repérez la liste **Services** et l'onglet **Endpoints**.
 4. Repérez la période et le filtre `env` visibles.
-5. Notez la date, l'heure et la période.
-
-| Élément | Observation |
-|---|---|
-| Date et heure |  |
-| Période |  |
-| Entrées de navigation visibles |  |
+5. Observez la date, l'heure et la période.
 
 ### Quel est le rôle d'APM Home ?
 
@@ -95,16 +89,8 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 1. Restez dans **APM Home**, section **Your system at a glance > Services**.
 2. Repérez la recherche **Search services** et le filtre `env`.
 3. Recherchez `eu-interfaces`.
-4. Relevez, sans les interpréter isolément, le trafic, le taux d'erreur et la latence affichés.
+4. Observez, sans les interpréter isolément, le trafic, le taux d'erreur et la latence affichés.
 5. Si le résultat est absent sur **Past 1 Hour**, élargissez la période avant de demander au formateur un service de substitution.
-
-| Élément | Observation |
-|---|---|
-| Service |  |
-| Environnement |  |
-| Trafic |  |
-| Taux d'erreur |  |
-| Latence |  |
 
 ### Que décrivent trafic, erreurs et latence ?
 
@@ -120,12 +106,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 2. Dans sa page, ouvrez la section **Dependencies**.
 3. Repérez la **Dependency Map** et le bouton **Open Fullscreen View**, sans ouvrir les paramètres.
 4. Repérez les nœuds et les relations avec des composants techniques.
-5. Notez deux dépendances ou services voisins sans conclure à leur responsabilité. Si aucune relation n'est visible sur la période, écrivez **aucune dépendance observée**.
-
-| Relation observée | Interprétation prudente |
-|---|---|
-|  | appel ou relation observée dans la télémétrie |
-|  | appel ou relation observée dans la télémétrie |
+5. Observez deux dépendances ou services voisins sans conclure à leur responsabilité.
 
 ### La Dependency Map est-elle une CMDB exhaustive ?
 
@@ -139,9 +120,9 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 
 1. Si nécessaire, revenez à la page de `eu-interfaces` depuis **APM Home > Services**.
 2. Repérez **Service Summary**, **Resources**, **Deployments**, **Dependencies**, **Traces**, **Errors**, **Live Debugger**, **Infrastructure**, **Logs**, **Security** et **Costs**, selon vos droits.
-3. Relevez les filtres **operation**, **env**, **version** et la période.
-4. Notez la version visible ou **non observée**.
-5. Repérez **Service Config**, mais ne l'ouvrez pas et ne cliquez pas sur **Edit**.
+3. Observez les filtres **operation**, **env**, **version** et la période.
+4. Observez la version visible ou **non observée**.
+5. Repérez **Service Config**.
 
 ### Pourquoi `env` et `version` doivent-ils accompagner `service` ?
 
@@ -157,9 +138,9 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 
 1. Dans **Service Summary**, observez les courbes de requêtes, erreurs et latence.
 2. Repérez les unités et la période.
-3. Notez si une erreur est visible ou écrivez **aucune erreur observée sur la période**.
+3. Vérifiez si une erreur est visible sur la période.
 4. Repérez les cartes **SERVICE HEALTH MONITORS** et **SLOs**.
-5. Notez **aucun configuré** si les cartes indiquent respectivement **NONE**. Ne cliquez ni sur **Configure** ni sur **Create**.
+5. Observez **aucun configuré** si les cartes indiquent respectivement **NONE**.
 
 ### L'absence de Service Health Monitor ou de SLO signifie-t-elle que le service n'est pas observé ?
 
@@ -178,14 +159,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 1. Ouvrez **Resources**.
 2. Repérez les colonnes ou mesures de requêtes, erreurs et latence.
 3. Identifiez une ressource possédant plusieurs observations.
-4. Notez son nom de manière anonymisée si sa valeur est sensible.
-
-| Élément | Observation |
-|---|---|
-| Ressource choisie |  |
-| Nombre ou volume visible |  |
-| Latence |  |
-| Erreurs |  |
+4. Observez son nom de manière anonymisée si sa valeur est sensible.
 
 ### Quelle différence existe entre un service et une ressource ?
 
@@ -198,7 +172,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 1. Ouvrez la ressource sélectionnée si le lien est disponible.
 2. Repérez ses signaux agrégés et les accès aux traces associées.
 3. Comparez son périmètre avec celui du service.
-4. Revenez à la page précédente sans enregistrer de vue.
+4. Revenez à la page précédente.
 
 ### Pourquoi analyser une ressource avant une trace ?
 
@@ -209,8 +183,8 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 ## Étape 8 — Examiner Dependencies
 
 1. Ouvrez **Dependencies** ou la section équivalente.
-2. Relevez deux composants appelés, s'ils sont visibles.
-3. Notez les mesures proposées sans conclure à une saturation.
+2. Observez deux composants appelés, s'ils sont visibles.
+3. Observez les mesures proposées sans conclure à une saturation.
 
 ### Une dépendance lente dans cette vue est-elle automatiquement la cause racine ?
 
@@ -223,17 +197,9 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 1. Ouvrez **Logs > Explorer** dans un nouvel onglet.
 2. Si elle existe et vous est accessible, sélectionnez votre vue `[TRAINING] M05 Logs API - <participant> - 20260720` créée au module 5.
 3. Cette vue cible les logs du module 5 et sert uniquement à retrouver la navigation. Elle ne prouve pas une corrélation avec `eu-interfaces`.
-4. Remplacez temporairement la requête par `service:eu-interfaces`, sans enregistrer la modification.
-5. Relevez uniquement la présence ou l'absence des attributs `service`, `env`, `version`, `dd.trace_id` et `dd.span_id`.
-6. Revenez à l'onglet APM. Ne modifiez pas la vue enregistrée.
-
-| Attribut | Présent dans les logs ? | Utilité pour le pivot APM |
-|---|---|---|
-| `service` |  | retrouver le même producteur |
-| `env` |  | conserver le même environnement |
-| `version` |  | comparer les déploiements |
-| `dd.trace_id` |  | relier un log à une trace |
-| `dd.span_id` |  | relier un log à une opération |
+4. Remplacez temporairement la requête par `service:eu-interfaces`.
+5. Observez uniquement la présence ou l'absence des attributs `service`, `env`, `version`, `dd.trace_id` et `dd.span_id`.
+6. Revenez à l'onglet APM.
 
 ### Pourquoi reprendre ces attributs avant d'explorer les traces ?
 
@@ -265,7 +231,7 @@ service:eu-interfaces operation_name:console
 
 1. Repérez **Service**, **Resource**, **Operation Name**, **Duration**, **Status**, **Env**, **Version** et **Peer Service**, lorsqu'elles existent.
 2. Dépliez plusieurs facettes sans recopier de valeur sensible.
-3. Notez leur usage.
+3. Observez leur usage.
 
 | Facette | Usage de référence |
 |---|---|
@@ -286,7 +252,7 @@ service:eu-interfaces operation_name:console
 
 1. Sélectionnez une ressource suffisamment représentée depuis la facette.
 2. Vérifiez que la requête combine le service et la ressource.
-3. Notez sa forme générique sans recopier de valeur sensible.
+3. Observez sa forme générique sans recopier de valeur sensible.
 
 ```text
 service:<service> resource_name:<ressource_proposée>
@@ -302,13 +268,7 @@ service:<service> resource_name:<ressource_proposée>
 
 1. Choisissez trois spans du même service et de la même ressource.
 2. Comparez leur durée, statut, environnement et version.
-3. Écrivez **non observé** pour un attribut absent.
-
-| Observation | Durée | Statut | Env | Version | Différence utile |
-|---:|---:|---|---|---|---|
-| 1 |  |  |  |  |  |
-| 2 |  |  |  |  |  |
-| 3 |  |  |  |  |  |
+3. Identifiez les attributs absents.
 
 ### Trois spans suffisent-ils à mesurer l'ampleur d'un incident ?
 
@@ -350,7 +310,7 @@ service:<service> resource_name:<ressource_proposée>
 1. Suivez les relations parent-enfant depuis le span racine.
 2. Repérez les opérations imbriquées et les branches parallèles.
 3. Identifiez les derniers achèvements qui déterminent la durée de bout en bout.
-4. Notez les spans feuilles ou dépendances consommant effectivement du temps.
+4. Observez les spans feuilles ou dépendances consommant effectivement du temps.
 
 ### Pourquoi la somme des durées des spans peut-elle dépasser la durée de la trace ?
 
@@ -364,14 +324,6 @@ service:<service> resource_name:<ressource_proposée>
 [span racine] -> [span intermédiaire] -> [span feuille ou dépendance dominante]
 ```
 
-| Élément | Observation |
-|---|---|
-| Durée totale |  |
-| Chemin critique |  |
-| Span ou dépendance dominant |  |
-| Durée contributrice |  |
-| Erreur visible |  |
-
 ### Le span le plus long prouve-t-il la cause racine ?
 
 **Réponse :** non. Un parent long peut principalement attendre ses enfants, et une dépendance longue peut refléter une saturation située plus loin.
@@ -381,8 +333,8 @@ service:<service> resource_name:<ressource_proposée>
 ## Étape 18 — Examiner une erreur
 
 1. Si un span rouge est visible, repérez où l'erreur est enregistrée et si elle apparaît aussi sur ses parents.
-2. Si aucune erreur n'est visible, notez **aucune erreur observée sur cette trace**.
-3. Relevez le type d'erreur uniquement s'il n'est pas sensible.
+2. Si aucune erreur n'est visible, observez **aucune erreur observée sur cette trace**.
+3. Observez le type d'erreur uniquement s'il n'est pas sensible.
 
 ### Le premier span rouge est-il nécessairement l'origine de l'erreur ?
 
@@ -393,7 +345,7 @@ service:<service> resource_name:<ressource_proposée>
 ## Étape 19 — Repérer les pivots de corrélation
 
 1. Dans le détail, repérez les accès vers les logs, les métriques de l'hôte, le profilage ou la dépendance, lorsqu'ils existent.
-2. Notez le pivot qui serait le plus utile pour tester votre hypothèse.
+2. Observez le pivot qui serait le plus utile pour tester votre hypothèse.
 
 ### Pourquoi faut-il demander un second signal ?
 
@@ -402,12 +354,12 @@ service:<service> resource_name:<ressource_proposée>
 ## Étape 20 — Vérifier le pivot réel entre trace et logs
 
 1. Dans le détail de la trace, recherchez **Logs**, **View related logs**, **Correlated logs** ou un accès équivalent.
-2. Si le pivot est disponible, ouvrez-le en lecture seule.
+2. Si le pivot est disponible, ouvrez-le.
 3. Vérifiez que le filtre conserve le service et la période de la trace.
 4. Observez si des événements sont retournés, sans copier leur contenu ni les identifiants techniques.
-5. Revenez à la trace sans enregistrer de vue.
+5. Revenez à la trace.
 
-| Contrôle | Résultat à noter |
+| Contrôle | Résultat attendu |
 |---|---|
 | Accès aux logs proposé | oui / non observé |
 | Événements retournés | oui / aucun sur la période |
@@ -416,7 +368,7 @@ service:<service> resource_name:<ressource_proposée>
 
 ### Que conclure si le pivot ne retourne aucun log ?
 
-**Réponse :** écrivez **corrélation non observée dans ce contexte**. Ne concluez pas immédiatement à une panne de configuration.
+**Réponse :** vérifiez **corrélation non observée dans ce contexte**. Ne concluez pas immédiatement à une panne de configuration.
 
 **Explication :** les logs doivent contenir des identifiants correctement parsés et remappés, mais les logs et les traces sont aussi échantillonnés indépendamment. Une trace peut avoir été conservée sans son log, ou inversement.
 
@@ -426,42 +378,27 @@ service:<service> resource_name:<ressource_proposée>
 2. Dans **APM Home > Services**, constatez si des services techniques PHP tels que `mysqli`, `pdo`, `phpredis` ou `web.request` sont visibles.
 3. Ne déduisez pas qu'ils appartiennent tous à la même trace : seule la hiérarchie du waterfall peut prouver leur participation à l'observation ouverte.
 4. Dans les détails du service ou de la trace, cherchez le langage ou le runtime uniquement si cette information est affichée.
-5. Ne modifiez pas **Service Config**, le SDK, l'Agent ou les variables d'environnement.
-6. Complétez le tableau avec **observé**, **non observé** ou **non vérifiable avec mes droits**.
-
-| Capacité attendue de l'instrumentation automatique PHP | Constat réel |
-|---|---|
-| requête web et code de statut |  |
-| durée des opérations instrumentées |  |
-| appels SQL ou accès base de données |  |
-| appels à des bibliothèques compatibles |  |
-| exception non gérée, si un cas existe |  |
-| `env`, `service`, `version` |  |
+6. Vérifiez les éléments avec **observé**, **non observé** ou **non vérifiable avec mes droits**.
 
 ### Que fournit l'instrumentation automatique PHP ?
 
 **Réponse :** lorsque le traceur PHP est installé et que les bibliothèques sont compatibles, il crée automatiquement des spans techniques et collecte notamment des durées, des informations de requête web, des accès SQL et des exceptions non gérées.
 
-**Limite :** l'instrumentation automatique ne connaît pas spontanément les concepts métier. Relevez uniquement les attributs réellement présents ; aucune instrumentation n'est modifiée pendant l'atelier.
+**Limite :** l'instrumentation automatique ne connaît pas spontanément les concepts métier. Observez les attributs réellement présents.
 
 ## Étape 22 — Inventorier les attributs réellement présents
 
-1. Dans les traces ouvertes, relevez uniquement les noms d'attributs non sensibles réellement visibles.
+1. Dans les traces ouvertes, observez uniquement les noms d'attributs non sensibles réellement visibles.
 2. Pour chacun, indiquez son type, quelques valeurs agrégées proposées par Datadog et son usage possible comme filtre.
 3. Marquez **absent** pour `env`, `version`, `team` ou tout attribut attendu mais non disponible.
-4. Ne proposez et ne créez aucun attribut supplémentaire.
-
-| Attribut observé | Type visible | Usage possible | Limite |
-|---|---|---|---|
-|  |  |  |  |
 
 **Réponse expliquée :** cet inventaire décrit l'instrumentation actuelle. Une absence devient une limite documentée, pas une donnée de remplacement.
 
 ## Étape 23 — Vérifier les pivots proposés par Datadog
 
 1. Depuis la trace réelle ouverte, repérez les liens proposés vers Logs ou RUM.
-2. Testez uniquement un pivot en lecture seule et revenez à la trace sans enregistrer de vue.
-3. Si aucun pivot n'est proposé, écrivez **pivot non disponible sur cette trace**.
+2. Testez un pivot et revenez à la trace.
+3. Si aucun pivot n'est proposé, vérifiez **pivot non disponible sur cette trace**.
 4. Ne recherchez pas un service de remplacement et ne spécifiez pas de widget : les valeurs à saisir seront données directement dans le module concerné.
 
 **Réponse expliquée :** un pivot visible dépend de l'instrumentation, de la propagation du contexte, de l'ingestion et de la rétention. Son absence ne doit pas être compensée par une préparation théorique.
@@ -473,6 +410,6 @@ service:<service> resource_name:<ressource_proposée>
 1. Conservez le filtre `service:eu-interfaces operation_name:console` et le mode **Traces**.
 2. Étendez la période de 15 minutes à 1 heure, 4 heures puis 1 jour si nécessaire.
 3. Comparez jusqu'à trois traces réellement disponibles.
-4. Relevez durée, statut, ressource et dépendances visibles.
+4. Observez durée, statut, ressource et dépendances visibles.
 
 **Réponse expliquée :** trois traces ne suffisent pas à établir une tendance ; elles permettent seulement d'apprendre la lecture du waterfall et de formuler une prochaine vérification.

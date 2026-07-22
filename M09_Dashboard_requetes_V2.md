@@ -8,7 +8,7 @@ lang: fr-FR
 
 ## Objectif
 
-Auditer un dashboard réel, puis créer un dashboard pédagogique unique à partir des logs, traces, événements RUM et monitors réellement présents sur la plateforme.
+Auditer un dashboard réel, puis créer un dashboard pédagogique unique à partir des logs, métriques, traces, événements RUM et monitors présents sur la plateforme.
 
 ## Livrable
 
@@ -16,8 +16,7 @@ Vous produisez :
 
 - l'audit daté d'un dashboard existant ;
 - un dashboard réel `[TRAINING] M09 - <participant> - <date>` ;
-- neuf widgets obligatoires fondés sur le scénario d'investigation, `eu-interfaces`, `peopulse` et le monitor pédagogique créé au module 8 ;
-- un widget RUM de performance optionnel lorsque la donnée est disponible ;
+- onze widgets obligatoires fondés sur la métrique et les logs pédagogiques, `eu-interfaces`, `peopulse` et les monitors créés au module 8 ;
 - une question opérationnelle et une action associée à chaque widget ;
 - les variables du dashboard ;
 - une disposition allant de l'impact vers le diagnostic ;
@@ -25,37 +24,36 @@ Vous produisez :
 
 ## Place dans la progression
 
-Le module 5 a ingéré les logs du service `training-<participant>-20260720-svc`. Le module 6 a qualifié l'APM de `eu-interfaces` avec l'opération `console`. Le module 7 a validé les agrégats RUM de `peopulse`. Le module 8 a créé et testé un monitor pédagogique limité au service du participant. Les valeurs à saisir sont données ci-dessous lors de la création de chaque widget.
+Le module 5 a ingéré les logs et la métrique `training.checkout.queue_depth` du service pédagogique. Le module 6 a qualifié l'APM de `eu-interfaces` avec l'opération `console`. Le module 7 a validé les agrégats RUM de `peopulse`. Le module 8 a créé et testé un Log Monitor et un Metric Monitor. Les valeurs à saisir sont données ci-dessous lors de la création de chaque widget.
 
-L'atelier utilise l'APM de `eu-interfaces`, les agrégats RUM de `peopulse` et l'état du monitor pédagogique créé au module 8. Il prépare également la requête du scénario de logs qui sera envoyé au module 10. Ces sources sont indépendantes : leur juxtaposition sert à apprendre les widgets et ne démontre aucune corrélation technique.
+L'atelier utilise la métrique du service pédagogique, l'APM de `eu-interfaces`, les agrégats RUM de `peopulse` et l'état des deux monitors créés au module 8. Il prépare également la requête du scénario de logs qui sera envoyé au module 10. Ces sources sont indépendantes : leur juxtaposition sert à apprendre les widgets et ne démontre aucune corrélation technique.
 
 ## Règle d'écriture contrôlée
 
-Vous êtes autorisé à créer et modifier uniquement votre dashboard :
+Créez et modifiez votre dashboard :
 
 ```text
 [TRAINING] M09 - <identifiant-participant> - <AAAAMMJJ>
 ```
 
-L'identifiant participant doit être professionnel, court et non sensible, par exemple `loic-thobois`. N'éditez, ne clonez, ne partagez et ne supprimez aucun dashboard existant. Ne créez ni monitor, SLO, vue enregistrée, ressource applicative ou configuration. N'utilisez aucune donnée personnelle, nom d'action RUM, URL détaillée, message de log ou identifiant réel dans les titres, filtres et descriptions.
+L'identifiant participant doit être professionnel, court et non sensible, par exemple `loic-thobois`. N'utilisez aucune donnée personnelle, nom d'action RUM, URL détaillée, message de log ou identifiant réel dans les titres, filtres et descriptions.
 
 Si vous ne disposez pas du droit de créer un dashboard, exécutez les étapes de construction comme une recette documentée et utilisez les captures fournies.
 
 ## Prérequis
 
 - Chrome connecté à Datadog ;
-- accès en lecture aux dashboards, logs, APM et RUM ;
+- accès aux dashboards, métriques, logs, APM et RUM ;
 - droit de créer un dashboard, ou parcours de repli sans écriture ;
 - convention de services et de tags du module 4 ;
-- requêtes et observations issues des logs du module 5 ;
+- requêtes et observations issues des logs et métriques du module 5 ;
 - hypothèse et indicateurs APM du module 6 ;
 - indicateurs d'expérience utilisateur retenus au module 7 ;
-- monitor pédagogique créé et testé au module 8 ;
-- un document dans lequel consigner les réponses.
+- Log Monitor et Metric Monitor créés et testés au module 8 ;
 
 ## Comment utiliser ce document
 
-Effectuez chaque observation avant de lire la réponse de référence qui la suit. Les nombres, périodes et widgets de la plateforme peuvent évoluer : votre relevé daté constitue le résultat de l'atelier. Toutes les parties utilisent uniquement les données réelles sous forme agrégée. Ne déduisez aucune corrélation entre les sources sans preuve technique.
+Effectuez chaque observation avant de lire la réponse de référence qui la suit. Les nombres, périodes et widgets peuvent évoluer : utilisez les valeurs visibles. Toutes les parties utilisent les données réelles sous forme agrégée.
 
 # Partie 1 — Parcourir les dashboards
 
@@ -64,14 +62,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 1. Dans le menu gauche, ouvrez **Dashboards**.
 2. Sélectionnez **Dashboard List** ou **List**, selon le libellé visible.
 3. Repérez le champ de recherche, les listes ou filtres disponibles et le nombre total de dashboards.
-4. Notez la date, l'heure et le nombre affiché.
-5. N'utilisez pas **New Dashboard**.
-
-| Information | Valeur observée |
-|---|---|
-| Date et heure |  |
-| Nombre de dashboards |  |
-| Filtres ou listes disponibles |  |
+4. Observez la date, l'heure et le nombre affiché.
 
 ### À quoi sert la liste des dashboards ?
 
@@ -79,7 +70,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 **Pourquoi :** un dashboard est une ressource organisée pour un lecteur et un usage ; la liste permet d'abord d'identifier la vue pertinente avant d'analyser ses widgets.
 
-**Limite :** le nombre et les vues visibles dépendent des droits, des équipes et des filtres. La plateforme affichait 231 dashboards lors de la vérification ; relevez toujours la valeur visible au moment de l'atelier.
+**Limite :** le nombre et les vues visibles dépendent des droits, des équipes et des filtres. La plateforme affichait 231 dashboards lors de la vérification ; observez toujours la valeur visible au moment de l'atelier.
 
 ## Étape 2 — Rechercher le dashboard de référence
 
@@ -87,13 +78,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 2. Attendez la mise à jour de la liste.
 3. Ouvrez la ligne portant exactement ce titre.
 4. Vérifiez qu'aucun mode d'édition n'est actif.
-5. Si le dashboard est absent, choisissez un dashboard API ou service lisible et notez son titre comme substitution.
-
-| Élément | Observation |
-|---|---|
-| Dashboard ouvert |  |
-| Dashboard de substitution ? |  |
-| Mode lecture confirmé ? |  |
+5. Si le dashboard est absent, choisissez un dashboard API ou service lisible et observez son titre comme substitution.
 
 ### Pourquoi auditer une vue existante avant d'en concevoir une ?
 
@@ -105,17 +90,10 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 ## Étape 3 — Lire le bandeau de contexte
 
-1. Repérez la période active et notez-la.
+1. Repérez la période active et observez-la.
 2. Repérez **Filter by** ou la zone des variables.
-3. Notez le nom et la valeur de chaque variable visible.
+3. Observez le nom et la valeur de chaque variable visible.
 4. Repérez les commandes de pause, actualisation ou sélection temporelle sans les utiliser.
-5. Ne changez ni période ni variable.
-
-| Élément | Valeur observée |
-|---|---|
-| Période |  |
-| Variable(s) |  |
-| Valeur(s) active(s) |  |
 
 ### Pourquoi la période et les variables doivent-elles être lues avant les courbes ?
 
@@ -128,20 +106,9 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 ## Étape 4 — Inventorier les widgets
 
 1. Parcourez le dashboard de haut en bas.
-2. Relevez le titre et le type apparent de chaque widget visible.
+2. Observez le titre et le type apparent de chaque widget visible.
 3. Reformulez la question à laquelle il semble répondre.
-4. Écrivez **question ambiguë** lorsque le titre ne suffit pas.
-5. N'ouvrez pas l'éditeur du widget.
-
-| N° | Titre observé | Type apparent | Question supposée |
-|---:|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
-| 6 |  |  |  |
-| 7 |  |  |  |
+4. Vérifiez **question ambiguë** lorsque le titre ne suffit pas.
 
 ### Quels widgets étaient visibles lors de la vérification ?
 
@@ -155,7 +122,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 1. Choisissez une série temporelle visible.
 2. Repérez son titre, sa légende, ses unités et les séries affichées.
-4. Notez ce que l'infobulle apporte : horodatage, valeur et série.
+4. Observez ce que l'infobulle apporte : horodatage, valeur et série.
 5. Répétez l'observation sur un widget de classement ou de valeur, s'il existe.
 
 ### Pourquoi le type de widget doit-il suivre la question ?
@@ -172,14 +139,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 2. Identifiez le premier qui montre une chronologie.
 3. Identifiez le premier qui réduit le périmètre.
 4. Identifiez le premier qui oriente vers un diagnostic.
-5. Écrivez **absent** lorsqu'un niveau n'est pas clair.
-
-| Niveau | Widget correspondant | Position |
-|---|---|---:|
-| Impact |  |  |
-| Chronologie |  |  |
-| Périmètre |  |  |
-| Diagnostic |  |  |
+5. Vérifiez **absent** lorsqu'un niveau n'est pas clair.
 
 ### Quel ordre facilite une qualification d'incident ?
 
@@ -193,7 +153,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 1. Repérez les menus contextuels, liens ou actions de survol d'un widget sans les activer s'ils ouvrent une édition.
 2. Identifiez les destinations de lecture proposées : APM, traces, métriques, logs ou plein écran, selon la vue.
-3. Notez la destination qui serait utile après une anomalie.
+3. Observez la destination qui serait utile après une anomalie.
 
 ### Un dashboard doit-il contenir tout le diagnostic ?
 
@@ -205,9 +165,9 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 ## Étape 8 — Examiner la variable réelle
 
-1. Relevez la question rendue possible par la variable actuelle.
+1. Observez la question rendue possible par la variable actuelle.
 2. Déterminez si son libellé explique clairement son usage.
-3. Notez les dimensions absentes qui seraient utiles pour comparer des déploiements.
+3. Observez les dimensions absentes qui seraient utiles pour comparer des déploiements.
 
 ### Que permettent les variables observées dans `Monitoring EU-Interfaces` ?
 
@@ -221,7 +181,7 @@ Effectuez chaque observation avant de lire la réponse de référence qui la sui
 
 1. Ouvrez **APM Home**.
 2. Recherchez `eu-interfaces` dans la liste des services.
-3. Ouvrez sa page de service en lecture seule.
+3. Ouvrez sa page de service.
 4. Repérez les filtres **env** et **version** ainsi que la période.
 5. Revenez au dashboard avec l'onglet précédent du navigateur.
 
@@ -392,7 +352,7 @@ APM — activité eu-interfaces / console
 1. Ajoutez un widget **Query Value**.
 2. Choisissez **Indexed Spans** ou la source APM équivalente.
 3. Sélectionnez `eu-interfaces`, puis l'opération `console` lorsqu'elle est proposée.
-4. Filtrez sur le statut **error** au moyen du sélecteur proposé par l'éditeur.
+4. Filtrez sur le statut **Error** au moyen du sélecteur proposé par l'éditeur.
 5. Choisissez **Count**.
 6. Donnez au widget le titre :
 
@@ -450,7 +410,7 @@ RUM — vues peopulse
 
 1. Ajoutez un widget **Timeseries** ou **Query Value**.
 2. Choisissez la source **RUM**.
-3. Sélectionnez le type d'événement **errors**.
+3. Sélectionnez le type d'événement **Errors**.
 4. Filtrez sur l'application `peopulse`.
 5. Choisissez **Count**.
 6. Ne regroupez pas par utilisateur, session, URL ou message d'erreur.
@@ -469,19 +429,6 @@ RUM — vues peopulse
 
 **Réponse :** la vérification du module 7 a montré que des noms d'actions et URL peuvent contenir du texte métier, des paramètres ou des données personnelles. Le comptage agrégé des vues suffit pour apprendre la source RUM sans exposer ces valeurs.
 
-### Widget optionnel — Indicateur Web Vital
-
-Ajoutez ce widget uniquement si l'éditeur RUM du dashboard propose une mesure Web Vital contenant réellement des données :
-
-1. ajoutez une **Query Value** ou une **Timeseries** RUM ;
-2. filtrez sur l'application `peopulse` ;
-3. sélectionnez une mesure proposée telle que LCP ou INP ;
-4. utilisez l'agrégation recommandée par l'interface ;
-5. nommez explicitement l'indicateur et l'application ;
-6. supprimez le widget si la mesure reste vide sur **Past 1 Week**.
-
-**Limite :** ne créez pas une mesure, une facette ou un calcul global pour rendre ce widget disponible. L'absence de donnée est un résultat de recette.
-
 ## Étape 15 — Ajouter le neuvième widget : la synthèse des monitors
 
 1. Cliquez sur **Add Widgets**, puis choisissez **Monitor Summary** ou **Résumé des monitors**.
@@ -494,7 +441,6 @@ Ajoutez ce widget uniquement si l'éditeur RUM du dashboard propose une mesure W
 
 4. Vérifiez que le résultat ne contient qu'un seul monitor et qu'il porte votre identifiant.
 5. Choisissez l'affichage **Counts and List** ou **Nombre et liste**.
-6. N'activez aucune option de notification et ne modifiez pas le monitor depuis le widget.
 7. Donnez au widget le titre :
 
 ```text
@@ -509,15 +455,68 @@ Monitors — état de ma détection pédagogique
 
 **Limite :** l'état **OK** signifie que la condition configurée n'est pas satisfaite ; il ne garantit pas à lui seul l'absence de problème. Un état **No Data** doit être interprété avec la politique de données manquantes étudiée au module 8.
 
-## Étape 16 — Organiser et enregistrer le dashboard
+## Étape 16 — Ajouter la métrique et son monitor
+
+### Widget 10 — Évolution de la file de commandes
+
+1. Ajoutez un widget **Timeseries**.
+2. Choisissez la source **Metrics**.
+3. Recherchez :
+
+   ```text
+   training.checkout.queue_depth
+   ```
+
+4. Utilisez l'agrégation **avg**.
+5. Filtrez sur :
+
+   ```text
+   env:training
+   service:training-<participant>-20260720-svc
+   participant:<participant>
+   ```
+
+6. Ajoutez un marqueur Warning à `8` et un marqueur Alert à `10`.
+7. Donnez au widget le titre :
+
+   ```text
+   File de commandes — profondeur
+   ```
+
+**Question :** quand la file atteint-elle son maximum et revient-elle à un niveau normal ?
+
+**Action :** ouvrir Metrics Explorer sur le pic avant d'examiner les logs du même scénario pédagogique.
+
+### Widget 11 — État du Metric Monitor
+
+1. Ajoutez un widget **Monitor Summary**.
+2. Sélectionnez le type de résumé **Monitor**.
+3. Recherchez le nom exact :
+
+   ```text
+   [TRAINING] M08 Metric Queue - <participant> - 20260720
+   ```
+
+4. Choisissez l'affichage **Counts and List**.
+5. Donnez au widget le titre :
+
+   ```text
+   File de commandes — état de l'alerte
+   ```
+
+**Résultat attendu :** la courbe montre la séquence normale du module 5, le pic `15` et le retour à `3` du module 8. Le Monitor Summary présente l'état courant du Metric Monitor.
+
+**Interprétation :** le widget Timeseries montre le signal ; le Monitor Summary montre le résultat de la règle de détection.
+
+## Étape 17 — Organiser et enregistrer le dashboard
 
 1. Placez la note en haut du dashboard.
-2. Placez le Monitor Summary immédiatement sous la note de contexte.
+2. Placez les deux Monitor Summary immédiatement sous la note de contexte.
 3. Créez ensuite trois zones de lecture au moyen de groupes ou de titres de section : **Expérience utilisateur**, **Comportement applicatif** et **Diagnostic technique**.
 4. Placez les widgets RUM dans **Expérience utilisateur**.
 5. Placez l'activité, les erreurs et la latence APM dans **Comportement applicatif**.
-6. Placez l'activité, les échecs et les statuts Logs dans **Diagnostic technique**.
-7. Choisissez une période commune permettant d'afficher des données, sans dépasser **Past 1 Day** pour la recette ; utilisez **Past 1 Week** uniquement pour vérifier le widget Web Vital optionnel.
+6. Placez la métrique de file, l'activité, les échecs et les statuts Logs dans **Diagnostic technique**.
+7. Choisissez une période commune permettant d'afficher des données, sans dépasser **Past 1 Day** pour la recette.
 8. Vérifiez que les titres ne contiennent aucune valeur sensible.
 9. Ajoutez une variable `env` uniquement si elle est proposée et applicable aux widgets concernés ; conservez `*` par défaut.
 10. N'ajoutez pas de variable `service` globale : les widgets ciblent volontairement des périmètres différents.
@@ -528,24 +527,24 @@ Monitors — état de ma détection pédagogique
 | Nom unique et préfixé | conforme |
 | Note de non-corrélation | visible |
 | Trois widgets Logs | enregistrés, donnée ou absence expliquée |
+| Métrique pédagogique | courbe filtrée sur le service et le participant |
 | Trois widgets APM | enregistrés, périmètre `eu-interfaces` / `console` |
 | Deux widgets RUM | agrégés, sans action, URL ou utilisateur |
-| Widget Monitors | limité au monitor `[TRAINING] M08` du participant |
-| Web Vital optionnel | conservé uniquement si la donnée existe |
+| Deux widgets Monitors | limités aux deux monitors `[TRAINING] M08` du participant |
 | Partage public | désactivé |
 
-### Pourquoi limiter le dashboard à neuf widgets obligatoires ?
+### Pourquoi limiter le dashboard à onze widgets obligatoires ?
 
 **Réponse :** le dashboard couvre le volume, l'erreur, la performance et la détection sans dupliquer les explorateurs. Chaque widget doit conduire à une question et à une action ; les détails événementiels restent dans Logs, APM, RUM ou le monitor.
 
 # Partie 4 — Exploiter le dashboard sans inventer de corrélation
 
-## Étape 17 — Comparer les comportements des widgets
+## Étape 18 — Comparer les comportements des widgets
 
 1. Placez le dashboard sur **Past 1 Hour**.
-2. Notez quels widgets contiennent des données.
+2. Observez quels widgets contiennent des données.
 3. Étendez à **Past 4 Hours**, puis **Past 1 Day** si nécessaire.
-4. Pour chaque widget, relevez la source, le filtre, la période minimale utile et la question à laquelle il répond.
+4. Pour chaque widget, observez la source, le filtre, la période minimale utile et la question à laquelle il répond.
 
 | Widget | Source réelle | Question autorisée |
 |---|---|---|
@@ -561,7 +560,7 @@ Monitors — état de ma détection pédagogique
 
 **Réponse expliquée :** les périodes de disponibilité peuvent différer en raison du trafic, de la rétention, de l'échantillonnage et de la fenêtre d'évaluation du monitor. Une variation simultanée ne suffit pas à relier ces sources.
 
-## Étape 18 — Tester les filtres sans perdre le contexte
+## Étape 19 — Tester les filtres sans perdre le contexte
 
 1. Modifiez temporairement la période globale.
 2. Si la variable `env` existe, testez une valeur réellement proposée par Datadog puis revenez à `*`.
@@ -570,9 +569,9 @@ Monitors — état de ma détection pédagogique
 
 **Résultat attendu :** le dashboard reste lisible sans suggérer que le service pédagogique, `eu-interfaces` et `peopulse` appartiennent à une même chaîne de service.
 
-## Étape 19 — Examiner une requête en mode édition
+## Étape 20 — Examiner une requête en mode édition
 
-Pour chacun des neuf widgets obligatoires :
+Pour chacun des onze widgets obligatoires :
 
 1. Ouvrez son mode d'édition.
 2. Identifiez la source, l'agrégation, les filtres et l'unité.
@@ -581,53 +580,48 @@ Pour chacun des neuf widgets obligatoires :
 
 **Interprétation :** un widget fiable rend visibles sa portée et ses limites. Les titres génériques tels que « erreurs » ou « trafic » sont insuffisants dans un environnement partagé.
 
-## Étape 20 — Utiliser les pivots de navigation en lecture seule
+## Étape 21 — Utiliser les pivots de navigation
 
 1. Depuis un widget Logs, ouvrez le détail dans le Log Explorer si le lien est proposé.
 2. Vérifiez que la période et la requête du scénario sont transmises.
 3. Depuis un widget APM, ouvrez le Trace Explorer ou le service si le lien est proposé.
 4. Vérifiez `eu-interfaces`, l'opération `console` et la période.
-5. Pour le RUM, restez sur les agrégats ; n'ouvrez ni nom d'action sensible, ni session, ni replay.
-6. Depuis le widget Monitors, ouvrez uniquement le détail de votre monitor `[TRAINING] M08` et revenez au dashboard sans passer en édition.
+5. Pour le RUM, consultez les agrégats.
+6. Depuis chacun des widgets Monitors, ouvrez le détail du monitor `[TRAINING] M08` correspondant, puis revenez au dashboard.
+7. Depuis la métrique de file, ouvrez Metrics Explorer et conservez les mêmes tags et la même période.
 
 **Réponse expliquée :** le dashboard sert de point d'entrée. Le diagnostic détaillé se poursuit dans l'explorateur correspondant, avec les mêmes filtres et la même période lorsque Datadog sait les transmettre.
 
 # Partie 5 — Recette et nettoyage
 
-## Étape 21 — Effectuer la recette fonctionnelle
+## Étape 22 — Effectuer la recette fonctionnelle
 
 Vérifiez les points suivants :
 
 - le nom commence par `[TRAINING] M09` et contient votre identifiant et la date ;
 - la note supérieure indique que les sources ne représentent pas un incident commun ;
-- les widgets utilisent uniquement le service pédagogique du participant, `eu-interfaces`, `peopulse` et le monitor `[TRAINING] M08` ;
+- les widgets utilisent le service pédagogique du participant, `eu-interfaces`, `peopulse` et les deux monitors `[TRAINING] M08` ;
 - les trois widgets Logs partagent exactement la requête de base du scénario ;
 - les trois widgets APM restent limités à `eu-interfaces` et `console` ;
 - les deux widgets RUM sont agrégés et n'exposent aucune session, action ou URL ;
+- la métrique `training.checkout.queue_depth` est filtrée sur le service et le participant ;
 - aucune donnée nominative, URL détaillée ou action RUM sensible n'est affichée ;
 - aucun partage public ni notification n'est configuré ;
-- le widget Monitor Summary ne montre que votre monitor `[TRAINING] M08` ;
+- les deux widgets Monitor Summary montrent uniquement vos monitors `[TRAINING] M08` ;
 - aucun dashboard existant n'a été modifié.
 
-## Étape 22 — Restituer sans surinterpréter
+## Étape 23 — Restituer sans surinterpréter
 
 Présentez le dashboard en répondant aux questions suivantes :
 
 1. Quels widgets distinguent activité, erreurs et statuts des logs ?
 2. Quels widgets distinguent activité, erreurs et latence APM ?
 3. Quels widgets qualifient l'activité et les erreurs RUM sans exposer les utilisateurs ?
-4. Quel widget permet de lire l'état du monitor pédagogique ?
+4. Quels widgets permettent de lire l'état des deux monitors pédagogiques ?
+5. Quelle différence existe entre la courbe de file et l'état du Metric Monitor ?
 5. Quel pivot ouvre l'explorateur adapté à chaque signal ?
 
 **Réponse de référence :** chaque groupe de widgets qualifie une dimension différente avant d'orienter vers l'explorateur adapté. Le dashboard est un support de synthèse et de navigation, pas la preuve d'un incident transversal.
-
-## Étape 23 — Identifier le dashboard à supprimer
-
-1. Vérifiez que le titre commence par `[TRAINING] M09` et contient votre identifiant.
-2. À la fin de la formation, supprimez uniquement ce dashboard si le formateur vous l'autorise.
-3. Si vous ne disposez pas du droit de suppression, communiquez simplement son titre exact au formateur.
-
-Ne supprimez aucune autre ressource.
 
 ## Questions de synthèse
 
@@ -642,20 +636,6 @@ Ne supprimez aucune autre ressource.
 ### Que faut-il faire avant de construire un dashboard d'incident corrélé ?
 
 **Réponse :** choisir un service réel disposant de signaux reliés par des attributs vérifiés, puis confirmer la chaîne de corrélation dans les explorateurs avant de l'afficher.
-
-## Validation finale
-
-- [ ] Les widgets utilisent des données présentes ou une requête explicitement préparée pour le scénario du module 10.
-- [ ] Aucun incident de production n'est inventé ou affirmé.
-- [ ] Les sources réelles ne sont jamais présentées comme corrélées sans preuve.
-- [ ] Les neuf widgets obligatoires sont présents et nommés explicitement.
-- [ ] Les trois widgets Logs utilisent le scénario `checkout-investigation`.
-- [ ] Les widgets APM indiquent clairement `eu-interfaces` et `console`.
-- [ ] Les widgets RUM sont agrégés et respectent la confidentialité.
-- [ ] Le widget Monitor Summary est limité au monitor `[TRAINING] M08` du participant.
-- [ ] Une seule ressource a été créée : le dashboard du participant.
-- [ ] La confidentialité RUM est respectée.
-- [ ] Le titre exact du dashboard à supprimer est conservé.
 
 ## Références officielles
 

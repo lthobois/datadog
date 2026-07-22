@@ -1,18 +1,18 @@
 ---
-title: "Atelier 8 — Créer et tester un monitor de logs pédagogique"
+title: "Atelier 8 — Créer et tester des monitors pédagogiques"
 subtitle: "Document participant autonome"
 lang: fr-FR
 ---
 
-# Créer et tester un monitor de logs pédagogique
+# Créer et tester un Log Monitor et un Metric Monitor
 
 ## Objectif
 
-Créer un monitor de logs strictement limité à votre service pédagogique, déclencher son évaluation avec un événement contrôlé, observer son cycle d'état, puis préparer son intégration au dashboard du module 9.
+Créer un Log Monitor et un Metric Monitor limités à votre service pédagogique, déclencher leur évaluation, observer leur cycle d'état, puis préparer leur intégration au dashboard du module 9.
 
 ## Contexte
 
-Vous travaillez dans une organisation Datadog partagée correspondant à la production. Le service de formation créé au module 4 et alimenté au module 5 permet de pratiquer sans modifier les services existants :
+Vous travaillez dans une organisation Datadog partagée correspondant à la production. Le service de formation créé au module 4 et alimenté au module 5 sert de support à l'atelier :
 
 ```text
 training-<participant>-20260720-svc
@@ -24,41 +24,47 @@ Le monitor recherche uniquement un log portant le scénario :
 monitor-check
 ```
 
+Le second monitor surveille la métrique créée au module 5 :
+
+```text
+training.checkout.queue_depth
+```
+
 Le test ne représente pas un incident de production. Il sert à observer la relation entre une requête, une fenêtre d'évaluation, un seuil et un état Datadog.
 
 ## Livrables
 
 À la fin de l'atelier, vous disposez :
 
-- d'un monitor unique `[TRAINING] M08 Log errors - <participant> - 20260720` ;
+- d'un Log Monitor `[TRAINING] M08 Log errors - <participant> - 20260720` ;
+- d'un Metric Monitor `[TRAINING] M08 Metric Queue - <participant> - 20260720` ;
 - d'un monitor sans destinataire ni intégration de notification ;
 - d'un log d'erreur pédagogique ayant déclenché le monitor ;
 - d'une observation des états `OK`, `Alert`, puis `OK` après expiration de la fenêtre ;
-- des tags et du nom exact permettant au dashboard du module 9 d'afficher ce monitor ;
-- du nom de la ressource à supprimer en fin de formation.
+- des tags permettant au dashboard du module 9 d'afficher les deux monitors.
 
 ## Règles de sécurité
 
 Les seules écritures autorisées sont :
 
-1. la création de votre propre monitor préfixé `[TRAINING] M08` ;
+1. la création de vos deux monitors préfixés `[TRAINING] M08` ;
 2. l'envoi d'un unique log de test dans votre service `training-*` ;
-3. la suppression de votre monitor en fin de formation, uniquement avec l'autorisation du formateur.
+3. l'envoi des valeurs pédagogiques `15` et `3` pour la métrique de file ;
+4. la suppression de vos monitors en fin de formation, avec l'autorisation du formateur.
 
-Ne modifiez, ne dupliquez, ne désactivez, ne mutez et ne supprimez aucun monitor existant. Ne configurez aucune adresse, mention `@`, intégration, workflow, case management, webhook ou notification externe. Ne créez aucun downtime.
 
 La clé API autorisée reste secrète. Ne la communiquez pas, ne faites aucune capture de sa valeur et ne sauvegardez pas le script qui la contient.
 
 ## Prérequis
 
 - Chrome connecté à l'organisation Datadog de la formation ;
-- accès en lecture à **Logs > Log Explorer** et **Monitors > Manage Monitors** ;
+- accès à **Logs > Log Explorer**, **Metrics > Explorer** et **Monitors > Manage Monitors** ;
 - droit de créer et supprimer son propre monitor ;
-- PowerShell ISE disponible ;
+- PowerShell ISE ou Bash avec cURL disponible ;
 - service `training-<participant>-20260720-svc` utilisé aux modules 4 et 5 ;
 - clé API autorisée par le formateur, identifiée au module 5 par le Key ID `650b6239-78e6-46c1-8233-749ae21ae904`.
 
-Si vous ne disposez pas du droit de créer un monitor, ne demandez pas d'élévation de privilèges pendant l'atelier. Préparez la fiche de configuration avec les valeurs ci-dessous, puis observez le monitor créé par le formateur pour le groupe.
+Si vous ne disposez pas du droit de créer un monitor, suivez les valeurs ci-dessous sur le monitor créé par le formateur pour le groupe.
 
 # Partie 1 — Préparer la détection
 
@@ -73,13 +79,13 @@ Si vous ne disposez pas du droit de créer un monitor, ne demandez pas d'éléva
    ```
 
 4. Vérifiez le nom du service.
-5. Notez le nombre d'événements retournés.
+5. Observez le nombre d'événements retournés.
 
 **Résultat attendu :** aucun événement récent ne correspond avant le test.
 
 **Vérification :** la liste est vide ou le compteur vaut zéro.
 
-**Interprétation :** la requête est isolée par le service unique, la source, le scénario et le statut. Si un ancien test est visible, réduisez la période à une fenêtre ne contenant aucun événement ; ne supprimez aucun log.
+**Interprétation :** la requête est isolée par le service unique, la source, le scénario et le statut. Si un ancien test est visible, réduisez la période à une fenêtre ne contenant aucun événement.
 
 ## Étape 2 — Définir la question du monitor
 
@@ -111,7 +117,7 @@ La configuration attendue est :
 
 1. Revenez dans **Logs > Log Explorer** avec la requête exacte validée à l'étape 1.
 2. Vérifiez une dernière fois que la barre de recherche contient votre service, la source `powershell-training`, le scénario `monitor-check` et `status:error`.
-3. Ouvrez le menu **More internal actions** associé à la recherche.
+3. Ouvrez le menu de la fleche vers le bas à droite du bouton "Save to dashboard" associé à la recherche.
 4. Cliquez sur **Create monitor**.
 5. Vérifiez que l'éditeur indique une source Logs et non Metrics, APM ou RUM.
 
@@ -129,10 +135,9 @@ La configuration attendue est :
    service:training-<participant>-20260720-svc source:powershell-training @training_scenario:monitor-check status:error
    ```
 
-2. Ne modifiez pas la requête si elle correspond exactement à cette valeur.
 3. Conservez **Show Count of all logs**.
 4. Ne sélectionnez aucune facette, mesure ou valeur unique.
-5. Conservez **by (everything)** et ne cliquez pas sur **Add Group By**.
+5. Conservez **by (everything)**.
 
 **Résultat attendu :** l'aperçu ne contient aucune donnée récente et la requête cible uniquement votre service.
 
@@ -237,10 +242,8 @@ Si un contrôle n'est pas conforme, corrigez-le avant de poursuivre.
 
 ## Étape 9 — Créer le monitor
 
-1. Cliquez une seule fois sur **Create and Publish**. N'utilisez pas **Save as Draft**.
+1. Cliquez une fois sur **Create and Publish**.
 2. Attendez l'ouverture de la page du monitor.
-3. Copiez son nom exact dans votre document de travail.
-4. Ne modifiez aucun autre monitor.
 
 **Résultat attendu :** votre monitor existe et son nom commence par `[TRAINING] M08`.
 
@@ -304,7 +307,7 @@ curl -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
 
 3. Collez la valeur secrète de la clé API autorisée.
 4. Remplacez l'identifiant participant.
-5. Vérifiez le nom construit dans `$serviceName`.
+5. Vérifiez le nom du service construit par le script.
 
 **Résultat attendu :** le script cible le même service et le même scénario que le monitor.
 
@@ -351,8 +354,8 @@ curl -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
 1. Ouvrez **Monitors > Manage Monitors**.
 2. Recherchez le nom exact de votre monitor.
 3. Ouvrez-le.
-4. Actualisez la page jusqu'à la prochaine évaluation, sans modifier la configuration.
-5. Relevez l'heure du changement d'état et la valeur évaluée.
+4. Actualisez la page jusqu'à la prochaine évaluation.
+5. Observez l'heure du changement d'état et la valeur évaluée.
 
 **Résultat attendu :** le monitor passe en `Alert` lorsque le comptage sur cinq minutes devient supérieur à zéro.
 
@@ -377,7 +380,7 @@ curl -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
 
 1. N'envoyez aucun autre log de test.
 2. Lorsque l'événement n'appartient plus aux cinq dernières minutes, actualisez la page du monitor.
-3. Relevez l'état et l'heure de récupération.
+3. Observez l'état et l'heure de récupération.
 
 **Résultat attendu :** le comptage revient à zéro et le monitor repasse en `OK` après une nouvelle évaluation.
 
@@ -445,33 +448,158 @@ Pour le module 9, conservez :
 
 **Interprétation :** le widget présentera l'état courant. Il pourra donc être `OK` au moment du module 9 même si l'historique conserve le passage antérieur en `Alert`.
 
-# Partie 6 — Validation et nettoyage
+# Partie 6 — Surveiller la métrique de file d'attente
 
-## Étape 19 — Effectuer la validation finale
+## Étape 19 — Créer le Metric Monitor
 
-- [ ] Le monitor commence par `[TRAINING] M08` et contient votre identifiant.
-- [ ] La requête cible uniquement votre service et `monitor-check`.
-- [ ] Le monitor n'a aucun groupement.
-- [ ] La condition est `count over last 5 minutes > 0`.
-- [ ] Les données absentes sont évaluées comme zéro.
-- [ ] Aucun destinataire, workflow ou canal externe n'est configuré.
-- [ ] Le log de test a reçu une réponse HTTP `202`.
-- [ ] Le passage en `Alert` a été observé ou documenté.
-- [ ] Le retour en `OK` a été observé ou reste attendu après expiration de la fenêtre.
-- [ ] Le nom exact du monitor est conservé pour le module 9.
+1. Ouvrez **Monitors > New Monitor > Metric**.
+2. Choisissez **Threshold Alert**.
+3. Sélectionnez la métrique :
 
-## Étape 20 — Nettoyer à la fin de la formation
+   ```text
+   training.checkout.queue_depth
+   ```
 
-Ne supprimez pas le monitor avant l'atelier du module 9 : son widget Monitor Summary en dépend.
+4. Filtrez sur votre service et votre identifiant :
+
+   ```text
+   env:training
+   service:training-<participant>-20260720-svc
+   participant:<participant>
+   ```
+
+5. Utilisez **max** sur la fenêtre **last 1 minute**.
+6. Définissez **Warning** à `8` et **Alert** à `10`.
+7. Dans les options avancées, définissez le seuil de récupération critique à `6`.
+8. Désactivez l'exigence d'une fenêtre complète et choisissez de ne pas notifier en cas d'absence de données.
+9. Utilisez le nom :
+
+   ```text
+   [TRAINING] M08 Metric Queue - <participant> - 20260720
+   ```
+
+10. Ajoutez les tags `training:true`, `training_module:08`, `participant:<participant>` et `service:training-<participant>-20260720-svc`.
+11. Créez le monitor.
+
+La requête obtenue correspond à :
+
+```text
+max(last_1m):avg:training.checkout.queue_depth{env:training,service:training-<participant>-20260720-svc,participant:<participant>} > 10
+```
+
+**Résultat attendu :** le monitor est créé et la série du module 5 est visible dans son aperçu.
+
+## Étape 20 — Envoyer une valeur critique
+
+Sous Windows, exécutez ce script PowerShell avec `$metricValue = 15` :
+
+```powershell
+$apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
+$participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
+$serviceName = "training-$participant-20260720-svc"
+$metricValue = 15
+$now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+
+$payload = @{
+    series = @(
+        @{
+            metric = "training.checkout.queue_depth"
+            type   = 3
+            points = @(@{ timestamp = $now; value = $metricValue })
+            tags   = @(
+                "env:training"
+                "service:$serviceName"
+                "participant:$participant"
+                "training_session:20260720"
+                "scenario:checkout"
+            )
+        }
+    )
+} | ConvertTo-Json -Depth 6 -Compress
+
+$response = Invoke-WebRequest `
+    -UseBasicParsing `
+    -Method Post `
+    -Uri "https://api.datadoghq.eu/api/v2/series" `
+    -Headers @{ "DD-API-KEY" = $apiKey } `
+    -ContentType "application/json" `
+    -Body $payload
+
+Write-Host "Code HTTP :" $response.StatusCode
+Write-Host "Valeur envoyée :" $metricValue
+```
+
+Sous Linux ou macOS, exécutez l'équivalent Bash/cURL :
+
+```bash
+api_key="COLLER_LA_VALEUR_SECRETE_ICI"
+participant="REMPLACER_PAR_VOTRE_IDENTIFIANT"
+service_name="training-${participant}-20260720-svc"
+metric_value=15
+now=$(date +%s)
+
+curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
+  -X POST "https://api.datadoghq.eu/api/v2/series" \
+  -H "DD-API-KEY: ${api_key}" \
+  -H "Content-Type: application/json" \
+  --data "{\"series\":[{\"metric\":\"training.checkout.queue_depth\",\"type\":3,\"points\":[{\"timestamp\":${now},\"value\":${metric_value}}],\"tags\":[\"env:training\",\"service:${service_name}\",\"participant:${participant}\",\"training_session:20260720\",\"scenario:checkout\"]}]}"
+
+echo "Valeur envoyée : ${metric_value}"
+unset api_key
+```
+
+Actualisez le monitor après la prochaine évaluation.
+
+**Résultat attendu :** la valeur `15` franchit le seuil `10` et le monitor passe en `Alert`.
+
+## Étape 21 — Observer la récupération
+
+1. Attendez que la valeur `15` sorte de la fenêtre d'une minute.
+2. Réexécutez le script précédent avec la valeur `3` :
+
+   ```powershell
+   $metricValue = 3
+   ```
+
+   ```bash
+   metric_value=3
+   ```
+
+3. Actualisez le monitor après la prochaine évaluation.
+
+**Résultat attendu :** la valeur passe sous le seuil de récupération `6` et le monitor revient en `OK`.
+
+**Interprétation :** le seuil d'alerte indique quand agir ; le seuil de récupération évite de déclarer trop vite le retour à la normale.
+
+## Étape 22 — Préparer les widgets du module 9
+
+Le dashboard final utilisera :
+
+| Élément | Valeur |
+|---|---|
+| Métrique | `training.checkout.queue_depth` |
+| Widget de signal | Timeseries, agrégation `avg` |
+| Seuils affichés | Warning `8`, Alert `10` |
+| Monitor | `[TRAINING] M08 Metric Queue - <participant> - 20260720` |
+| Widget d'état | Monitor Summary |
+
+# Partie 7 — Validation et nettoyage
+
+## Étape 23 — Effectuer la validation finale
+
+À la fin de l'atelier, le Log Monitor détecte le log `monitor-check` et le Metric Monitor détecte le dépassement de `training.checkout.queue_depth`. Les deux monitors portent votre identifiant et les tags du service. Le module 9 utilisera leur nom exact pour afficher leur état.
+
+## Étape 24 — Nettoyer à la fin de la formation
+
+Conservez les deux monitors jusqu'à l'atelier du module 9 : leurs widgets Monitor Summary en dépendent.
 
 À la fin de la formation, et uniquement avec l'autorisation du formateur :
 
-1. recherchez le nom exact de votre monitor ;
+1. recherchez les deux monitors par leur nom exact ;
 2. vérifiez le préfixe `[TRAINING] M08` et votre identifiant ;
-3. supprimez uniquement ce monitor ;
-4. ne supprimez aucun autre monitor.
+3. supprimez votre Log Monitor et votre Metric Monitor ;
 
-Le log de test suit la politique de rétention de l'organisation et ne doit pas être supprimé individuellement.
+Le log et les points de métrique suivent les politiques de rétention de l'organisation.
 
 ## Aide au diagnostic
 
@@ -493,7 +621,6 @@ Le log de test suit la politique de rétention de l'organisation et ne doit pas 
 
 - utilisez le nom exact contenant votre identifiant ;
 - vérifiez le tag `participant:<participant>` ;
-- ne modifiez pas les monitors des autres participants.
 
 ### Le monitor reste Alert
 
@@ -502,6 +629,19 @@ Le log de test suit la politique de rétention de l'organisation et ne doit pas 
 - attendez que le dernier événement sorte de la fenêtre et qu'une nouvelle évaluation ait lieu ;
 - ne forcez pas la récupération et ne mutez pas le monitor.
 
+### Le Metric Monitor ne passe pas en Alert
+
+- vérifiez la présence de la valeur `15` dans Metrics Explorer ;
+- comparez les tags `service` et `participant` avec ceux du monitor ;
+- vérifiez l'agrégation **max**, la fenêtre d'une minute et le seuil `10` ;
+- attendez la prochaine évaluation.
+
+### Le Metric Monitor ne revient pas en OK
+
+- attendez que le point `15` sorte de la fenêtre d'une minute ;
+- envoyez la valeur `3` avec les mêmes tags ;
+- vérifiez que le seuil de récupération critique vaut `6`.
+
 ## Références officielles
 
 - [Datadog — Log Monitor](https://docs.datadoghq.com/monitors/types/log/)
@@ -509,3 +649,5 @@ Le log de test suit la politique de rétention de l'organisation et ne doit pas 
 - [Datadog — Recovery Thresholds](https://docs.datadoghq.com/monitors/guide/recovery-thresholds/)
 - [Datadog — Monitor Summary Widget](https://docs.datadoghq.com/dashboards/widgets/monitor_summary/)
 - [Datadog — Send Logs API](https://docs.datadoghq.com/api/latest/logs/send-logs/)
+- [Datadog — Metric Monitor](https://docs.datadoghq.com/monitors/types/metric/)
+- [Datadog — Submit Metrics](https://docs.datadoghq.com/api/latest/metrics/submit-metrics/)

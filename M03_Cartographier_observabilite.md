@@ -8,48 +8,27 @@ lang: fr-FR
 
 ## Objectif opérationnel
 
-Parcourir les principales vues d'exploitation de Datadog en lecture seule, comprendre la fonction de chacune et construire un chemin d'investigation autour du service réel `eu-interfaces`.
+Parcourir les principales vues d'exploitation de Datadog, comprendre la fonction de chacune et construire un chemin d'investigation autour du service réel `eu-interfaces`.
 
 ## Résultats produits
 
 À l'issue de l'atelier, vous disposez :
 
-- d'un relevé factuel et daté de `eu-interfaces` ;
+- d'une vue factuelle de `eu-interfaces` ;
 - d'une carte simplifiée de ses dépendances ;
 - d'une cartographie des principales portes d'entrée Datadog ;
-- d'une matrice « question → signal → vue → réponse » ;
+- d'un parcours « question → signal → vue → réponse » ;
 - d'un parcours d'investigation réutilisable.
-
-## Règle de sécurité
-
-Cet atelier est intégralement réalisé en lecture seule sur une plateforme réelle et partagée.
-
-Ne cliquez pas sur les commandes suivantes :
-
-- `Edit` ;
-- `Configure` ;
-- `Create` ;
-- `New` ;
-- `Declare Incident` ;
-- `Mute` ;
-- `Delete` ;
-- `Service Config` ;
-- `Settings`.
-
-Ne créez et ne modifiez aucun service, dashboard, monitor, SLO, incident, pipeline, index, intégration ou paramètre.
-
-Si une commande de modification est ouverte par erreur, fermez-la sans enregistrer.
 
 ## Prérequis
 
 - navigateur connecté à l'organisation Datadog ;
-- accès en lecture aux domaines utilisés ;
+- accès aux domaines utilisés ;
 - période contenant des données pour `eu-interfaces` ;
-- possibilité de prendre des notes dans ce document ou dans un éditeur de texte.
 
 ## Comment utiliser ce document
 
-Les valeurs de la plateforme évoluent. Vous devez donc relever les valeurs visibles au moment de l'atelier.
+Les valeurs de la plateforme évoluent : utilisez celles qui sont visibles au moment de l'atelier.
 
 Chaque question pédagogique est immédiatement suivie de trois éléments :
 
@@ -57,7 +36,7 @@ Chaque question pédagogique est immédiatement suivie de trois éléments :
 - **Pourquoi** : ce que cette réponse permet de comprendre ;
 - **Limite** : ce que l'observation ne permet pas encore de conclure.
 
-Lorsque l'interface ne contient pas une information attendue, écrivez `non observé`. Une absence de donnée constitue une observation ; elle ne doit pas être remplacée par une valeur inventée.
+L'absence d'une information attendue constitue un résultat à part entière.
 
 # Partie 1 — Se repérer dans l'interface
 
@@ -69,7 +48,7 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 4. Repérez **Bits AI**.
 5. Repérez les commandes permettant de réduire ou de masquer le menu.
 6. Repérez **Integrations**, **Profile** et **Help** en bas du menu.
-7. Relevez les domaines visibles parmi :
+7. Observez les domaines visibles parmi :
    - Dashboards ;
    - Monitoring ;
    - Developer Portal ;
@@ -87,14 +66,6 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
    - Metrics ;
    - Logs.
 
-| Repère | Observation sur votre interface |
-|---|---|
-| Page ouverte par Home |  |
-| Raccourci de Search Datadog |  |
-| Bits AI visible | oui / non |
-| Menu complet ou réduit |  |
-| Domaines absents ou désactivés |  |
-
 ### Question — Pourquoi le menu ne doit-il pas être parcouru de haut en bas pendant une investigation ?
 
 **Réponse :** parce que le menu regroupe des domaines d'usage et ne décrit pas une procédure. Il faut ouvrir un domaine pour répondre à une question précise.
@@ -107,7 +78,6 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 
 1. Activez **Search Datadog** avec `Ctrl+K` sous Windows ou Linux, ou `Cmd+K` sous macOS.
 2. Saisissez `Monitoring API`.
-3. Ne sélectionnez pas une commande de création.
 4. Si le dashboard apparaît dans les résultats, ouvrez-le.
 5. S'il n'apparaît pas, fermez la recherche et passez par **Dashboards > Dashboard Lists**.
 6. Dans la liste, utilisez le champ de recherche pour retrouver `Monitoring API`.
@@ -130,16 +100,7 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 4. Repérez les variables de template éventuellement disponibles.
 5. Observez les widgets sans les modifier.
 6. Choisissez un widget contenant une métrique de volume, d'erreur ou de latence.
-7. Relevez son titre et la question à laquelle il peut répondre.
-
-| Élément | Observation |
-|---|---|
-| Titre du dashboard |  |
-| Période |  |
-| Fuseau horaire |  |
-| Variables visibles |  |
-| Widget choisi |  |
-| Signal représenté | métrique / log / trace / autre |
+7. Observez son titre et la question à laquelle il peut répondre.
 
 ### Question — À quoi sert un dashboard dans une investigation ?
 
@@ -151,10 +112,9 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 
 ## Étape 4 — Vérifier systématiquement la période
 
-1. Notez la période affichée dans le dashboard.
+1. Observez la période affichée dans le dashboard.
 2. Dans les étapes suivantes, comparez la période de chaque vue avec cette période de départ.
-3. Si une vue est vide sur une période courte, élargissez uniquement le sélecteur temporel, par exemple vers les dernières 24 heures.
-4. Ne modifiez aucune requête enregistrée ni aucun widget.
+3. Si une vue est vide sur une période courte, élargissez le sélecteur temporel, par exemple vers les dernières 24 heures.
 
 ### Question — Pourquoi une vue vide ne prouve-t-elle pas une absence de données ?
 
@@ -169,19 +129,12 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 1. Dans le menu gauche, cliquez sur **APM**.
 2. Vérifiez que **APM Home** est affiché.
 3. Repérez le filtre **Env**.
-4. Notez sa valeur sans la modifier.
+4. Observez sa valeur sans la modifier.
 5. Repérez le sélecteur de période.
-6. Notez la période.
+6. Observez la période.
 7. Repérez la synthèse ou la liste des services.
 
-| Élément | Observation |
-|---|---|
-| Environnement affiché |  |
-| Période affichée |  |
-| Nombre de services, si visible |  |
-| État global ou message principal |  |
-
-### Question — Pourquoi faut-il noter l'environnement et la période avant de lire une valeur ?
+### Question — Pourquoi faut-il vérifier l'environnement et la période avant de lire une valeur ?
 
 **Réponse :** parce qu'une métrique n'a de sens que dans le périmètre où elle a été calculée.
 
@@ -194,19 +147,8 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 1. Repérez la liste ou le catalogue des services.
 2. Recherchez `eu-interfaces`.
 3. Repérez les colonnes disponibles parmi **Requests**, **Error Rate**, **p95 Latency**, **Last Deploy**, **Env**, **Dashboards** et **Monitors**.
-4. Recopiez uniquement les valeurs visibles.
+4. Observez uniquement les valeurs visibles.
 5. Utilisez `non observé` lorsqu'une valeur manque.
-
-| Élément | Observation datée |
-|---|---|
-| Service | `eu-interfaces` |
-| Requests |  |
-| Error Rate |  |
-| p95 Latency |  |
-| Last Deploy |  |
-| Env |  |
-| Dashboards associés |  |
-| Monitors associés |  |
 
 ### Question — Un taux d'erreur nul prouve-t-il que le service rendu est sain ?
 
@@ -219,13 +161,8 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 ## Étape 7 — Comparer des composants techniques
 
 1. Dans la liste, repérez deux entités parmi `phpredis`, `pdo`, `mysqli`, `curl`, `guzzle`, `memcached` ou une autre entité visible.
-2. Relevez leur environnement, leur latence p95 et leur taux d'erreur lorsque ces données sont affichées.
+2. Observez leur environnement, leur latence p95 et leur taux d'erreur lorsque ces données sont affichées.
 3. N'inventez pas leur rôle.
-
-| Entité | Env | p95 Latency | Error Rate | Qualification correcte |
-|---|---|---:|---:|---|
-|  |  |  |  | fait observé / rôle à confirmer |
-|  |  |  |  | fait observé / rôle à confirmer |
 
 ### Question — Le nom `pdo` ou `phpredis` suffit-il à prouver le rôle exact du composant ?
 
@@ -255,7 +192,7 @@ Lorsque l'interface ne contient pas une information attendue, écrivez `non obse
 
 ## Étape 9 — Parcourir les vues internes du service
 
-Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensuite à la page du service.
+Repérez chaque vue. Ouvrez-la si elle est disponible et revenez ensuite à la page du service.
 
 ### Service Summary
 
@@ -282,12 +219,8 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 ### Deployments
 
 1. Ouvrez **Deployments**.
-2. Relevez la version visible, **First Seen**, **Last Seen** ou le statut affiché.
-3. Relevez Requests/s, Error Rate et p95 Latency lorsqu'ils sont disponibles.
-
-| Version | First Seen | Last Seen ou statut | Requests/s | Error Rate | p95 Latency |
-|---|---|---|---:|---:|---:|
-|  |  |  |  |  |  |
+2. Observez la version visible, **First Seen**, **Last Seen** ou le statut affiché.
+3. Observez Requests/s, Error Rate et p95 Latency lorsqu'ils sont disponibles.
 
 **Réponse — Ce que cette vue apporte :** un contexte de changement et une comparaison possible entre versions.
 
@@ -299,8 +232,8 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 
 1. Ouvrez **Dependencies** ou repérez la carte équivalente.
 2. Identifiez `eu-interfaces`.
-3. Relevez jusqu'à quatre dépendances visibles.
-4. Notez le sens de la relation uniquement s'il est lisible.
+3. Observez jusqu'à quatre dépendances visibles.
+4. Observez le sens de la relation uniquement s'il est lisible.
 
 **Réponse — Ce que cette vue apporte :** les relations observées ou inférées entre le service et des composants en amont ou en aval.
 
@@ -313,7 +246,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 1. Ouvrez **Traces** ou **Trace Explorer**.
 2. Vérifiez que le filtre `service:eu-interfaces` est présent ou que le service est bien sélectionné.
 3. Repérez les facettes **Duration**, **Status**, **Env**, **Service** et **Resource**.
-4. Ouvrez une trace représentative uniquement en lecture.
+4. Ouvrez une trace représentative.
 5. Repérez son waterfall et ses spans.
 
 **Réponse — Ce que cette vue apporte :** le parcours d'une requête individuelle et le temps consommé par chaque span.
@@ -326,7 +259,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 
 1. Ouvrez **Errors** si la vue est disponible.
 2. Repérez les types d'erreurs, leur fréquence et les versions concernées.
-3. Si aucune erreur n'est visible, notez `aucune erreur observée sur la période`.
+3. Si aucune erreur n'est visible, observez `aucune erreur observée sur la période`.
 
 **Réponse — Ce que cette vue apporte :** le regroupement d'occurrences similaires en problèmes exploitables.
 
@@ -352,7 +285,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 2. Vérifiez que la requête conserve `service:eu-interfaces` ou un filtre équivalent.
 3. Vérifiez la période.
 4. Repérez les facettes **Service**, **Status**, **Host** et **Source**.
-5. Ouvrez un log représentatif sans modifier la configuration.
+5. Ouvrez un log représentatif.
 
 **Réponse — Ce que cette vue apporte :** le détail textuel ou structuré d'un événement avec son contexte.
 
@@ -362,7 +295,7 @@ Repérez chaque vue. Ouvrez-la uniquement si elle est disponible et revenez ensu
 
 ## Étape 10 — Construire la carte des dépendances
 
-À partir des relations visibles, complétez la carte. Utilisez `?` lorsque le sens ou le rôle n'est pas confirmé.
+À partir des relations visibles, observez la carte. Utilisez `?` lorsque le sens ou le rôle n'est pas confirmé.
 
 ```text
                   +------------------+
@@ -426,10 +359,10 @@ eu-interfaces
 1. Cliquez sur **Metrics** dans le menu gauche.
 2. Repérez **Overview**, **Explorer**, **Summary** et **Volume**.
 3. Dans **Overview**, repérez les sources de métriques, le nombre d'Agents actifs et les volumes disponibles.
-4. Ouvrez **Explorer** sans enregistrer de changement.
+4. Ouvrez **Explorer**.
 5. Repérez le champ de requête, l'agrégation, les regroupements et le sélecteur temporel.
 6. Revenez à **Summary** et repérez la recherche d'une métrique et de ses tags.
-7. Repérez **Volume** sans modifier la configuration.
+7. Repérez **Volume**.
 
 ### Question — Quelle différence existe entre Metrics Explorer et Metrics Summary ?
 
@@ -445,8 +378,6 @@ eu-interfaces
 
 **Pourquoi :** la cardinalité influence la lisibilité, les performances et le coût. Identifier les dimensions inutiles permet de gouverner la collecte.
 
-**Limite :** ne modifiez pas les tags indexés ou les réglages de métriques dans cet atelier ; ces changements peuvent modifier les analyses et la facturation.
-
 ## Étape 13 — Ouvrir Logs
 
 1. Cliquez sur **Logs**.
@@ -456,7 +387,7 @@ eu-interfaces
 5. Si les données sont insuffisantes, sélectionnez les dernières 24 heures.
 6. Repérez la barre de requête.
 7. Repérez les facettes **Service**, **Status**, **Host** et **Source**.
-8. Filtrez en lecture avec `service:eu-interfaces` uniquement si des logs correspondants sont disponibles.
+8. Si des logs correspondants sont disponibles, filtrez avec `service:eu-interfaces`.
 9. Retirez le filtre si aucun résultat n'existe et observez les services disponibles.
 
 ### Question — Quelle différence existe entre Log Explorer et Log Configuration ?
@@ -481,10 +412,10 @@ eu-interfaces
 2. Ouvrez la liste des monitors.
 3. Repérez le champ de recherche et les filtres.
 4. Repérez les états disponibles, notamment `OK`, `Alert`, `Warn` ou `No Data`.
-5. Choisissez un monitor en lecture seule.
+5. Choisissez un monitor.
 6. Ouvrez son détail.
 7. Repérez son type, sa requête, sa fenêtre d'évaluation, son regroupement, ses seuils, son message et sa chronologie.
-8. Revenez à la liste sans modifier le monitor.
+8. Revenez à la liste.
 
 ### Question — À quoi sert un monitor ?
 
@@ -506,7 +437,6 @@ eu-interfaces
 
 1. Dans la liste des monitors, recherchez `service health`.
 2. Si aucun résultat n'apparaît, retirez le filtre et vérifiez les types de monitors existants.
-3. Ne créez aucun monitor.
 
 ### Question — Qu'est-ce qu'un Service Health Monitor ?
 
@@ -523,9 +453,9 @@ eu-interfaces
 ## Étape 16 — Rechercher les SLO
 
 1. Dans **Monitoring**, repérez l'entrée **SLOs** ou **Service Level Objectives** si elle est visible.
-2. Ouvrez la liste en lecture seule.
+2. Ouvrez la liste.
 3. Recherchez `eu-interfaces`.
-4. Si aucun SLO n'est trouvé, notez `aucun SLO eu-interfaces observé`.
+4. Si aucun SLO n'est trouvé, observez `aucun SLO eu-interfaces observé`.
 5. Si un SLO existe, repérez son objectif, sa période, son indicateur et son budget d'erreur.
 
 ### Question — Qu'est-ce qu'un SLO ?
@@ -555,7 +485,6 @@ eu-interfaces
 3. Ouvrez le RUM Explorer ou la liste des sessions.
 4. Vérifiez la période ; utilisez les dernières 24 heures si nécessaire.
 5. Repérez les sessions, vues, actions, erreurs et ressources disponibles.
-6. N'ouvrez pas un Session Replay non préalablement autorisé.
 
 ### Question — Quelle différence existe entre RUM et Synthetic Monitoring ?
 
@@ -569,9 +498,9 @@ eu-interfaces
 
 # Partie 5 — Relier les questions aux vues et aux réponses
 
-## Étape 18 — Utiliser la matrice de référence
+## Étape 18 — Utiliser le parcours de référence
 
-La matrice suivante contient directement les réponses attendues. Utilisez-la pour justifier le prochain menu à ouvrir pendant une investigation.
+Le parcours suivant indique le prochain menu à ouvrir pendant une investigation.
 
 | Question | Signal principal | Première vue | Réponse recherchée | Recoupement | Explication |
 |---|---|---|---|---|---|
@@ -591,7 +520,7 @@ La matrice suivante contient directement les réponses attendues. Utilisez-la po
 
 | Affirmation | Réponse | Explication |
 |---|---|---|
-| La latence p95 affichée vaut la valeur relevée pour la période. | Fait, si réellement observé | la phrase décrit une valeur, son périmètre et sa période |
+| La latence p95 affichée vaut la valeur visible pour la période. | Fait, si réellement observé | la phrase décrit une valeur, son périmètre et sa période |
 | Une dépendance lente contribue peut-être à la latence. | Hypothèse | « peut-être » indique une explication à tester par trace et métriques |
 | Le dernier déploiement est forcément la cause. | Conclusion prématurée | la proximité temporelle ne suffit pas à démontrer la causalité |
 | Le taux d'erreur affiché est nul pour la période. | Fait, si réellement observé | l'affirmation reste limitée à la requête et à la période |
@@ -618,20 +547,6 @@ La matrice suivante contient directement les réponses attendues. Utilisez-la po
 **Pourquoi :** ouvrir immédiatement une trace ou un log spectaculaire peut conduire à analyser un cas non représentatif.
 
 **Limite :** cet ordre est une référence, pas une règle rigide. Une alerte, un identifiant de trace fourni par le support ou une session RUM précise peut justifier une autre porte d'entrée.
-
-## Étape 21 — Vérifier l'autonomie de votre livrable
-
-Votre document est complet lorsque vous avez :
-
-- relevé la période et l'environnement ;
-- décrit `eu-interfaces` sans extrapolation ;
-- cartographié au moins deux dépendances ;
-- identifié le rôle des principales vues APM ;
-- parcouru Dashboards, Developer Portal, Metrics, Logs, Monitoring et RUM ;
-- expliqué Service Health Monitor, `No Data` et SLO ;
-- distingué exploitation et configuration ;
-- séparé faits, hypothèses et conclusions prématurées ;
-- conservé une posture strictement en lecture seule.
 
 # Synthèse — Questions et réponses
 
@@ -676,36 +591,3 @@ Votre document est complet lorsque vous avez :
 **Réponse :** parce que le menu peut être affiché alors que l'instrumentation, les données, la licence, les droits ou le processus d'équipe ne sont pas en place.
 
 **Explication :** l'usage doit être démontré par des objets, des données récentes et un workflow opérationnel, pas par le seul libellé du menu.
-
-# Aide au diagnostic
-
-| Difficulté | Cause probable | Action en lecture seule |
-|---|---|---|
-| `eu-interfaces` absent | période ou instrumentation modifiée | élargir la période, puis choisir un service actif et noter la substitution |
-| Vue vide | période, droits, filtre ou absence de données | vérifier période, requête, env et droits ; noter `non observé` |
-| Dépendances illisibles | carte dense ou données insuffisantes | utiliser les entités de la liste sans inventer le sens des liens |
-| Version absente | instrumentation ou période | noter `non observé` et poursuivre |
-| Aucun Service Health Monitor | autre stratégie d'alerte ou absence de configuration | expliquer l'apport attendu et constater l'absence sans créer |
-| Aucun SLO | indicateur ou cible non formalisés | expliquer la différence monitor/SLO et noter l'absence |
-| Aucun log `eu-interfaces` | collecte non activée ou nom différent | retirer le filtre et identifier les services réellement disponibles |
-| Aucun résultat RUM | période, application ou instrumentation | passer à 24 heures et noter la limite |
-| Commande d'édition ouverte | confusion de navigation | fermer sans enregistrer |
-| Interface différente | évolution ou droits Datadog | chercher la fonction par son objectif et la recherche globale |
-
-# Point de contrôle final
-
-Vous maîtrisez les fondamentaux de navigation si vous pouvez expliquer la chaîne suivante :
-
-```text
-question
-  -> porte d'entrée
-  -> période et périmètre
-  -> vue agrégée
-  -> événement représentatif
-  -> signal de recoupement
-  -> fait
-  -> hypothèse testée
-  -> décision
-```
-
-La maîtrise de Datadog ne consiste pas à ouvrir tous les menus. Elle consiste à choisir la vue qui répond à la question présente, à conserver le contexte pendant les pivots et à savoir ce que chaque observation permet — ou ne permet pas — de conclure.

@@ -16,7 +16,7 @@ Vous produisez :
 
 - un identifiant de service unique et normalisé ;
 - une définition de service pédagogique enregistrée dans le Catalog ;
-- une fiche de contrôle avant et après création ;
+- une vérification avant et après création ;
 - une convention minimale de nommage et de tags ;
 - une analyse distinguant métadonnées déclarées et télémétrie observée ;
 
@@ -122,7 +122,7 @@ Dans le même formulaire :
 3. Dans **Tier**, sélectionnez `4`.
 4. Dans **Languages**, sélectionnez `Python`.
 
-Si une valeur n'est pas proposée, laissez uniquement ce champ vide et notez l'écart. N'utilisez pas une valeur de production en remplacement.
+Si une valeur n'est pas proposée, laissez uniquement ce champ vide et observez l'écart. N'utilisez pas une valeur de production en remplacement.
 
 **Explication :** ces valeurs signalent une ressource pédagogique de faible criticité. Elles ne déploient aucun service et ne créent aucune télémétrie.
 
@@ -144,7 +144,7 @@ N'ajoutez pas `env:training`, `service:...` ou `version:...` : ces clés relève
 ## Étape 6 — Traiter l'owner, les contacts et les liens
 
 1. Si **Owner** est obligatoire, sélectionnez uniquement la Team pédagogique déjà validée.
-2. Si aucune Team pédagogique n'est proposée, laissez le champ vide si le formulaire l'autorise ; ne créez pas de Team.
+2. Si aucune Team pédagogique n'est proposée, laissez le champ vide si le formulaire l'autorise.
 3. Laissez vides les contacts, PagerDuty, Slack, Teams, dépôts, runbooks et liens internes.
 4. Laissez vides **Depends On**, **Component Of**, On-Call, pipelines et emplacements de code.
 
@@ -182,25 +182,9 @@ En cas de conflit, annulez et recommencez à l'étape 1 avec un suffixe validé.
 
 **Réponse :** une seule définition portant le nom unique et les métadonnées pédagogiques validées.
 
-**Limite :** si plusieurs lignes ou une fusion inattendue apparaissent, n'effectuez aucune autre modification et prévenez le formateur.
+**Limite :** si plusieurs lignes ou une fusion inattendue apparaissent, prévenez le formateur.
 
 ## Étape 8 — Auditer les métadonnées enregistrées
-
-| Métadonnée | Valeur attendue | Valeur observée |
-|---|---|---|
-| Name | nom technique unique |  |
-| Display name | `[TRAINING] ...` |  |
-| Description | texte saisi à l'étape 3 |  |
-| Lifecycle | `experimental` |  |
-| Tier | `4` |  |
-| Owner | équipe pédagogique ou `Not Provided` |  |
-| Type | `Custom` |  |
-| Languages | `Python` |  |
-| Source de métadonnées | `UI` |  |
-| Schéma | `v3` |  |
-| Custom Tags | les quatre tags de l'étape 5 |  |
-| Contacts/liens | aucun |  |
-| Relations/On-Call | aucun |  |
 
 ### Pourquoi comparer attendu et observé ?
 
@@ -224,10 +208,8 @@ En cas de conflit, annulez et recommencez à l'étape 1 avec un suffixe validé.
 ## Étape 10 — Examiner Setup Guidance et la télémétrie
 
 1. Sur **Service Page**, vérifiez que l'environnement affiché est `none` et que **Service Summary** indique **No APM or USM metrics**.
-2. Ouvrez **Setup Guidance** et relevez les contrôles détectés et non détectés.
+2. Ouvrez **Setup Guidance** et observez les contrôles détectés et non détectés.
 3. Vérifiez que **Log Patterns** est désactivé en l'absence de logs.
-4. N'essayez pas de rendre les contrôles verts en instrumentant une application.
-5. Ne cliquez pas sur **New Monitor**, **New SLO** ou **New API Test** : ces liens ouvrent des workflows de création hors périmètre de cet atelier.
 
 | Élément | Observation attendue |
 |---|---|
@@ -266,8 +248,8 @@ En cas de conflit, annulez et recommencez à l'étape 1 avec un suffixe validé.
 ## Étape 12 — Modifier directement sa description
 
 1. Vérifiez que le nom affiché commence par `training-` et contient votre identifiant.
-2. Si l'un de ces contrôles échoue, n'ouvrez pas l'édition et prévenez le formateur.
-3. Sur **Service Page**, ouvrez **Entity Metadata > Edit**. N'utilisez pas le bouton **Edit** placé près du sélecteur `env`.
+2. Si l'un de ces contrôles échoue, prévenez le formateur.
+3. Sur **Service Page**, ouvrez **Entity Metadata > Edit**.
 4. À la fin de la description existante, saisissez exactement :
 
 ```text
@@ -306,7 +288,7 @@ Convention V2 — Service pédagogique
 
 1. Conservez le nom exact de votre service affiché dans **Service Page**.
 2. À la fin de la formation, recherchez ce nom exact.
-3. Ne supprimez la ressource que si le formateur vous l'autorise et si le nom contient votre préfixe et votre identifiant.
+3. Avec l'autorisation du formateur, supprimez la ressource portant votre préfixe et votre identifiant.
 4. Sinon, communiquez simplement le nom exact au formateur.
 
 **Réponse expliquée :** le préfixe `[TRAINING]` et l'identifiant participant suffisent à reconnaître la ressource avec un processus simple.
@@ -332,38 +314,6 @@ Convention V2 — Service pédagogique
 
 **Réponse :** les tags enregistrés décrivent l'entité du Catalog ; l'Unified Service Tagging porté par la télémétrie relie effectivement métriques, traces et logs d'un déploiement.
 
-## Aide au diagnostic
-
-| Difficulté | Interprétation | Action sûre |
-|---|---|---|
-| **Create a New Entry** absent | droit insuffisant ou interface différente | rester en lecture et noter que la création est impossible |
-| nom déjà présent | collision | ajouter un suffixe validé et recommencer la recherche |
-| owner pédagogique absent | aucune Team autorisée proposée | laisser vide si autorisé ou arrêter ; ne pas créer de Team |
-| valeur `experimental` absente | schéma différent | utiliser la valeur validée ou laisser vide ; jamais `production` par défaut |
-| validation YAML/JSON en erreur | champ invalide | revenir au formulaire et corriger sans API |
-| plusieurs services après création | conflit ou corrélation inattendue | arrêter toute modification et prévenir le formateur |
-| service absent de la vue Performance | aucune télémétrie à afficher | utiliser **Services > Ownership** |
-| retour immédiat à Entities Sources après Save | comportement observé | rechercher le nom exact avant toute nouvelle soumission |
-| `env:none` sur Service Page | aucun environnement corrélé par télémétrie | ne pas ajouter `env` dans Custom Tags pour masquer ce constat |
-| télémétrie et Setup Guidance `Not Detected` | comportement normal | ne pas cliquer sur les workflows de création proposés |
-| erreur après Save | résultat incertain | rechercher le nom exact avant toute nouvelle soumission |
-
-## Validation finale
-
-- [ ] L'utilisation du nom ou pseudonyme est autorisée.
-- [ ] Le nom est normalisé et commence par `training-`.
-- [ ] La date et le contrôle par recherche garantissent l'unicité.
-- [ ] Une seule définition de service a été créée.
-- [ ] Le lifecycle n'est pas productif.
-- [ ] Le tier `4` et le langage `Python` sont visibles après réouverture de l'éditeur.
-- [ ] Les quatre tags personnalisés sont visibles et permettent de retrouver le service.
-- [ ] Les tags et la description identifient clairement l'usage pédagogique.
-- [ ] Aucun contact, secret, dépôt ou workflow réel n'est associé.
-- [ ] Aucune Team n'a été créée ou modifiée.
-- [ ] L'absence de télémétrie est correctement interprétée.
-- [ ] La seule modification porte sur la description du service créé.
-- [ ] Les métadonnées déclarées sont distinguées des signaux observés.
-- [ ] Aucun service existant n'a été modifié ou supprimé.
 
 ## Références officielles
 

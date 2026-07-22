@@ -8,7 +8,7 @@ lang: fr-FR
 
 ## Objectif
 
-Envoyer un événement pédagogique dans Datadog avec PowerShell ISE, vérifier son ingestion, extraire ses valeurs avec une règle Grok exécutée à la requête, puis enregistrer une vue personnelle permettant de retrouver les logs du service créé au module 4.
+Envoyer un événement pédagogique dans Datadog avec PowerShell ou Bash/cURL, vérifier son ingestion, extraire ses valeurs avec une règle Grok exécutée à la requête, puis enregistrer une vue personnelle permettant de retrouver les logs du service créé au module 4.
 
 ## Résultat produit
 
@@ -27,9 +27,9 @@ Vous travaillez dans une organisation Datadog partagée correspondant à la prod
 1. l'envoi de quelques logs pédagogiques via l'API HTTP ;
 2. la création ou la correction de votre propre Saved View préfixée `[TRAINING]`.
 
-La clé API dont l'identifiant est fourni reste un secret de production. Son utilisation doit avoir été autorisée par le formateur. Ne la communiquez à personne, ne la recopiez pas dans ce document, ne faites aucune capture de l'écran qui l'affiche et ne sauvegardez pas le script PowerShell qui la contient.
+La clé API dont l'identifiant est fourni reste un secret de production. Son utilisation doit avoir été autorisée par le formateur. Ne la communiquez à personne, ne la recopiez pas dans ce document, ne faites aucune capture de l'écran qui l'affiche et ne sauvegardez pas le script qui la contient.
 
-Ne créez et ne modifiez aucun pipeline, index, filtre d'exclusion, archive, facette globale, métrique, monitor ou dashboard. L'extraction Grok est réalisée uniquement avec un **Calculated Field** personnel et temporaire dans le Log Explorer.
+L'extraction Grok est réalisée avec un **Calculated Field** personnel et temporaire dans le Log Explorer.
 
 ## Prérequis
 
@@ -37,11 +37,11 @@ Ne créez et ne modifiez aucun pipeline, index, filtre d'exclusion, archive, fac
 - accès à **Organization Settings > API Keys** avec le droit de consulter la clé autorisée ;
 - accès à **Logs > Live Tail** et **Logs > Log Explorer** ;
 - droit de créer une Saved View ;
-- PowerShell ISE disponible sur le poste ;
+- PowerShell ISE ou Bash avec cURL disponible sur le poste ;
 - service `training-<participant>-<aaaammjj>-svc` créé au module 4 ;
 - identifiant de participant autorisé, sans espace ni donnée personnelle inutile.
 
-Si la valeur de la clé n'est pas accessible, ne créez pas une autre clé. Le formateur exécute le script pour votre identifiant, puis vous poursuivez à partir de la recherche dans Live Tail.
+Si la valeur de la clé n'est pas accessible, demandez au formateur d'exécuter le script pour votre identifiant, puis poursuivez à partir de la recherche dans Live Tail.
 
 ## Comprendre le parcours
 
@@ -88,16 +88,13 @@ Grok transforme ensuite temporairement les parties du message en champs utilisab
 
 **Interprétation :** le Key ID permet d'identifier la bonne ressource ; il ne permet pas d'authentifier l'appel HTTP.
 
-**Si la valeur n'est pas visible :** arrêtez cette étape et demandez au formateur d'exécuter l'envoi. Ne créez pas de clé et n'utilisez pas une clé portant un autre identifiant.
+**Si la valeur n'est pas visible :** demandez au formateur d'exécuter l'envoi, puis passez à l'étape suivante.
 
-# Partie 2 — Générer un log avec PowerShell ISE
+# Partie 2 — Générer un log avec PowerShell ou Bash
 
-## Étape 3 — Préparer le script sans l'enregistrer
+## Étape 3 — Préparer l'envoi
 
-1. Ouvrez **Windows PowerShell ISE**.
-2. Créez un nouveau script avec **File > New** ou `Ctrl+N`.
-3. Ne sauvegardez pas ce fichier.
-4. Collez le script suivant dans le volet de script :
+Sous Windows, ouvrez **Windows PowerShell ISE** et exécutez le script suivant :
 
 ```powershell
 $apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
@@ -124,9 +121,24 @@ Write-Host "Code HTTP :" $response.StatusCode
 Write-Host "Service :" $serviceName
 ```
 
-5. Remplacez `COLLER_LA_VALEUR_SECRETE_ICI` par la valeur copiée depuis Datadog.
-6. Remplacez `REMPLACER_PAR_VOTRE_IDENTIFIANT` par le même identifiant que dans le service du module 4.
-7. Vérifiez la valeur construite dans `$serviceName` avant l'exécution. Elle doit être exactement égale au nom du service créé au module 4.
+Sous Linux ou macOS, exécutez l'équivalent Bash/cURL :
+
+```bash
+api_key="COLLER_LA_VALEUR_SECRETE_ICI"
+participant="REMPLACER_PAR_VOTRE_IDENTIFIANT"
+service_name="training-${participant}-20260720-svc"
+
+curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
+  -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
+  -H "DD-API-KEY: ${api_key}" \
+  -H "Content-Type: application/json" \
+  --data "{\"message\":\"TRAINING participant=${participant} operation=login duration_ms=128 result=success\",\"service\":\"${service_name}\",\"ddsource\":\"powershell-training\",\"ddtags\":\"env:training,training:true,training_session:20260720,participant:${participant}\",\"status\":\"info\"}"
+
+echo "Service : ${service_name}"
+unset api_key
+```
+
+Remplacez les deux valeurs génériques et vérifiez que le nom du service correspond à celui créé au module 4.
 
 Exemple de correspondance :
 
@@ -143,8 +155,7 @@ service     : training-loic-thobois-20260720-svc
 
 ## Étape 4 — Exécuter l'envoi
 
-1. Exécutez le script une seule fois avec **Run Script** ou `F5`.
-2. Lisez la sortie dans la console PowerShell ISE.
+Exécutez une fois la version adaptée à votre environnement et vérifiez la sortie.
 
 **Résultat attendu :**
 
@@ -159,12 +170,11 @@ Service : training-<participant>-20260720-svc
 
 ## Étape 5 — Retirer immédiatement le secret
 
-1. Fermez le nouveau script sans l'enregistrer.
-2. Si PowerShell ISE demande d'enregistrer les modifications, choisissez **Don't Save** ou **Ne pas enregistrer**.
+Fermez PowerShell ISE sans enregistrer le script. Sous Bash, la commande `unset api_key` efface la variable de la session.
 
 **Résultat attendu :** la clé n'est plus présente dans le volet de script, dans la variable PowerShell.
 
-**Vérification :** aucun fichier `.ps1` n'a été créé.
+**Vérification :** aucun fichier contenant la clé n'a été créé.
 
 **Interprétation :** cette procédure limite l'exposition pédagogique du secret. En production, une clé doit normalement être injectée depuis un gestionnaire de secrets plutôt qu'inscrite dans un script.
 
@@ -207,7 +217,7 @@ Service : training-<participant>-20260720-svc
 
 **Interprétation :** la présence dans Log Explorer confirme que l'événement est interrogeable dans la période et le stockage sélectionnés.
 
-**Si le log apparaît dans Live Tail mais pas dans Log Explorer :** l'envoi fonctionne, mais un filtre d'index, une exclusion, un quota, une restriction d'accès ou la période sélectionnée peut empêcher son affichage. Ne modifiez aucune configuration ; conservez ce constat et prévenez le formateur.
+**Si le log apparaît dans Live Tail mais pas dans Log Explorer :** l'envoi fonctionne, mais un filtre d'index, une exclusion, un quota, une restriction d'accès ou la période sélectionnée peut empêcher son affichage. Conservez ce constat et prévenez le formateur.
 
 # Partie 4 — Extraire les valeurs du message avec Grok
 
@@ -278,7 +288,7 @@ La fonction **Calculated Fields Extractions** est une fonction Preview. Les libe
 
 ## Étape 11 — Lire la liste des pipelines
 
-Un pipeline applique ses processeurs uniquement aux logs qui correspondent à son filtre. L'analyse de cette page permet de comprendre le traitement sans modifier la configuration.
+Un pipeline applique ses processeurs aux logs qui correspondent à son filtre. L'analyse de cette page permet de comprendre le traitement.
 
 1. Dans le menu **Logs**, ouvrez **Configuration**.
 2. Dans la section **Processing**, ouvrez **Pipelines**.
@@ -294,9 +304,8 @@ Un pipeline applique ses processeurs uniquement aux logs qui correspondent à so
    | N8N | `source:n8n` |
    | Datadog Agent | ensemble de sources Agent |
 
-6. N'utilisez pas **New Pipeline**, **Add a new pipeline**, un interrupteur d'activation ou une action d'édition.
 
-**Résultat attendu :** la liste des pipelines et leurs filtres sont visibles en lecture seule.
+**Résultat attendu :** la liste des pipelines et leurs filtres sont visibles.
 
 **Vérification :** la colonne **Filters** contient principalement des expressions commençant par `source:`.
 
@@ -324,7 +333,7 @@ Un pipeline applique ses processeurs uniquement aux logs qui correspondent à so
 
 3. Si aucun pipeline n'est retourné, effacez le filtre pour restaurer la liste complète.
 4. Comparez directement la source pédagogique avec les filtres affichés.
-5. Complétez l'analyse :
+5. Vérifiez l'analyse :
 
    | Question | Réponse vérifiée |
    |---|---|
@@ -423,6 +432,112 @@ La table doit donc présenter au minimum :
 
 **Interprétation :** un log enrichit la télémétrie Logs du service. Il ne crée pas de traces APM, de dépendances, de latence ni de taux d'erreur APM.
 
+# Partie 7 — Ingérer une métrique évolutive
+
+## Étape 16 — Comprendre le scénario
+
+La métrique `training.checkout.queue_depth` représente le nombre de commandes en attente. C'est un **gauge** : chaque point contient la valeur observée à un instant donné.
+
+Le scénario envoie six points espacés d'une minute :
+
+```text
+2 → 4 → 6 → 8 → 5 → 3
+```
+
+Les points sont placés dans les cinq dernières minutes afin que la courbe soit immédiatement visible.
+
+## Étape 17 — Envoyer la métrique
+
+Sous Windows, exécutez ce script dans PowerShell ISE après avoir remplacé la clé et l'identifiant :
+
+```powershell
+$apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
+$participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
+$serviceName = "training-$participant-20260720-svc"
+$now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+$values = @(2, 4, 6, 8, 5, 3)
+
+$points = for ($index = 0; $index -lt $values.Count; $index++) {
+    @{
+        timestamp = $now - (($values.Count - 1 - $index) * 60)
+        value     = $values[$index]
+    }
+}
+
+$payload = @{
+    series = @(
+        @{
+            metric = "training.checkout.queue_depth"
+            type   = 3
+            points = $points
+            tags   = @(
+                "env:training"
+                "service:$serviceName"
+                "participant:$participant"
+                "training_session:20260720"
+                "scenario:checkout"
+            )
+        }
+    )
+} | ConvertTo-Json -Depth 6 -Compress
+
+$response = Invoke-WebRequest `
+    -UseBasicParsing `
+    -Method Post `
+    -Uri "https://api.datadoghq.eu/api/v2/series" `
+    -Headers @{ "DD-API-KEY" = $apiKey } `
+    -ContentType "application/json" `
+    -Body $payload
+
+Write-Host "Code HTTP :" $response.StatusCode
+Write-Host "Métrique : training.checkout.queue_depth"
+Write-Host "Service :" $serviceName
+```
+
+Sous Linux ou macOS, utilisez Bash/cURL :
+
+```bash
+api_key="COLLER_LA_VALEUR_SECRETE_ICI"
+participant="REMPLACER_PAR_VOTRE_IDENTIFIANT"
+service_name="training-${participant}-20260720-svc"
+now=$(date +%s)
+
+payload=$(printf '{"series":[{"metric":"training.checkout.queue_depth","type":3,"points":[{"timestamp":%s,"value":2},{"timestamp":%s,"value":4},{"timestamp":%s,"value":6},{"timestamp":%s,"value":8},{"timestamp":%s,"value":5},{"timestamp":%s,"value":3}],"tags":["env:training","service:%s","participant:%s","training_session:20260720","scenario:checkout"]}]}' \
+  "$((now-300))" "$((now-240))" "$((now-180))" "$((now-120))" "$((now-60))" "$now" "$service_name" "$participant")
+
+curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
+  -X POST "https://api.datadoghq.eu/api/v2/series" \
+  -H "DD-API-KEY: ${api_key}" \
+  -H "Content-Type: application/json" \
+  --data "$payload"
+
+echo "Métrique : training.checkout.queue_depth"
+echo "Service : ${service_name}"
+unset api_key payload
+```
+
+**Résultat attendu :** l'API répond avec le code HTTP `202`.
+
+## Étape 18 — Exploiter la métrique
+
+1. Ouvrez **Metrics > Explorer**.
+2. Recherchez `training.checkout.queue_depth`.
+3. Sélectionnez l'agrégation **avg**.
+4. Filtrez sur :
+
+   ```text
+   env:training
+   service:training-<participant>-20260720-svc
+   participant:<participant>
+   ```
+
+5. Choisissez **Past 15 Minutes**.
+6. Observez la progression jusqu'à `8`, puis le retour à `3`.
+
+**Résultat attendu :** la courbe affiche six points et reste sous le seuil critique `10` qui sera utilisé au module 8.
+
+**Interprétation :** la métrique décrit une évolution numérique. Les tags isolent le service et le participant sans créer un nom de métrique différent pour chacun.
+
 # Références officielles
 
 - [Datadog — Send Logs API](https://docs.datadoghq.com/api/latest/logs/send-logs/)
@@ -430,4 +545,5 @@ La table doit donc présenter au minimum :
 - [Datadog — Grok Extractions](https://docs.datadoghq.com/logs/explorer/calculated_fields/extractions/)
 - [Datadog — Saved Views](https://docs.datadoghq.com/logs/explorer/saved_views/)
 - [Datadog — Set Up Catalog](https://docs.datadoghq.com/internal_developer_portal/catalog/set_up/)
-
+- [Datadog — Submit Metrics](https://docs.datadoghq.com/api/latest/metrics/submit-metrics/)
+- [Datadog — Custom Metrics](https://docs.datadoghq.com/metrics/custom_metrics/)

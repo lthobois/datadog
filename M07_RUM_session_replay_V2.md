@@ -8,14 +8,14 @@ lang: fr-FR
 
 ## Objectif
 
-Parcourir l'organisation RUM réellement disponible en lecture seule, comprendre les types d'événements et qualifier les pivots accessibles sans exposer de donnée sensible.
+Parcourir l'organisation RUM disponible, comprendre les types d'événements et qualifier les pivots accessibles sans exposer de donnée sensible.
 
 ## Livrable
 
 Vous produisez :
 
-- un relevé daté de l'organisation RUM visible ;
-- un relevé des types d'événements et facettes utilisables en sécurité ;
+- une vue de l'organisation RUM visible ;
+- les types d'événements et facettes utilisables ;
 - une analyse des risques liés aux actions, URL et sessions ;
 - un constat sur le pivot éventuel vers l'APM ;
 - une conclusion séparant constat réel, hypothèse et limite ;
@@ -32,20 +32,20 @@ Les observations servent ensuite à :
 
 ## Règle de sécurité
 
-Travaillez uniquement en lecture. Ne créez ni application, vue sauvegardée, mesure, funnel, monitor, dashboard ou configuration. Ne cliquez pas sur un bouton d'enregistrement ou de modification. N'ouvrez aucun Session Replay réel non explicitement autorisé. Ne recopiez aucun nom d'application sensible, nom, email, identifiant d'application ou de session, token client, URL détaillée, saisie ou contenu utilisateur réel.
+Ne observez aucun nom d'application sensible, nom, email, identifiant d'application ou de session, token client, URL détaillée, saisie ou contenu utilisateur réel.
 
 ## Prérequis
 
 - Chrome connecté à Datadog ;
-- accès en lecture à **Digital Experience** et au **RUM Explorer**, ou captures anonymisées ;
+- accès à **Digital Experience** et au **RUM Explorer**, ou captures anonymisées ;
 - application RUM réelle `peopulse` ;
 - vocabulaire `env/service/version` ;
-- accès en lecture aux agrégats RUM autorisés.
+- accès aux agrégats RUM autorisés.
 - constat de disponibilité des pivots APM réalisé au module 6.
 
 ## Comment utiliser ce document
 
-Effectuez d'abord l'observation demandée, puis lisez la réponse qui suit la question. Les applications, sessions et volumes évoluent avec la période, le consentement et l'échantillonnage : votre relevé daté prévaut. Toutes les étapes utilisent uniquement les agrégats réels de `peopulse`.
+Effectuez l'observation demandée, puis lisez la réponse qui suit la question. Les applications, sessions et volumes évoluent avec la période, le consentement et l'échantillonnage : utilisez les valeurs visibles. Toutes les étapes utilisent les agrégats réels de `peopulse`.
 
 ## Contexte réel vérifié sur la plateforme
 
@@ -73,15 +73,8 @@ L'application contient un volume important de sessions, vues, actions et ressour
 1. Cliquez sur **Search Datadog** ou utilisez `Ctrl+K`.
 2. Dans la liste des produits, ouvrez **Real User Monitoring** sous **Digital Experience**.
 3. Si vous souhaitez aller directement aux événements, l'entrée **Explorer** sous **RUM** est également disponible.
-4. Ne choisissez pas **Create RUM Application**.
 5. Vérifiez que l'application sélectionnée est `peopulse`.
-6. Notez la date, l'heure, la période et les onglets visibles.
-
-| Élément | Observation |
-|---|---|
-| Date et heure |  |
-| Modules visibles |  |
-| Application sélectionnée | `peopulse` |
+6. Observez la date, l'heure, la période et les onglets visibles.
 
 ### Quel est le rôle du RUM ?
 
@@ -92,10 +85,10 @@ L'application contient un volume important de sessions, vues, actions et ressour
 ## Étape 2 — Vérifier l'application autorisée
 
 1. Vérifiez que l'en-tête indique l'application `peopulse`.
-2. Si vous arrivez sur **Application Management**, ouvrez uniquement `peopulse`.
+2. Si vous arrivez sur **Application Management**, ouvrez `peopulse`.
 3. Vérifiez son type **JavaScript** et la présence du message **Events received**, sans développer les étapes d'installation.
 4. Ouvrez **Real User Monitoring — Optimize app performance**.
-5. Ne cliquez pas sur **Edit Application** et ne copiez ni `applicationId`, ni `clientToken`, ni extrait d'initialisation.
+5. Observez le nom et le type de l'application.
 
 ### Quel était l'état observé lors de la conception ?
 
@@ -109,16 +102,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 2. Repérez les onglets **Optimization**, **Feature Flag Tracking**, **Profiling**, **Session Replay**, **Explorer**, **Error Tracking** et **Product Analytics**.
 3. Repérez la période et les filtres `env`, `service`, `version`, pays et navigateur.
 4. Dans la navigation de la page, repérez **Overview**, **Optimize Vitals**, **Frontend Errors**, **Deployments** et **Resources**.
-5. Observez uniquement les agrégats de vues, performance et erreurs. Ne changez pas la configuration de l'application.
-
-| Élément | Observation non sensible |
-|---|---|
-| Type d'application | Browser JavaScript |
-| Période |  |
-| Vues visibles |  |
-| Session Replay disponible | oui |
-| Product Analytics disponible | oui |
-| Core Web Vitals visibles | oui / non observé |
+5. Observez les agrégats de vues, performance et erreurs.
 
 ### Pourquoi commencer par une synthèse agrégée ?
 
@@ -133,7 +117,6 @@ L'application contient un volume important de sessions, vues, actions et ressour
 3. Conservez **Simple Search** pour l'atelier.
 4. Repérez les visualisations disponibles : **List**, **Timeseries**, **Top List**, **Bar Chart**, **Table**, **Distribution**, **Geomap**, **Funnel**, **Tree Map** et **Pie Chart**. Certaines options dépendent du type d'événement.
 5. Vérifiez qu'aucun filtre **User Email** ou identifiant utilisateur n'est appliqué.
-6. Ne sauvegardez aucune vue et n'utilisez pas **Open in Sheets**.
 
 ### À quoi sert le RUM Explorer ?
 
@@ -159,7 +142,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 1. Repérez les filtres proposés pour le type courant. Pour **Sessions**, l'interface présente notamment `Env`, **User Email**, **Initial View Name**, **Session Type** et **Error Count**.
 2. Dépliez une facette sans sélectionner de valeur sensible.
 3. Ne dépliez pas **User Email**.
-4. Notez quelles dimensions non nominatives permettraient de comparer des populations ou versions.
+4. Observez quelles dimensions non nominatives permettraient de comparer des populations ou versions.
 
 ### Pourquoi une facette utilisateur nominative n'est-elle pas nécessaire ici ?
 
@@ -171,8 +154,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 
 1. Sélectionnez le type **Sessions** si la vue le permet.
 2. Repérez durée, nombre de vues, erreurs, actions, frustration, vue initiale, vue finale et disponibilité du replay.
-3. Ne recopiez aucun identifiant ou attribut nominatif.
-4. N'ouvrez pas le replay.
+3. Ne observez aucun identifiant ou attribut nominatif.
 
 ### Quels critères rendent une session intéressante pour une analyse ciblée ?
 
@@ -196,7 +178,6 @@ L'application contient un volume important de sessions, vues, actions et ressour
 2. Repérez uniquement les colonnes **Action Type**, **Action Name**, **Action Frustration Type** et **View Name**.
 3. Ne lisez pas les valeurs d'**Action Name** à voix haute et ne les copiez pas : la vérification a montré que certaines reprennent du texte contenant des informations personnelles ou métier.
 4. Constatez simplement si les noms sont techniques, génériques ou dépendants du texte de l'interface.
-5. N'ouvrez aucun détail d'action réel.
 
 ### Pourquoi une action automatique peut-elle être mal nommée sur une modale legacy ?
 
@@ -211,7 +192,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 3. Utilisez le filtre **Resource Type** pour isoler `xhr` ou `fetch` si nécessaire.
 4. Ne copiez aucune URL : la plateforme contient des chemins paramétrés, identifiants et chaînes de requête.
 5. Si une ressource générique et manifestement non sensible peut être ouverte, recherchez **View Trace**, **Trace**, **APM** ou un accès équivalent sans recopier d'identifiant.
-6. Si aucun lien **View Trace** sûr n'est visible dans la liste, notez **pivot APM non vérifiable en sécurité sur les données réelles** et n'inventez aucune ressource de remplacement.
+6. Si aucun lien **View Trace** sûr n'est visible dans la liste, observez **pivot APM non vérifiable en sécurité sur les données réelles** et n'inventez aucune ressource de remplacement.
 
 ### Que représente une ressource RUM ?
 
@@ -225,8 +206,8 @@ L'application contient un volume important de sessions, vues, actions et ressour
 
 1. Sélectionnez successivement **Errors**, **Long tasks** puis **Vitals**.
 2. Repérez les agrégats sans ouvrir de contenu sensible.
-3. Si **Vitals** affiche zéro événement, notez **aucun événement Vital observé sur la période** ; le type reste néanmoins disponible dans l'Explorer.
-4. Notez la question que chaque type permet de tester.
+3. Si **Vitals** affiche zéro événement, observez **aucun événement Vital observé sur la période** ; le type reste néanmoins disponible dans l'Explorer.
+4. Observez la question que chaque type permet de tester.
 
 ### Quelle différence existe entre une erreur, une tâche longue et un Vital ?
 
@@ -239,15 +220,15 @@ L'application contient un volume important de sessions, vues, actions et ressour
 ## Étape 12 — Comparer les types d'événements
 
 1. Dans RUM Explorer, sélectionnez successivement **Sessions**, **Views**, **Actions**, **Errors**, **Resources**, **Long tasks** et **Vitals**.
-2. Pour chaque type, notez uniquement le volume agrégé et les facettes non sensibles disponibles.
-3. Ne lisez pas à voix haute et ne recopiez pas les noms d'actions, URL, identifiants ou contenus métier.
+2. Pour chaque type, observez uniquement le volume agrégé et les facettes non sensibles disponibles.
+3. Ne lisez pas à voix haute et ne observez pas les noms d'actions, URL, identifiants ou contenus métier.
 
 ## Étape 13 — Étudier les vues
 
 1. Revenez sur **Views**.
 2. Filtrez l'application `peopulse` avec le sélecteur proposé.
 3. Comparez deux périodes.
-4. Relevez les Web Vitals agrégés disponibles.
+4. Observez les Web Vitals agrégés disponibles.
 
 **Réponse expliquée :** une vue représente une page ou un état de navigation suivi par le SDK. Les volumes et performances varient avec le trafic et l'échantillonnage.
 
@@ -255,7 +236,7 @@ L'application contient un volume important de sessions, vues, actions et ressour
 
 1. Ouvrez **Actions**.
 2. Observez la structure des colonnes et les agrégations.
-3. Notez les risques de confidentialité constatés au niveau des noms automatiques.
+3. Observez les risques de confidentialité constatés au niveau des noms automatiques.
 
 ## Étape 15 — Étudier les ressources
 
