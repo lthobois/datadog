@@ -8,7 +8,7 @@ lang: fr-FR
 
 ## Objectif
 
-Envoyer un événement pédagogique dans Datadog avec PowerShell ou Bash/cURL, vérifier son ingestion, extraire ses valeurs avec une règle Grok exécutée à la requête, puis enregistrer une vue personnelle permettant de retrouver les logs du service créé au module 4.
+Envoyer un événement pédagogique dans Datadog avec PowerShell ou Bash/cURL, vérifier son ingestion, extraire ses valeurs avec une règle Grok exécutée à la requête, distinguer une facette qualitative d'une mesure, puis enregistrer une vue personnelle permettant de retrouver les logs du service créé au module 4.
 
 ## Résultat produit
 
@@ -17,6 +17,7 @@ Envoyer un événement pédagogique dans Datadog avec PowerShell ou Bash/cURL, v
 - de logs pédagogiques isolés par le nom unique de votre service ;
 - d'une preuve d'acceptation HTTP `202 Accepted` ;
 - d'une extraction Grok temporaire faisant apparaître les valeurs du message ;
+- d'une identification de `operation` comme dimension qualitative et de `duration_ms` comme mesure potentielle ;
 - d'une vue `[TRAINING]` filtrée sur votre service et vos logs pédagogiques ;
 - du nom exact de la vue à supprimer en fin de formation.
 
@@ -107,6 +108,7 @@ $payload = @{
     ddsource = "powershell-training"
     ddtags   = "env:training,training:true,training_session:20260720,participant:$participant"
     status   = "info"
+    duration_ms = 128
 } | ConvertTo-Json
 
 $response = Invoke-WebRequest `
@@ -132,7 +134,7 @@ curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
   -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
   -H "DD-API-KEY: ${api_key}" \
   -H "Content-Type: application/json" \
-  --data "{\"message\":\"TRAINING participant=${participant} operation=login duration_ms=128 result=success\",\"service\":\"${service_name}\",\"ddsource\":\"powershell-training\",\"ddtags\":\"env:training,training:true,training_session:20260720,participant:${participant}\",\"status\":\"info\"}"
+  --data "{\"message\":\"TRAINING participant=${participant} operation=login duration_ms=128 result=success\",\"service\":\"${service_name}\",\"ddsource\":\"powershell-training\",\"ddtags\":\"env:training,training:true,training_session:20260720,participant:${participant}\",\"status\":\"info\",\"duration_ms\":128}"
 
 echo "Service : ${service_name}"
 unset api_key
@@ -265,7 +267,11 @@ La fonction **Calculated Fields Extractions** est une fonction Preview. Les libe
 
 **Interprétation :** le préfixe `#` désigne un champ calculé à la requête. Il ne s'agit pas d'un attribut réécrit dans le log.
 
+**Cas observé sur certaines versions de la Preview :** l'aperçu peut rester sur **No value** et le bouton d'enregistrement demeurer désactivé alors que l'échantillon et la règle sont cohérents. Vérifiez une fois que **Extract from** cible bien `message` et que le **Log sample** contient le message complet. Si le résultat reste inchangé, n'insistez pas et ne créez pas de pipeline partagé : notez la limitation de la Preview, passez l'étape 10 et poursuivez à l'étape 11 avec les attributs JSON déjà présents, notamment `@duration_ms`.
+
 ## Étape 10 — Filtrer avec le résultat Grok
+
+Réalisez cette étape uniquement si le Calculated Field a pu être créé à l'étape 9.
 
 1. Ajoutez temporairement à la requête :
 
@@ -284,9 +290,39 @@ La fonction **Calculated Fields Extractions** est une fonction Preview. Les libe
 
 **Interprétation :** l'extraction rend le contenu textuel filtrable et exploitable sans retraitement à l'ingestion.
 
-# Partie 5 — Analyser les filtres des pipelines
+# Partie 5 — Distinguer une facette d'une mesure
 
-## Étape 11 — Lire la liste des pipelines
+## Étape 11 — Qualifier les attributs selon leur usage
+
+Dans un log Datadog, une **facette qualitative**, également appelée dimension, sert principalement à filtrer, regrouper et compter des valeurs. Une **mesure** représente une grandeur numérique sur laquelle Datadog peut effectuer des agrégations telles que `avg`, `sum`, `min`, `max` ou un percentile.
+
+Le fait qu'une valeur soit numérique ne suffit pas à en faire une mesure : son rôle dépend de l'usage attendu.
+
+| Champ | Valeur observée | Rôle pertinent | Exploitation attendue |
+|---|---:|---|---|
+| `operation` ou `#operation` | `login` | Facette qualitative / dimension | filtrer ou regrouper par opération |
+| `result` ou `#result` | `success` | Facette qualitative / dimension | compter les succès et les échecs |
+| `duration_ms` ou `#duration_ms` | `128` | Mesure | calculer une moyenne, un maximum ou un percentile |
+| `http.status_code` | `200` | Dimension numérique | regrouper les réponses 2xx, 4xx ou 5xx |
+
+1. Ouvrez le log pédagogique dans le panneau latéral.
+2. Dans **Attributes**, repérez `duration_ms`. La valeur doit être numérique et apparaître sans guillemets ni unité incorporée.
+3. Cliquez sur `duration_ms` et observez les actions proposées par Datadog.
+4. Si le champ n'est pas déjà configuré, un champ numérique peut proposer **Create facet** et **Create measure**.
+5. Repérez ensuite `service`, `status` ou un autre champ qualitatif : il sert de dimension pour filtrer ou regrouper les logs.
+6. N'utilisez pas l'action de création dans cet atelier : une facette ou une mesure persistante constitue une configuration partagée de l'organisation.
+
+**Résultat attendu :** vous identifiez `duration_ms` comme une mesure potentielle et les champs catégoriels comme des dimensions.
+
+**Vérification :** `duration_ms` vaut `128` sous la forme d'un nombre. La chaîne `"128 ms"` serait inadaptée à une agrégation numérique directe.
+
+**Interprétation :** le log transporte un attribut et sa valeur ; la configuration Datadog lui attribue ensuite le rôle de dimension ou de mesure. Une dimension répond à « quelles catégories ? », tandis qu'une mesure répond à « combien ? » ou « quelle durée ? ».
+
+> **Important :** une mesure de log n'est pas une métrique Datadog autonome. Elle permet d'agréger une valeur numérique présente dans les logs. La création d'une métrique à partir de logs est une opération distincte.
+
+# Partie 6 — Analyser les filtres des pipelines
+
+## Étape 12 — Lire la liste des pipelines
 
 Un pipeline applique ses processeurs aux logs qui correspondent à son filtre. L'analyse de cette page permet de comprendre le traitement.
 
@@ -311,7 +347,7 @@ Un pipeline applique ses processeurs aux logs qui correspondent à son filtre. L
 
 **Interprétation :** `source` représente la technologie ou l'origine déclarée du log. Un pipeline d'intégration limite son périmètre aux sources qu'il sait traiter.
 
-## Étape 12 — Déterminer le pipeline applicable au log pédagogique
+## Étape 13 — Déterminer le pipeline applicable au log pédagogique
 
 1. Rappelez la source envoyée par le script PowerShell :
 
@@ -341,7 +377,7 @@ Un pipeline applique ses processeurs aux logs qui correspondent à son filtre. L
    | Un pipeline personnalisé possède-t-il le filtre `source:powershell-training` ? | Non sur la plateforme vérifiée |
    | Le log est-il malgré tout ingéré et indexé ? | Oui, sa présence dans Live Tail et Log Explorer le prouve |
    | Le message est-il découpé par un pipeline personnalisé ? | Non, il reste textuel |
-   | Où les valeurs sont-elles extraites dans l'atelier ? | Dans un Calculated Field Grok exécuté à la requête |
+   | Où les valeurs sont-elles extraites dans l'atelier ? | Dans un Calculated Field Grok exécuté à la requête, si la fonction Preview est opérationnelle |
 
 **Résultat attendu :** aucun des pipelines personnalisés visibles ne correspond à `source:powershell-training`.
 
@@ -359,9 +395,9 @@ TRAINING participant=<participant> operation=login duration_ms=128 result=succes
 
 **Explication :** le Calculated Field permet de démontrer Grok de manière personnelle, rétroactive et temporaire. Un pipeline serait pertinent seulement après validation du format, du filtre, des droits, des tests et du retour arrière dans un environnement autorisé.
 
-# Partie 6 — Créer la vue personnelle
+# Partie 7 — Créer la vue personnelle
 
-## Étape 13 — Préparer la requête durable
+## Étape 14 — Préparer la requête durable
 
 Retirez les filtres commençant par `#`. Utilisez pour la vue la requête suivante :
 
@@ -391,7 +427,7 @@ La table doit donc présenter au minimum :
 
 **Réponse :** les champs calculés sont temporaires, personnels et ne persistent pas au-delà de la session du Log Explorer. Une Saved View conserve la requête, la période et la présentation, mais ne transforme pas l'extraction Grok en configuration permanente.
 
-## Étape 14 — Enregistrer la Saved View
+## Étape 15 — Enregistrer la Saved View
 
 1. Cliquez sur **Views**.
 2. Cliquez sur **Save as new view**.
@@ -412,7 +448,7 @@ La table doit donc présenter au minimum :
 
 **Interprétation :** la vue mémorise un point d'entrée reproductible vers vos logs pédagogiques. Elle ne modifie ni les logs ni leur traitement.
 
-## Étape 15 — Vérifier le rattachement au service
+## Étape 16 — Vérifier le rattachement au service
 
 1. Ouvrez **Developer Portal > Catalog**.
 2. Recherchez le nom exact de votre service :
@@ -432,9 +468,9 @@ La table doit donc présenter au minimum :
 
 **Interprétation :** un log enrichit la télémétrie Logs du service. Il ne crée pas de traces APM, de dépendances, de latence ni de taux d'erreur APM.
 
-# Partie 7 — Ingérer une métrique évolutive
+# Partie 8 — Ingérer une métrique évolutive
 
-## Étape 16 — Comprendre le scénario
+## Étape 17 — Comprendre le scénario
 
 La métrique `training.checkout.queue_depth` représente le nombre de commandes en attente. C'est un **gauge** : chaque point contient la valeur observée à un instant donné.
 
@@ -446,7 +482,7 @@ Le scénario envoie six points espacés d'une minute :
 
 Les points sont placés dans les cinq dernières minutes afin que la courbe soit immédiatement visible.
 
-## Étape 17 — Envoyer la métrique
+## Étape 18 — Envoyer la métrique
 
 Sous Windows, exécutez ce script dans PowerShell ISE après avoir remplacé la clé et l'identifiant :
 
@@ -518,7 +554,7 @@ unset api_key payload
 
 **Résultat attendu :** l'API répond avec le code HTTP `202`.
 
-## Étape 18 — Exploiter la métrique
+## Étape 19 — Exploiter la métrique
 
 1. Ouvrez **Metrics > Explorer**.
 2. Recherchez `training.checkout.queue_depth`.
@@ -543,6 +579,7 @@ unset api_key payload
 - [Datadog — Send Logs API](https://docs.datadoghq.com/api/latest/logs/send-logs/)
 - [Datadog — Calculated Fields](https://docs.datadoghq.com/logs/explorer/calculated_fields/)
 - [Datadog — Grok Extractions](https://docs.datadoghq.com/logs/explorer/calculated_fields/extractions/)
+- [Datadog — Log Facets and Measures](https://docs.datadoghq.com/logs/explorer/facets/)
 - [Datadog — Saved Views](https://docs.datadoghq.com/logs/explorer/saved_views/)
 - [Datadog — Set Up Catalog](https://docs.datadoghq.com/internal_developer_portal/catalog/set_up/)
 - [Datadog — Submit Metrics](https://docs.datadoghq.com/api/latest/metrics/submit-metrics/)
