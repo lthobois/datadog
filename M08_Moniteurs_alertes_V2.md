@@ -440,7 +440,7 @@ Pour le module 9, conservez :
 |---|---|
 | Type de widget | Monitor Summary |
 | Type de résumé | Monitor |
-| Affichage | Counts and List |
+| Affichage | Both |
 | Monitor recherché | nom exact `[TRAINING] M08 Log errors - <participant> - 20260720` |
 | Titre du widget | `Monitors — état de ma détection pédagogique` |
 
@@ -468,10 +468,10 @@ Pour le module 9, conservez :
    participant:<participant>
    ```
 
-5. Utilisez **max** sur la fenêtre **last 1 minute**.
+5. Dans **Evaluation Details**, choisissez **maximum** sur la fenêtre **last 5 minutes**. Conservez **avg by** et **(everything)** pour l'agrégation spatiale.
 6. Définissez **Warning** à `8` et **Alert** à `10`.
 7. Dans les options avancées, définissez le seuil de récupération critique à `6`.
-8. Désactivez l'exigence d'une fenêtre complète et choisissez de ne pas notifier en cas d'absence de données.
+8. Dans **Advanced options**, conservez **Do not require a full window of data for evaluation**. Pour les données absentes, conservez **Show last known status**.
 9. Utilisez le nom :
 
    ```text
@@ -484,7 +484,7 @@ Pour le module 9, conservez :
 La requête obtenue correspond à :
 
 ```text
-max(last_1m):avg:training.checkout.queue_depth{env:training,service:training-<participant>-20260720-svc,participant:<participant>} > 10
+max(last_5m):avg:training.checkout.queue_depth{env:training,service:training-<participant>-20260720-svc,participant:<participant>} > 10
 ```
 
 **Résultat attendu :** le monitor est créé et la série du module 5 est visible dans son aperçu.
@@ -554,7 +554,7 @@ Actualisez le monitor après la prochaine évaluation.
 
 ## Étape 21 — Observer la récupération
 
-1. Attendez que la valeur `15` sorte de la fenêtre d'une minute.
+1. Attendez que la valeur `15` sorte de la fenêtre de cinq minutes.
 2. Réexécutez le script précédent avec la valeur `3` :
 
    ```powershell
@@ -633,12 +633,12 @@ Le log et les points de métrique suivent les politiques de rétention de l'orga
 
 - vérifiez la présence de la valeur `15` dans Metrics Explorer ;
 - comparez les tags `service` et `participant` avec ceux du monitor ;
-- vérifiez l'agrégation **max**, la fenêtre d'une minute et le seuil `10` ;
+- vérifiez l'agrégation temporelle **maximum**, la fenêtre de cinq minutes et le seuil `10` ;
 - attendez la prochaine évaluation.
 
 ### Le Metric Monitor ne revient pas en OK
 
-- attendez que le point `15` sorte de la fenêtre d'une minute ;
+- attendez que le point `15` sorte de la fenêtre de cinq minutes ;
 - envoyez la valeur `3` avec les mêmes tags ;
 - vérifiez que le seuil de récupération critique vaut `6`.
 

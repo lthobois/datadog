@@ -440,7 +440,7 @@ RUM — vues peopulse
    ```
 
 4. Vérifiez que le résultat ne contient qu'un seul monitor et qu'il porte votre identifiant.
-5. Choisissez l'affichage **Counts and List** ou **Nombre et liste**.
+5. Choisissez l'affichage **Both** pour afficher les compteurs et la liste.
 7. Donnez au widget le titre :
 
 ```text
@@ -467,8 +467,8 @@ Monitors — état de ma détection pédagogique
    training.checkout.queue_depth
    ```
 
-4. Utilisez l'agrégation **avg**.
-5. Filtrez sur :
+4. Conservez l'agrégation spatiale **avg by** et le regroupement **(everything)**.
+5. Dans **Filters**, ajoutez successivement :
 
    ```text
    env:training
@@ -476,7 +476,9 @@ Monitors — état de ma détection pédagogique
    participant:<participant>
    ```
 
-6. Ajoutez un marqueur Warning à `8` et un marqueur Alert à `10`.
+6. Ouvrez **Markers** et ajoutez :
+   - une ligne à `8`, en **warning/orange**, avec le libellé `Warning 8` ;
+   - une ligne à `10`, en **error/red**, avec le libellé `Alert 10`.
 7. Donnez au widget le titre :
 
    ```text
@@ -497,7 +499,7 @@ Monitors — état de ma détection pédagogique
    [TRAINING] M08 Metric Queue - <participant> - 20260720
    ```
 
-4. Choisissez l'affichage **Counts and List**.
+4. Choisissez l'affichage **Both**.
 5. Donnez au widget le titre :
 
    ```text

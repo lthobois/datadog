@@ -522,8 +522,8 @@ unset api_key payload
 
 1. Ouvrez **Metrics > Explorer**.
 2. Recherchez `training.checkout.queue_depth`.
-3. Sélectionnez l'agrégation **avg**.
-4. Filtrez sur :
+3. Conservez l'agrégation spatiale **avg by** et le regroupement **(everything)**.
+4. Dans **Filters**, ajoutez successivement les tags suivants en validant chaque valeur proposée par Datadog :
 
    ```text
    env:training

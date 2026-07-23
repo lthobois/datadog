@@ -249,7 +249,7 @@ En cas de conflit, annulez et recommencez à l'étape 1 avec un suffixe validé.
 
 1. Vérifiez que le nom affiché commence par `training-` et contient votre identifiant.
 2. Si l'un de ces contrôles échoue, prévenez le formateur.
-3. Sur **Service Page**, ouvrez **Entity Metadata > Edit**.
+3. Sur **Service Page**, cliquez sur **Service Config**, puis ouvrez **Entity Metadata > Edit**.
 4. À la fin de la description existante, saisissez exactement :
 
 ```text
@@ -261,7 +261,7 @@ Convention vérifiée pendant l'atelier du module 4.
 7. Rouvrez **Entity Metadata > Edit** pour vérifier la persistance de la phrase, puis cliquez sur **Cancel**.
 
 **Réponse expliquée :** cette modification démontre le cycle de mise à jour sans toucher à l'identité, l'owner, le lifecycle ou les relations.
-# Partie 4 — Produire la convention et organiser le nettoyage
+# Partie 4 — Produire la convention
 
 ## Étape 13 — Formaliser les règles apprises
 
@@ -292,6 +292,7 @@ Convention V2 — Service pédagogique
 4. Sinon, communiquez simplement le nom exact au formateur.
 
 **Réponse expliquée :** le préfixe `[TRAINING]` et l'identifiant participant suffisent à reconnaître la ressource avec un processus simple.
+
 ## Questions de synthèse corrigées
 
 ### Qu'a réellement créé l'atelier ?
