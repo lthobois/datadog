@@ -40,7 +40,7 @@ Utilisez les filtres et requêtes temporaires nécessaires à l'exploration. Ne 
 - Chrome connecté à Datadog ;
 - accès à **APM**, aux services et au Trace Explorer ;
 - convention `env/service/version` du module 4 ;
-- vue de logs `[TRAINING] M05 Logs API - <participant> - <date-service>` créée au module 5, si ce parcours a été réalisé ;
+- vue de logs `[TRAINING] M05 Logs API - <participant>` créée au module 5, si ce parcours a été réalisé ;
 - accès au service réel `eu-interfaces`.
 
 ## Comment utiliser ce document
@@ -195,7 +195,7 @@ Le parcours a été vérifié le 20 juillet 2026 dans l'organisation Datadog de 
 ## Étape 9 — Reprendre le contrat de contexte des logs
 
 1. Ouvrez **Logs > Explorer** dans un nouvel onglet.
-2. Si elle existe et vous est accessible, sélectionnez votre vue `[TRAINING] M05 Logs API - <participant> - <date-service>` créée au module 5.
+2. Si elle existe et vous est accessible, sélectionnez votre vue `[TRAINING] M05 Logs API - <participant>` créée au module 5.
 3. Cette vue cible les logs du module 5 et sert uniquement à retrouver la navigation. Elle ne prouve pas une corrélation avec `eu-interfaces`.
 4. Remplacez temporairement la requête par `service:eu-interfaces`.
 5. Observez uniquement la présence ou l'absence des attributs `service`, `env`, `version`, `dd.trace_id` et `dd.span_id`.

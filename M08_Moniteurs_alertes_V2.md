@@ -15,7 +15,7 @@ Créer un Log Monitor et un Metric Monitor limités à votre service pédagogiqu
 Vous travaillez dans une organisation Datadog partagée correspondant à la production. Le service de formation créé au module 4 et alimenté au module 5 sert de support à l'atelier :
 
 ```text
-training-<participant>-<date-service>-svc
+training-<participant>-svc
 ```
 
 Le monitor recherche uniquement un log portant le scénario :
@@ -23,8 +23,6 @@ Le monitor recherche uniquement un log portant le scénario :
 ```text
 monitor-check
 ```
-
-Dans tout ce document, `<date-service>` désigne la date déjà inscrite dans le nom du service créé au module 4. Réutilisez cette valeur au format `AAAAMMJJ`, y compris si vous réalisez ce module un autre jour.
 
 Le second monitor surveille la métrique créée au module 5 :
 
@@ -38,8 +36,8 @@ Le test ne représente pas un incident de production. Il sert à observer la rel
 
 À la fin de l'atelier, vous disposez :
 
-- d'un Log Monitor `[TRAINING] M08 Log errors - <participant> - <date-service>` ;
-- d'un Metric Monitor `[TRAINING] M08 Metric Queue - <participant> - <date-service>` ;
+- d'un Log Monitor `[TRAINING] M08 Log errors - <participant>` ;
+- d'un Metric Monitor `[TRAINING] M08 Metric Queue - <participant>` ;
 - d'un monitor sans destinataire ni intégration de notification ;
 - d'un log d'erreur pédagogique ayant déclenché le monitor ;
 - d'une observation des états `OK`, `Alert`, puis `OK` après expiration de la fenêtre ;
@@ -63,7 +61,7 @@ La clé API autorisée reste secrète. Ne la communiquez pas, ne faites aucune c
 - accès à **Logs > Log Explorer**, **Metrics > Explorer** et **Monitors > Manage Monitors** ;
 - droit de créer et supprimer son propre monitor ;
 - PowerShell ISE ou Bash avec cURL disponible ;
-- service `training-<participant>-<date-service>-svc` utilisé aux modules 4 et 5 ;
+- service `training-<participant>-svc` utilisé aux modules 4 et 5 ;
 - clé API autorisée par le formateur, identifiée au module 5 par le Key ID `650b6239-78e6-46c1-8233-749ae21ae904`.
 
 Si vous ne disposez pas du droit de créer un monitor, suivez les valeurs ci-dessous sur le monitor créé par le formateur pour le groupe.
@@ -74,10 +72,10 @@ Si vous ne disposez pas du droit de créer un monitor, suivez les valeurs ci-des
 
 1. Ouvrez **Logs > Log Explorer**.
 2. Sélectionnez **Past 15 Minutes**.
-3. Remplacez `<participant>` et `<date-service>`, puis saisissez :
+3. Remplacez `<participant>`, puis saisissez :
 
    ```text
-   service:training-<participant>-<date-service>-svc source:powershell-training @training_scenario:monitor-check status:error
+   service:training-<participant>-svc source:powershell-training @training_scenario:monitor-check status:error
    ```
 
 4. Vérifiez le nom du service.
@@ -134,7 +132,7 @@ La configuration attendue est :
 1. Dans la zone de recherche, vérifiez la requête préremplie en remplaçant mentalement `<participant>` par votre identifiant :
 
    ```text
-   service:training-<participant>-<date-service>-svc source:powershell-training @training_scenario:monitor-check status:error
+   service:training-<participant>-svc source:powershell-training @training_scenario:monitor-check status:error
    ```
 
 3. Conservez **Show Count of all logs**.
@@ -173,14 +171,14 @@ La configuration attendue est :
 1. Saisissez le nom suivant :
 
    ```text
-   [TRAINING] M08 Log errors - <participant> - <date-service>
+   [TRAINING] M08 Log errors - <participant>
    ```
 
-2. Remplacez `<participant>` par votre identifiant et `<date-service>` par la date portée par votre service.
+2. Remplacez `<participant>` par votre identifiant.
 3. Saisissez le message :
 
    ```markdown
-   Monitor pédagogique ORSYS limité au service training-<participant>-<date-service>-svc.
+   Monitor pédagogique ORSYS limité au service training-<participant>-svc.
 
    Signal : présence d'au moins un log error du scénario monitor-check sur cinq minutes.
    Action : ouvrir le Log Explorer avec la requête du monitor et vérifier le log de test.
@@ -194,14 +192,13 @@ La configuration attendue est :
    ```text
    training:true
    training_module:08
-   training_session:<date-service>
    participant:<participant>
-   service:training-<participant>-<date-service>-svc
+   service:training-<participant>-svc
    ```
 
-6. Remplacez les occurrences de `<participant>` et de `<date-service>`.
+6. Remplacez les occurrences de `<participant>`.
 
-**Résultat attendu :** le monitor est identifiable par son nom, sa session, son participant et son service.
+**Résultat attendu :** le monitor est identifiable par son nom, son participant et son service.
 
 **Vérification :** le tag `training_module:08` et le nom `[TRAINING] M08` sont visibles avant l'enregistrement.
 
@@ -229,7 +226,7 @@ Contrôlez chaque ligne :
 
 | Contrôle | Valeur attendue |
 |---|---|
-| Nom | `[TRAINING] M08 Log errors - <participant> - <date-service>` |
+| Nom | `[TRAINING] M08 Log errors - <participant>` |
 | Service | uniquement votre service `training-*` |
 | Scénario | `monitor-check` |
 | Statut recherché | `error` |
@@ -238,7 +235,7 @@ Contrôlez chaque ligne :
 | Groupement | aucun |
 | No Data | Evaluate as zero |
 | Destinataire | aucun |
-| Tags | `training:true`, module, session, participant, service |
+| Tags | `training:true`, module, participant, service |
 
 Si un contrôle n'est pas conforme, corrigez-le avant de poursuivre.
 
@@ -263,14 +260,13 @@ Si un contrôle n'est pas conforme, corrigez-le avant de poursuivre.
 ```powershell
 $apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
 $participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
-$serviceDate = "REMPLACER_PAR_DATE_DU_SERVICE"
-$serviceName = "training-$participant-$serviceDate-svc"
+$serviceName = "training-$participant-svc"
 
 $payload = @{
     message           = "TRAINING monitor-check participant=$participant result=failure"
     service           = $serviceName
     ddsource          = "powershell-training"
-    ddtags            = "env:training,training:true,training_session:$serviceDate,participant:$participant"
+    ddtags            = "env:training,training:true,participant:$participant"
     status            = "error"
     training_scenario = "monitor-check"
     operation         = "monitor-test"
@@ -297,9 +293,9 @@ curl -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
   -H "Content-Type: application/json" \
   -d '{
     "message":"TRAINING monitor-check participant=REMPLACER_PAR_VOTRE_IDENTIFIANT result=failure",
-    "service":"training-REMPLACER_PAR_VOTRE_IDENTIFIANT-REMPLACER_PAR_DATE_DU_SERVICE-svc",
+    "service":"training-REMPLACER_PAR_VOTRE_IDENTIFIANT-svc",
     "ddsource":"powershell-training",
-    "ddtags":"env:training,training:true,training_session:REMPLACER_PAR_DATE_DU_SERVICE,participant:REMPLACER_PAR_VOTRE_IDENTIFIANT",
+    "ddtags":"env:training,training:true,participant:REMPLACER_PAR_VOTRE_IDENTIFIANT",
     "status":"error",
     "training_scenario":"monitor-check",
     "operation":"monitor-test",
@@ -309,7 +305,7 @@ curl -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
 ```
 
 3. Collez la valeur secrète de la clé API autorisée.
-4. Remplacez l'identifiant participant et `REMPLACER_PAR_DATE_DU_SERVICE` par la date portée par votre service.
+4. Remplacez l'identifiant participant.
 5. Vérifiez le nom du service construit par le script.
 
 **Résultat attendu :** le script cible le même service et le même scénario que le monitor.
@@ -325,7 +321,7 @@ curl -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
 
    ```text
    Code HTTP : 202
-   Service : training-<participant>-<date-service>-svc
+   Service : training-<participant>-svc
    Scénario : monitor-check
    ```
 
@@ -421,9 +417,8 @@ Répondez aux questions suivantes :
    ```text
    training:true
    training_module:08
-   training_session:<date-service>
    participant:<participant>
-   service:training-<participant>-<date-service>-svc
+   service:training-<participant>-svc
    ```
 
 3. Corrigez uniquement votre monitor si un tag manque.
@@ -434,22 +429,6 @@ Répondez aux questions suivantes :
 **Vérification :** une recherche dans **Manage Monitors** avec votre nom exact ne retourne qu'un monitor.
 
 **Interprétation :** le dashboard pourra filtrer la liste des monitors sans dépendre de leur position dans l'interface.
-
-## Étape 18 — Conserver les paramètres du widget Monitor Summary
-
-Pour le module 9, conservez :
-
-| Paramètre | Valeur |
-|---|---|
-| Type de widget | Monitor Summary |
-| Type de résumé | Monitor |
-| Affichage | Both |
-| Monitor recherché | nom exact `[TRAINING] M08 Log errors - <participant> - <date-service>` |
-| Titre du widget | `Monitors — état de ma détection pédagogique` |
-
-**Résultat attendu :** vous disposez de toutes les valeurs nécessaires pour ajouter le monitor au dashboard sans afficher les monitors des autres participants.
-
-**Interprétation :** le widget présentera l'état courant. Il pourra donc être `OK` au moment du module 9 même si l'historique conserve le passage antérieur en `Alert`.
 
 # Partie 6 — Surveiller la métrique de file d'attente
 
@@ -467,7 +446,7 @@ Pour le module 9, conservez :
 
    ```text
    env:training
-   service:training-<participant>-<date-service>-svc
+   service:training-<participant>-svc
    participant:<participant>
    ```
 
@@ -478,16 +457,17 @@ Pour le module 9, conservez :
 9. Utilisez le nom :
 
    ```text
-   [TRAINING] M08 Metric Queue - <participant> - <date-service>
+   [TRAINING] M08 Metric Queue - <participant>
    ```
 
-10. Ajoutez les tags `training:true`, `training_module:08`, `participant:<participant>` et `service:training-<participant>-<date-service>-svc`.
-11. Créez le monitor.
+10. Ajoutez les tags `training:true`, `training_module:08`, `participant:<participant>` et `service:training-<participant>-svc`.
+11. Ajouter le titre dans la description
+12. Créez le monitor.
 
 La requête obtenue correspond à :
 
 ```text
-max(last_5m):avg:training.checkout.queue_depth{env:training,service:training-<participant>-<date-service>-svc,participant:<participant>} > 10
+max(last_5m):avg:training.checkout.queue_depth{env:training,service:training-<participant>-svc,participant:<participant>} > 10
 ```
 
 **Résultat attendu :** le monitor est créé et la série du module 5 est visible dans son aperçu.
@@ -499,8 +479,7 @@ Sous Windows, exécutez ce script PowerShell avec `$metricValue = 15` :
 ```powershell
 $apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
 $participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
-$serviceDate = "REMPLACER_PAR_DATE_DU_SERVICE"
-$serviceName = "training-$participant-$serviceDate-svc"
+$serviceName = "training-$participant-svc"
 $metricValue = 15
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 
@@ -514,7 +493,6 @@ $payload = @{
                 "env:training"
                 "service:$serviceName"
                 "participant:$participant"
-                "training_session:$serviceDate"
                 "scenario:checkout"
             )
         }
@@ -538,8 +516,7 @@ Sous Linux ou macOS, exécutez l'équivalent Bash/cURL :
 ```bash
 api_key="COLLER_LA_VALEUR_SECRETE_ICI"
 participant="REMPLACER_PAR_VOTRE_IDENTIFIANT"
-service_date="REMPLACER_PAR_DATE_DU_SERVICE"
-service_name="training-${participant}-${service_date}-svc"
+service_name="training-${participant}-svc"
 metric_value=15
 now=$(date +%s)
 
@@ -547,7 +524,7 @@ curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
   -X POST "https://api.datadoghq.eu/api/v2/series" \
   -H "DD-API-KEY: ${api_key}" \
   -H "Content-Type: application/json" \
-  --data "{\"series\":[{\"metric\":\"training.checkout.queue_depth\",\"type\":3,\"points\":[{\"timestamp\":${now},\"value\":${metric_value}}],\"tags\":[\"env:training\",\"service:${service_name}\",\"participant:${participant}\",\"training_session:${service_date}\",\"scenario:checkout\"]}]}"
+  --data "{\"series\":[{\"metric\":\"training.checkout.queue_depth\",\"type\":3,\"points\":[{\"timestamp\":${now},\"value\":${metric_value}}],\"tags\":[\"env:training\",\"service:${service_name}\",\"participant:${participant}\",\"scenario:checkout\"]}]}"
 
 echo "Valeur envoyée : ${metric_value}"
 unset api_key
@@ -575,18 +552,6 @@ Actualisez le monitor après la prochaine évaluation.
 **Résultat attendu :** la valeur passe sous le seuil de récupération `6` et le monitor revient en `OK`.
 
 **Interprétation :** le seuil d'alerte indique quand agir ; le seuil de récupération évite de déclarer trop vite le retour à la normale.
-
-## Étape 22 — Préparer les widgets du module 9
-
-Le dashboard final utilisera :
-
-| Élément | Valeur |
-|---|---|
-| Métrique | `training.checkout.queue_depth` |
-| Widget de signal | Timeseries, agrégation `avg` |
-| Seuils affichés | Warning `8`, Alert `10` |
-| Monitor | `[TRAINING] M08 Metric Queue - <participant> - <date-service>` |
-| Widget d'état | Monitor Summary |
 
 # Partie 7 — Validation et nettoyage
 
