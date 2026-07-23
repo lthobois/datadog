@@ -39,7 +39,9 @@ L'extraction Grok est réalisée avec un **Calculated Field** personnel et tempo
 - accès à **Logs > Live Tail** et **Logs > Log Explorer** ;
 - droit de créer une Saved View ;
 - PowerShell ISE ou Bash avec cURL disponible sur le poste ;
-- service `training-<participant>-<aaaammjj>-svc` créé au module 4 ;
+- service `training-<participant>-<date-service>-svc` créé au module 4.
+
+Dans tout ce document, `<date-service>` et les variables `serviceDate` ou `service_date` désignent la date déjà inscrite dans le nom du service au module 4, au format `AAAAMMJJ`. Ne les remplacez pas automatiquement par la date du jour.
 - identifiant de participant autorisé, sans espace ni donnée personnelle inutile.
 
 Si la valeur de la clé n'est pas accessible, demandez au formateur d'exécuter le script pour votre identifiant, puis poursuivez à partir de la recherche dans Live Tail.
@@ -100,13 +102,14 @@ Sous Windows, ouvrez **Windows PowerShell ISE** et exécutez le script suivant :
 ```powershell
 $apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
 $participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
-$serviceName = "training-$participant-20260720-svc"
+$serviceDate = "REMPLACER_PAR_DATE_DU_SERVICE"
+$serviceName = "training-$participant-$serviceDate-svc"
 
 $payload = @{
     message  = "TRAINING participant=$participant operation=login duration_ms=128 result=success"
     service  = $serviceName
     ddsource = "powershell-training"
-    ddtags   = "env:training,training:true,training_session:20260720,participant:$participant"
+    ddtags   = "env:training,training:true,training_session:$serviceDate,participant:$participant"
     status   = "info"
     duration_ms = 128
 } | ConvertTo-Json
@@ -128,13 +131,14 @@ Sous Linux ou macOS, exécutez l'équivalent Bash/cURL :
 ```bash
 api_key="COLLER_LA_VALEUR_SECRETE_ICI"
 participant="REMPLACER_PAR_VOTRE_IDENTIFIANT"
-service_name="training-${participant}-20260720-svc"
+service_date="REMPLACER_PAR_DATE_DU_SERVICE"
+service_name="training-${participant}-${service_date}-svc"
 
 curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
   -X POST "https://http-intake.logs.datadoghq.eu/api/v2/logs" \
   -H "DD-API-KEY: ${api_key}" \
   -H "Content-Type: application/json" \
-  --data "{\"message\":\"TRAINING participant=${participant} operation=login duration_ms=128 result=success\",\"service\":\"${service_name}\",\"ddsource\":\"powershell-training\",\"ddtags\":\"env:training,training:true,training_session:20260720,participant:${participant}\",\"status\":\"info\",\"duration_ms\":128}"
+  --data "{\"message\":\"TRAINING participant=${participant} operation=login duration_ms=128 result=success\",\"service\":\"${service_name}\",\"ddsource\":\"powershell-training\",\"ddtags\":\"env:training,training:true,training_session:${service_date},participant:${participant}\",\"status\":\"info\",\"duration_ms\":128}"
 
 echo "Service : ${service_name}"
 unset api_key
@@ -146,7 +150,7 @@ Exemple de correspondance :
 
 ```text
 participant : loic-thobois
-service     : training-loic-thobois-20260720-svc
+service     : training-loic-thobois-<date-service>-svc
 ```
 
 **Résultat attendu :** le script contient la clé secrète, votre identifiant et le nom exact de votre service.
@@ -163,7 +167,7 @@ Exécutez une fois la version adaptée à votre environnement et vérifiez la so
 
 ```text
 Code HTTP : 202
-Service : training-<participant>-20260720-svc
+Service : training-<participant>-<date-service>-svc
 ```
 
 **Vérification :** le code HTTP vaut `202`.
@@ -188,7 +192,7 @@ Fermez PowerShell ISE sans enregistrer le script. Sous Bash, la commande `unset 
 2. Saisissez la requête suivante en remplaçant les valeurs :
 
    ```text
-   service:training-<participant>-20260720-svc source:powershell-training training:true
+   service:training-<participant>-<date-service>-svc source:powershell-training training:true
    ```
 
 3. Attendez quelques secondes et actualisez si nécessaire.
@@ -208,7 +212,7 @@ Fermez PowerShell ISE sans enregistrer le script. Sous Bash, la commande `unset 
 3. Saisissez la même requête :
 
    ```text
-   service:training-<participant>-20260720-svc source:powershell-training training:true
+   service:training-<participant>-<date-service>-svc source:powershell-training training:true
    ```
 
 4. Ouvrez le résultat le plus récent et comparez ses attributs avec ceux vus dans Live Tail.
@@ -402,7 +406,7 @@ TRAINING participant=<participant> operation=login duration_ms=128 result=succes
 Retirez les filtres commençant par `#`. Utilisez pour la vue la requête suivante :
 
 ```text
-service:training-<participant>-20260720-svc source:powershell-training training:true
+service:training-<participant>-<date-service>-svc source:powershell-training training:true
 ```
 
 Conservez une période relative, par exemple **Past 3 Days**, puis préparez l'affichage avec les libellés réellement utilisés dans cette version de Datadog :
@@ -434,7 +438,7 @@ La table doit donc présenter au minimum :
 3. Saisissez le nom :
 
    ```text
-   [TRAINING] M05 Logs API - <participant> - 20260720
+   [TRAINING] M05 Logs API - <participant> - <date-service>
    ```
 
 4. Laissez **Team(s)** vide, sauf consigne explicite du formateur.
@@ -454,7 +458,7 @@ La table doit donc présenter au minimum :
 2. Recherchez le nom exact de votre service :
 
    ```text
-   training-<participant>-20260720-svc
+   training-<participant>-<date-service>-svc
    ```
 
 3. Ouvrez sa 'Service Page', puis cliquez sur l'onglet 'Service' en haut à gauche de la page.
@@ -464,7 +468,7 @@ La table doit donc présenter au minimum :
 
 **Résultat attendu :** la définition du service et le log utilisent le même nom.
 
-**Vérification :** la recherche `service:training-<participant>-20260720-svc` retrouve l'événement dans Log Explorer, même si la fiche Catalog met plus de temps à actualiser son état.
+**Vérification :** la recherche `service:training-<participant>-<date-service>-svc` retrouve l'événement dans Log Explorer, même si la fiche Catalog met plus de temps à actualiser son état.
 
 **Interprétation :** un log enrichit la télémétrie Logs du service. Il ne crée pas de traces APM, de dépendances, de latence ni de taux d'erreur APM.
 
@@ -489,7 +493,8 @@ Sous Windows, exécutez ce script dans PowerShell ISE après avoir remplacé la 
 ```powershell
 $apiKey = "COLLER_LA_VALEUR_SECRETE_ICI"
 $participant = "REMPLACER_PAR_VOTRE_IDENTIFIANT"
-$serviceName = "training-$participant-20260720-svc"
+$serviceDate = "REMPLACER_PAR_DATE_DU_SERVICE"
+$serviceName = "training-$participant-$serviceDate-svc"
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $values = @(2, 4, 6, 8, 5, 3)
 
@@ -510,7 +515,7 @@ $payload = @{
                 "env:training"
                 "service:$serviceName"
                 "participant:$participant"
-                "training_session:20260720"
+                "training_session:$serviceDate"
                 "scenario:checkout"
             )
         }
@@ -535,11 +540,12 @@ Sous Linux ou macOS, utilisez Bash/cURL :
 ```bash
 api_key="COLLER_LA_VALEUR_SECRETE_ICI"
 participant="REMPLACER_PAR_VOTRE_IDENTIFIANT"
-service_name="training-${participant}-20260720-svc"
+service_date="REMPLACER_PAR_DATE_DU_SERVICE"
+service_name="training-${participant}-${service_date}-svc"
 now=$(date +%s)
 
-payload=$(printf '{"series":[{"metric":"training.checkout.queue_depth","type":3,"points":[{"timestamp":%s,"value":2},{"timestamp":%s,"value":4},{"timestamp":%s,"value":6},{"timestamp":%s,"value":8},{"timestamp":%s,"value":5},{"timestamp":%s,"value":3}],"tags":["env:training","service:%s","participant:%s","training_session:20260720","scenario:checkout"]}]}' \
-  "$((now-300))" "$((now-240))" "$((now-180))" "$((now-120))" "$((now-60))" "$now" "$service_name" "$participant")
+payload=$(printf '{"series":[{"metric":"training.checkout.queue_depth","type":3,"points":[{"timestamp":%s,"value":2},{"timestamp":%s,"value":4},{"timestamp":%s,"value":6},{"timestamp":%s,"value":8},{"timestamp":%s,"value":5},{"timestamp":%s,"value":3}],"tags":["env:training","service:%s","participant:%s","training_session:%s","scenario:checkout"]}]}' \
+  "$((now-300))" "$((now-240))" "$((now-180))" "$((now-120))" "$((now-60))" "$now" "$service_name" "$participant" "$service_date")
 
 curl -sS -o /dev/null -w "Code HTTP : %{http_code}\n" \
   -X POST "https://api.datadoghq.eu/api/v2/series" \
@@ -563,7 +569,7 @@ unset api_key payload
 
    ```text
    env:training
-   service:training-<participant>-20260720-svc
+   service:training-<participant>-<date-service>-svc
    participant:<participant>
    ```
 

@@ -52,14 +52,16 @@ Si le participant ne souhaite pas afficher son nom dans l'organisation partagée
 Le nom technique suit ce modèle :
 
 ```text
-training-<prenom-nom>-<aaaammjj>-svc
+training-<prenom-nom>-<date-service>-svc
 ```
 
 Exemple de nom unique :
 
 ```text
-training-alex-martin-20260720-svc
+training-alex-martin-<date-service>-svc
 ```
+
+`<date-service>` désigne la date de création du service, au format `AAAAMMJJ`. Relevez-la une fois dans le nom créé au module 4 et réutilisez exactement cette même valeur dans tous les modules suivants, même si vous réalisez ces modules un autre jour.
 
 Règles de normalisation :
 
@@ -83,7 +85,7 @@ Chaque question est suivie de sa réponse. Effectuez d'abord l'observation ou r�
 
 1. Dans **Developer Portal > Catalog > Services**, ouvrez l'onglet **Ownership**.
 2. Conservez **Env = \***.
-3. Construisez votre nom sous la forme `training-<participant>-<aaaammjj>-svc`.
+3. Construisez votre nom sous la forme `training-<participant>-<date-service>-svc`, où `<date-service>` est la date du jour au format `AAAAMMJJ`.
 4. Utilisez uniquement votre identifiant pédagogique autorisé, en minuscules et avec des tirets.
 5. Recherchez ce nom exact dans **Search by name or tags**.
 6. Si le nom existe, ajoutez le suffixe fourni par le formateur et recommencez la recherche.
@@ -107,11 +109,11 @@ Dans le formulaire ouvert, saisissez maintenant :
 
 | Champ affiché | Valeur à saisir |
 |---|---|
-| Name | `training-<participant>-<aaaammjj>-svc` |
+| Name | `training-<participant>-<date-service>-svc` |
 | Display name | `[TRAINING] Service de <participant>` |
 | Description | `Service pédagogique créé pour la formation Datadog ; aucune télémétrie de production.` |
 
-Remplacez `<participant>` et `<aaaammjj>` par vos valeurs. Ne saisissez aucune équipe, application ou donnée métier réelle dans le nom ou la description.
+Remplacez `<participant>` et `<date-service>` par vos valeurs. Notez la date du service : elle devient l'identifiant de session réutilisé jusqu'au module 10. Ne saisissez aucune équipe, application ou donnée métier réelle dans le nom ou la description.
 
 ## Étape 4 — Saisir les caractéristiques
 
@@ -134,7 +136,7 @@ Dans **Custom Tags**, saisissez un tag, appuyez sur **Entrée**, puis passez au 
 managed_by:training
 purpose:datadog-course
 training_participant:<participant>
-expires_on:<aaaammjj>
+expires_on:<date-service>
 ```
 
 Après le quatrième tag, appuyez sur **Échap** et vérifiez que les quatre tags apparaissent comme sélectionnés.

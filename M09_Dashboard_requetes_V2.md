@@ -33,8 +33,10 @@ L'atelier utilise la métrique du service pédagogique, l'APM de `eu-interfaces`
 Créez et modifiez votre dashboard :
 
 ```text
-[TRAINING] M09 - <identifiant-participant> - <AAAAMMJJ>
+[TRAINING] M09 - <identifiant-participant> - <date-service>
 ```
+
+`<date-service>` est la date de création inscrite dans le nom du service du module 4, au format `AAAAMMJJ`. Elle reste identique dans le dashboard, les monitors et les requêtes, même si les modules sont réalisés à des dates différentes.
 
 L'identifiant participant doit être professionnel, court et non sensible, par exemple `loic-thobois`. N'utilisez aucune donnée personnelle, nom d'action RUM, URL détaillée, message de log ou identifiant réel dans les titres, filtres et descriptions.
 
@@ -205,10 +207,10 @@ Les widgets suivants utilisent des sources réelles différentes. Ils servent à
 4. Lorsque le dashboard vierge s'ouvre, modifiez son titre et saisissez :
 
 ```text
-[TRAINING] M09 - <identifiant-participant> - <AAAAMMJJ>
+[TRAINING] M09 - <identifiant-participant> - <date-service>
 ```
 
-5. Remplacez les deux valeurs entre chevrons par votre identifiant autorisé et la date du jour.
+5. Remplacez les deux valeurs entre chevrons par votre identifiant autorisé et la date de création portée par le service du module 4. Ne prenez pas la date du jour si le service a été créé un autre jour.
 6. Avant de valider le titre, vérifiez qu'aucun dashboard ne porte déjà ce nom ; ajoutez uniquement le suffixe fourni par le formateur en cas de collision.
 7. N'activez aucun partage public.
 8. Dans la description du dashboard, saisissez :
@@ -231,10 +233,10 @@ Ne pas utiliser comme dashboard de production. Nettoyage en fin de formation.
 ```markdown
 ## Télémétrie explorée pendant la formation
 
-- Logs : scénario `checkout-investigation` du service `training-<participant>-20260720-svc`
+- Logs : scénario `checkout-investigation` du service `training-<participant>-<date-service>-svc`
 - APM : `eu-interfaces`, opération `console`
 - RUM : application `peopulse`, agrégats uniquement
-- Monitors : monitor `[TRAINING] M08 Log errors - <participant> - 20260720`
+- Monitors : monitor `[TRAINING] M08 Log errors - <participant> - <date-service>`
 
 Ces sources ne décrivent pas un même incident.
 Le scénario Logs sera envoyé au module 10 : ses widgets peuvent être vides pendant leur création.
@@ -252,7 +254,7 @@ Le seul scénario pédagogique est `checkout-investigation` ; il sera envoyé au
 Les trois widgets utilisent la même requête de base :
 
 ```text
-service:training-<participant>-20260720-svc source:powershell-training @training_scenario:checkout-investigation
+service:training-<participant>-<date-service>-svc source:powershell-training @training_scenario:checkout-investigation
 ```
 
 Le scénario sera envoyé au module 10. Les widgets sont volontairement préparés avant l'arrivée des événements.
@@ -262,10 +264,10 @@ Le scénario sera envoyé au module 10. Les widgets sont volontairement prépar�
 1. Cliquez sur **Add Widgets**, puis choisissez **Timeseries**.
 2. Choisissez la source **Log Events** ou **Logs**.
 3. Sélectionnez l'agrégation **Count**.
-4. Remplacez `<participant>` par l'identifiant utilisé pour votre service pédagogique, puis saisissez directement :
+4. Remplacez `<participant>` par l'identifiant utilisé pour votre service pédagogique et `<date-service>` par la date portée par ce service, puis saisissez directement :
 
 ```text
-service:training-<participant>-20260720-svc source:powershell-training @training_scenario:checkout-investigation
+service:training-<participant>-<date-service>-svc source:powershell-training @training_scenario:checkout-investigation
 ```
 
 5. Ne regroupez pas par message, utilisateur, hôte ou identifiant.
@@ -436,7 +438,7 @@ RUM — vues peopulse
 3. Dans la requête, recherchez uniquement le monitor que vous avez créé au module 8 au moyen de son nom exact :
 
    ```text
-   [TRAINING] M08 Log errors - <participant> - 20260720
+   [TRAINING] M08 Log errors - <participant> - <date-service>
    ```
 
 4. Vérifiez que le résultat ne contient qu'un seul monitor et qu'il porte votre identifiant.
@@ -472,7 +474,7 @@ Monitors — état de ma détection pédagogique
 
    ```text
    env:training
-   service:training-<participant>-20260720-svc
+   service:training-<participant>-<date-service>-svc
    participant:<participant>
    ```
 
@@ -496,7 +498,7 @@ Monitors — état de ma détection pédagogique
 3. Recherchez le nom exact :
 
    ```text
-   [TRAINING] M08 Metric Queue - <participant> - 20260720
+   [TRAINING] M08 Metric Queue - <participant> - <date-service>
    ```
 
 4. Choisissez l'affichage **Both**.
